@@ -133,7 +133,7 @@
         },
         {
             "name": "PlayersComponent",
-            "id": "component-PlayersComponent-393d48f66c77920fde626f7a97577fc56a52abaf9ed5a4e11a65390dd56b48c1b9ac54398766d36850ac7864df048851447439110c31bfae75ffbfe40757f835",
+            "id": "component-PlayersComponent-3093efca5fdbeb4901a4b581f0887c1f1a1c5887b50b816fdc3b556d95d77f787358364f94f83debc7da0a970cab03b3d4ea0fd159ff6e4d46737f032363108f",
             "file": "src/app/components/players/players.component.ts",
             "encapsulation": [],
             "entryComponents": [],
@@ -153,13 +153,23 @@
             "propertiesClass": [
                 {
                     "name": "players",
-                    "defaultValue": "input<CardDetails[]>()",
+                    "defaultValue": "input.required<CardDetails[]>()",
                     "deprecated": false,
                     "deprecationMessage": "",
                     "type": "",
                     "optional": false,
                     "description": "",
                     "line": 13
+                },
+                {
+                    "name": "show",
+                    "defaultValue": "computed(() => this.players().every(player => player.value !== null))",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "",
+                    "optional": false,
+                    "description": "",
+                    "line": 14
                 }
             ],
             "methodsClass": [],
@@ -177,17 +187,17 @@
             "description": "",
             "rawdescription": "\n",
             "type": "component",
-            "sourceCode": "import { Component, input, Input } from '@angular/core';\r\nimport CardDetails from '../../models/CardDetails';\r\nimport { PokerCardComponent } from \"../poker-card/poker-card.component\";\r\n\r\n@Component({\r\n  selector: 'app-players',\r\n  standalone: true,\r\n  imports: [PokerCardComponent],\r\n  templateUrl: './players.component.html',\r\n  styleUrl: './players.component.css'\r\n})\r\nexport class PlayersComponent {\r\n  players = input<CardDetails[]>();\r\n  // @Input() players: CardDetails[] = [];\r\n}\r\n",
+            "sourceCode": "import { Component, computed, input, Input } from '@angular/core';\r\nimport CardDetails from '../../models/CardDetails';\r\nimport { PokerCardComponent } from \"../poker-card/poker-card.component\";\r\n\r\n@Component({\r\n  selector: 'app-players',\r\n  standalone: true,\r\n  imports: [PokerCardComponent],\r\n  templateUrl: './players.component.html',\r\n  styleUrl: './players.component.css'\r\n})\r\nexport class PlayersComponent {\r\n  players = input.required<CardDetails[]>();\r\n  show = computed(() => this.players().every(player => player.value !== null));\r\n}\r\n",
             "styleUrl": "./players.component.css",
             "assetsDirs": [],
             "styleUrlsData": "",
             "stylesData": "",
             "extends": [],
-            "templateData": "<div class=\"m-4 flex flex-wrap justify-center\">\r\n  @for (player of players; track player.display) {\r\n    <app-poker-card [card]=\"player\"></app-poker-card>\r\n  }\r\n</div>\r\n"
+            "templateData": "<div class=\"m-4 flex flex-wrap justify-center\">\r\n  @for (player of players(); track player.display) {\r\n    <app-poker-card [card]=\"player\" [show]=\"show()\"></app-poker-card>\r\n  }\r\n</div>\r\n"
         },
         {
             "name": "PointsComponent",
-            "id": "component-PointsComponent-8cb2d61f416e668f85328372d3e3dcbeb7d77ba0c38134284f70823bdb07936be16c2c116453200a7f488da5b138af95f2dd6fbfb2bd062e198c9e8efc21f844",
+            "id": "component-PointsComponent-9ab99f3c8c1805e169394667d1ed556627445937c6a5eecc9b1e93b1086a2051c461ef12c63dd9a8143fdefb3d835eeb23379f439421f77c65a7f748bd878759",
             "file": "src/app/components/points/points.component.ts",
             "encapsulation": [],
             "entryComponents": [],
@@ -204,28 +214,64 @@
             "hostDirectives": [],
             "inputsClass": [],
             "outputsClass": [],
-            "propertiesClass": [],
+            "propertiesClass": [
+                {
+                    "name": "points",
+                    "defaultValue": "input.required<CardDetails[]>()",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "",
+                    "optional": false,
+                    "description": "",
+                    "line": 13
+                },
+                {
+                    "name": "show",
+                    "defaultValue": "computed(() => this.transformedPoints().every(point => point.value !== null))",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "",
+                    "optional": false,
+                    "description": "",
+                    "line": 23
+                },
+                {
+                    "name": "transformedPoints",
+                    "defaultValue": "computed<CardDetails[]>(() =>\r\n    this.points().map(point => ({\r\n      ...point,\r\n      display: point.value,\r\n      value: point.value ? this.points().filter(p => p.value === point.value).length.toString() : null\r\n    }))\r\n  )",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "",
+                    "optional": false,
+                    "description": "",
+                    "line": 15
+                }
+            ],
             "methodsClass": [],
             "deprecated": false,
             "deprecationMessage": "",
             "hostBindings": [],
             "hostListeners": [],
             "standalone": true,
-            "imports": [],
+            "imports": [
+                {
+                    "name": "PokerCardComponent",
+                    "type": "component"
+                }
+            ],
             "description": "",
             "rawdescription": "\n",
             "type": "component",
-            "sourceCode": "import { Component } from '@angular/core';\r\n\r\n@Component({\r\n  selector: 'app-points',\r\n  standalone: true,\r\n  imports: [],\r\n  templateUrl: './points.component.html',\r\n  styleUrl: './points.component.css'\r\n})\r\nexport class PointsComponent {\r\n\r\n}\r\n",
+            "sourceCode": "import { Component, computed, input } from '@angular/core';\r\nimport CardDetails from '../../models/CardDetails';\r\nimport { PokerCardComponent } from '../poker-card/poker-card.component';\r\n\r\n@Component({\r\n  selector: 'app-points',\r\n  standalone: true,\r\n  imports: [PokerCardComponent],\r\n  templateUrl: './points.component.html',\r\n  styleUrl: './points.component.css'\r\n})\r\nexport class PointsComponent {\r\n  points = input.required<CardDetails[]>();\r\n\r\n  transformedPoints = computed<CardDetails[]>(() =>\r\n    this.points().map(point => ({\r\n      ...point,\r\n      display: point.value,\r\n      value: point.value ? this.points().filter(p => p.value === point.value).length.toString() : null\r\n    }))\r\n  );\r\n\r\n  show = computed(() => this.transformedPoints().every(point => point.value !== null));\r\n}\r\n",
             "styleUrl": "./points.component.css",
             "assetsDirs": [],
             "styleUrlsData": "",
             "stylesData": "",
             "extends": [],
-            "templateData": "<p>points works!</p>\r\n"
+            "templateData": "<div class=\"m-4 flex flex-wrap justify-center\">\r\n  @for (point of transformedPoints(); track point.display) {\r\n    <app-poker-card [card]=\"point\" [show]=\"show()\"></app-poker-card>\r\n  }\r\n</div>\r\n"
         },
         {
             "name": "PokerCardComponent",
-            "id": "component-PokerCardComponent-dd7090b31706b6f1aea0893499835417f7bb897b5c2e294e7b5918d19531130da1b5aab2c9e23c2a2de97e4b4c1eeb85f55573b87052516ff683ce507e0d5fe5",
+            "id": "component-PokerCardComponent-6357b6c989c548fb25f927e3702148e732550c376c108bd5c2c4b765428e26e697f34153b67f63156170de70e2b891787969ec31713855d1929ea53eb58802b9",
             "file": "src/app/components/poker-card/poker-card.component.ts",
             "encapsulation": [],
             "entryComponents": [],
@@ -243,16 +289,50 @@
             "inputsClass": [
                 {
                     "name": "card",
-                    "defaultValue": "{ display: '', selected: false, value: '' }",
                     "deprecated": false,
                     "deprecationMessage": "",
+                    "type": "",
+                    "optional": false,
+                    "description": "",
                     "line": 13,
-                    "type": "CardDetails",
-                    "decorators": []
+                    "required": true
+                },
+                {
+                    "name": "show",
+                    "defaultValue": "true",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "",
+                    "optional": false,
+                    "description": "",
+                    "line": 14,
+                    "required": false
                 }
             ],
             "outputsClass": [],
-            "propertiesClass": [],
+            "propertiesClass": [
+                {
+                    "name": "card",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "",
+                    "optional": false,
+                    "description": "",
+                    "line": 13,
+                    "required": true
+                },
+                {
+                    "name": "show",
+                    "defaultValue": "true",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "",
+                    "optional": false,
+                    "description": "",
+                    "line": 14,
+                    "required": false
+                }
+            ],
             "methodsClass": [],
             "deprecated": false,
             "deprecationMessage": "",
@@ -267,13 +347,13 @@
             "description": "",
             "rawdescription": "\n",
             "type": "component",
-            "sourceCode": "import { NgClass } from '@angular/common';\r\nimport { Component, Input } from '@angular/core';\r\nimport CardDetails from '../../models/CardDetails';\r\n\r\n@Component({\r\n  selector: 'app-poker-card',\r\n  standalone: true,\r\n  imports: [NgClass],\r\n  templateUrl: './poker-card.component.html',\r\n  styleUrl: './poker-card.component.css'\r\n})\r\nexport class PokerCardComponent {\r\n  @Input() card: CardDetails = { display: '', selected: false, value: '' };\r\n}\r\n",
+            "sourceCode": "import { NgClass } from '@angular/common';\r\nimport { Component, input, Input } from '@angular/core';\r\nimport CardDetails from '../../models/CardDetails';\r\n\r\n@Component({\r\n  selector: 'app-poker-card',\r\n  standalone: true,\r\n  imports: [NgClass],\r\n  templateUrl: './poker-card.component.html',\r\n  styleUrl: './poker-card.component.css'\r\n})\r\nexport class PokerCardComponent {\r\n  card = input.required<CardDetails>();\r\n  show = input<boolean>(true);\r\n}\r\n",
             "styleUrl": "./poker-card.component.css",
             "assetsDirs": [],
             "styleUrlsData": "",
             "stylesData": "",
             "extends": [],
-            "templateData": "<div class=\"flex items-center justify-center w-24 h-36 rounded-2xl m-2 indicator\" [ngClass]=\"{'cursor-pointer hover:bg-cyan-900 bg-cyan-700 text-cyan-100': !card.selected, 'bg-sky-700 text-sky-100': card.selected}\">\r\n  @if (card.value) {\r\n    <span class=\"indicator-item badge badge-accent\">{{card.value}}</span>\r\n  }\r\n  <div class=\"text-xs\">{{card.display}}</div>\r\n</div>\r\n"
+            "templateData": "<div class=\"flex items-center justify-center w-24 h-36 rounded-2xl m-2 indicator p-2 text-center\" [ngClass]=\"{'cursor-pointer hover:bg-cyan-900 bg-cyan-700 text-cyan-100': !card().selected, 'bg-sky-700 text-sky-100': card().selected}\">\r\n  @if (card().value) {\r\n    <span class=\"indicator-item badge badge-primary text-primary-content\">{{show() ? card().value : '🔒'}}</span>\r\n  }\r\n  <div class=\"text-xs\">{{card().display}}</div>\r\n</div>\r\n"
         }
     ],
     "modules": [],
@@ -341,7 +421,7 @@
                 "linktype": "component",
                 "name": "PlayersComponent",
                 "coveragePercent": 0,
-                "coverageCount": "0/2",
+                "coverageCount": "0/3",
                 "status": "low"
             },
             {
@@ -350,7 +430,7 @@
                 "linktype": "component",
                 "name": "PointsComponent",
                 "coveragePercent": 0,
-                "coverageCount": "0/1",
+                "coverageCount": "0/4",
                 "status": "low"
             },
             {
@@ -359,7 +439,7 @@
                 "linktype": "component",
                 "name": "PokerCardComponent",
                 "coveragePercent": 0,
-                "coverageCount": "0/2",
+                "coverageCount": "0/5",
                 "status": "low"
             },
             {
