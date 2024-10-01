@@ -197,7 +197,7 @@
         },
         {
             "name": "PointsComponent",
-            "id": "component-PointsComponent-9ab99f3c8c1805e169394667d1ed556627445937c6a5eecc9b1e93b1086a2051c461ef12c63dd9a8143fdefb3d835eeb23379f439421f77c65a7f748bd878759",
+            "id": "component-PointsComponent-2a6bd0a75c54836a1503d213e2d57a875b7e17e1e93bf9dc601d8b737efa268f5bc23f61a592eb4ef9a6231b5b42c087acf0fe44d419fb9bf591cb706302558e",
             "file": "src/app/components/points/points.component.ts",
             "encapsulation": [],
             "entryComponents": [],
@@ -227,23 +227,23 @@
                 },
                 {
                     "name": "show",
-                    "defaultValue": "computed(() => this.transformedPoints().every(point => point.value !== null))",
+                    "defaultValue": "computed(() =>\r\n    this.transformedPoints().every((point) => point.value !== null)\r\n  )",
                     "deprecated": false,
                     "deprecationMessage": "",
                     "type": "",
                     "optional": false,
                     "description": "",
-                    "line": 23
+                    "line": 28
                 },
                 {
                     "name": "transformedPoints",
-                    "defaultValue": "computed<CardDetails[]>(() =>\r\n    this.points().map(point => ({\r\n      ...point,\r\n      display: point.value,\r\n      value: point.value ? this.points().filter(p => p.value === point.value).length.toString() : null\r\n    }))\r\n  )",
+                    "defaultValue": "computed<CardDetails[]>(() =>\r\n    this.points().map((point) => {\r\n      const valueCount = point.value\r\n        ? this.points().filter((p) => p.value === point.value).length.toString()\r\n        : null;\r\n\r\n      return {\r\n        ...point,\r\n        display: point.value,\r\n        value: valueCount,\r\n      };\r\n    })\r\n  )",
                     "deprecated": false,
                     "deprecationMessage": "",
                     "type": "",
                     "optional": false,
                     "description": "",
-                    "line": 15
+                    "line": 14
                 }
             ],
             "methodsClass": [],
@@ -261,7 +261,7 @@
             "description": "",
             "rawdescription": "\n",
             "type": "component",
-            "sourceCode": "import { Component, computed, input } from '@angular/core';\r\nimport CardDetails from '../../models/CardDetails';\r\nimport { PokerCardComponent } from '../poker-card/poker-card.component';\r\n\r\n@Component({\r\n  selector: 'app-points',\r\n  standalone: true,\r\n  imports: [PokerCardComponent],\r\n  templateUrl: './points.component.html',\r\n  styleUrl: './points.component.css'\r\n})\r\nexport class PointsComponent {\r\n  points = input.required<CardDetails[]>();\r\n\r\n  transformedPoints = computed<CardDetails[]>(() =>\r\n    this.points().map(point => ({\r\n      ...point,\r\n      display: point.value,\r\n      value: point.value ? this.points().filter(p => p.value === point.value).length.toString() : null\r\n    }))\r\n  );\r\n\r\n  show = computed(() => this.transformedPoints().every(point => point.value !== null));\r\n}\r\n",
+            "sourceCode": "import { Component, computed, input } from '@angular/core';\r\nimport CardDetails from '../../models/CardDetails';\r\nimport { PokerCardComponent } from '../poker-card/poker-card.component';\r\n\r\n@Component({\r\n  selector: 'app-points',\r\n  standalone: true,\r\n  imports: [PokerCardComponent],\r\n  templateUrl: './points.component.html',\r\n  styleUrl: './points.component.css',\r\n})\r\nexport class PointsComponent {\r\n  points = input.required<CardDetails[]>();\r\n  transformedPoints = computed<CardDetails[]>(() =>\r\n    this.points().map((point) => {\r\n      const valueCount = point.value\r\n        ? this.points().filter((p) => p.value === point.value).length.toString()\r\n        : null;\r\n\r\n      return {\r\n        ...point,\r\n        display: point.value,\r\n        value: valueCount,\r\n      };\r\n    })\r\n  );\r\n\r\n  show = computed(() =>\r\n    this.transformedPoints().every((point) => point.value !== null)\r\n  );\r\n}\r\n",
             "styleUrl": "./points.component.css",
             "assetsDirs": [],
             "styleUrlsData": "",

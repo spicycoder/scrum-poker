@@ -7,18 +7,31 @@ import { PokerCardComponent } from '../poker-card/poker-card.component';
   standalone: true,
   imports: [PokerCardComponent],
   templateUrl: './points.component.html',
-  styleUrl: './points.component.css'
+  styleUrl: './points.component.css',
 })
 export class PointsComponent {
   points = input.required<CardDetails[]>();
-
   transformedPoints = computed<CardDetails[]>(() =>
-    this.points().map(point => ({
-      ...point,
-      display: point.value,
-      value: point.value ? this.points().filter(p => p.value === point.value).length.toString() : null
-    }))
+    Array.from(
+      this.points()
+        .reduce(
+          (map, point) =>
+            point.value && !map.has(point.value)
+              ? map.set(point.value, {
+                  ...point,
+                  display: point.value,
+                  value: this.points()
+                    .filter((p) => p.value === point.value)
+                    .length.toString(),
+                })
+              : map,
+          new Map()
+        )
+        .values()
+    )
   );
 
-  show = computed(() => this.transformedPoints().every(point => point.value !== null));
+  show = computed(() =>
+    this.transformedPoints().every((point) => point.value !== null)
+  );
 }

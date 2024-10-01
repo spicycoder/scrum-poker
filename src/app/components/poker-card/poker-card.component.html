@@ -1,5 +1,5 @@
 <div class="flex items-center justify-center w-24 h-36 rounded-2xl m-2 indicator p-2 text-center" [ngClass]="{'cursor-pointer hover:bg-cyan-900 bg-cyan-700 text-cyan-100': !card().selected, 'bg-sky-700 text-sky-100': card().selected}">
-  @if (card().value) {
+  @if (card().value && card().selected) {
     <span class="indicator-item badge badge-primary text-primary-content">{{show() ? card().value : '🔒'}}</span>
   }
   <div class="text-xs">{{card().display}}</div>
