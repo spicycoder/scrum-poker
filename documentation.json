@@ -197,7 +197,7 @@
         },
         {
             "name": "PointsComponent",
-            "id": "component-PointsComponent-2a6bd0a75c54836a1503d213e2d57a875b7e17e1e93bf9dc601d8b737efa268f5bc23f61a592eb4ef9a6231b5b42c087acf0fe44d419fb9bf591cb706302558e",
+            "id": "component-PointsComponent-58a372ffeab949f41cde266d70775496babe0461e587aa17744fe0f89e43bdc948e8aa8384563d787ce0e18898c1f2f904272893ea30096f842f13f309218274",
             "file": "src/app/components/points/points.component.ts",
             "encapsulation": [],
             "entryComponents": [],
@@ -233,11 +233,11 @@
                     "type": "",
                     "optional": false,
                     "description": "",
-                    "line": 28
+                    "line": 34
                 },
                 {
                     "name": "transformedPoints",
-                    "defaultValue": "computed<CardDetails[]>(() =>\r\n    this.points().map((point) => {\r\n      const valueCount = point.value\r\n        ? this.points().filter((p) => p.value === point.value).length.toString()\r\n        : null;\r\n\r\n      return {\r\n        ...point,\r\n        display: point.value,\r\n        value: valueCount,\r\n      };\r\n    })\r\n  )",
+                    "defaultValue": "computed<CardDetails[]>(() =>\r\n    Array.from(\r\n      this.points()\r\n        .reduce(\r\n          (map, point) =>\r\n            point.value && !map.has(point.value)\r\n              ? map.set(point.value, {\r\n                  ...point,\r\n                  display: point.value,\r\n                  value: this.points()\r\n                    .filter((p) => p.value === point.value)\r\n                    .length.toString(),\r\n                })\r\n              : map,\r\n          new Map()\r\n        )\r\n        .values()\r\n    )\r\n  )",
                     "deprecated": false,
                     "deprecationMessage": "",
                     "type": "",
@@ -261,7 +261,7 @@
             "description": "",
             "rawdescription": "\n",
             "type": "component",
-            "sourceCode": "import { Component, computed, input } from '@angular/core';\r\nimport CardDetails from '../../models/CardDetails';\r\nimport { PokerCardComponent } from '../poker-card/poker-card.component';\r\n\r\n@Component({\r\n  selector: 'app-points',\r\n  standalone: true,\r\n  imports: [PokerCardComponent],\r\n  templateUrl: './points.component.html',\r\n  styleUrl: './points.component.css',\r\n})\r\nexport class PointsComponent {\r\n  points = input.required<CardDetails[]>();\r\n  transformedPoints = computed<CardDetails[]>(() =>\r\n    this.points().map((point) => {\r\n      const valueCount = point.value\r\n        ? this.points().filter((p) => p.value === point.value).length.toString()\r\n        : null;\r\n\r\n      return {\r\n        ...point,\r\n        display: point.value,\r\n        value: valueCount,\r\n      };\r\n    })\r\n  );\r\n\r\n  show = computed(() =>\r\n    this.transformedPoints().every((point) => point.value !== null)\r\n  );\r\n}\r\n",
+            "sourceCode": "import { Component, computed, input } from '@angular/core';\r\nimport CardDetails from '../../models/CardDetails';\r\nimport { PokerCardComponent } from '../poker-card/poker-card.component';\r\n\r\n@Component({\r\n  selector: 'app-points',\r\n  standalone: true,\r\n  imports: [PokerCardComponent],\r\n  templateUrl: './points.component.html',\r\n  styleUrl: './points.component.css',\r\n})\r\nexport class PointsComponent {\r\n  points = input.required<CardDetails[]>();\r\n  transformedPoints = computed<CardDetails[]>(() =>\r\n    Array.from(\r\n      this.points()\r\n        .reduce(\r\n          (map, point) =>\r\n            point.value && !map.has(point.value)\r\n              ? map.set(point.value, {\r\n                  ...point,\r\n                  display: point.value,\r\n                  value: this.points()\r\n                    .filter((p) => p.value === point.value)\r\n                    .length.toString(),\r\n                })\r\n              : map,\r\n          new Map()\r\n        )\r\n        .values()\r\n    )\r\n  );\r\n\r\n  show = computed(() =>\r\n    this.transformedPoints().every((point) => point.value !== null)\r\n  );\r\n}\r\n",
             "styleUrl": "./points.component.css",
             "assetsDirs": [],
             "styleUrlsData": "",
@@ -353,7 +353,7 @@
             "styleUrlsData": "",
             "stylesData": "",
             "extends": [],
-            "templateData": "<div class=\"flex items-center justify-center w-24 h-36 rounded-2xl m-2 indicator p-2 text-center\" [ngClass]=\"{'cursor-pointer hover:bg-cyan-900 bg-cyan-700 text-cyan-100': !card().selected, 'bg-sky-700 text-sky-100': card().selected}\">\r\n  @if (card().value) {\r\n    <span class=\"indicator-item badge badge-primary text-primary-content\">{{show() ? card().value : '🔒'}}</span>\r\n  }\r\n  <div class=\"text-xs\">{{card().display}}</div>\r\n</div>\r\n"
+            "templateData": "<div class=\"flex items-center justify-center w-24 h-36 rounded-2xl m-2 indicator p-2 text-center\" [ngClass]=\"{'cursor-pointer hover:bg-cyan-900 bg-cyan-700 text-cyan-100': !card().selected, 'bg-sky-700 text-sky-100': card().selected}\">\r\n  @if (card().value && card().selected) {\r\n    <span class=\"indicator-item badge badge-primary text-primary-content\">{{show() ? card().value : '🔒'}}</span>\r\n  }\r\n  <div class=\"text-xs\">{{card().display}}</div>\r\n</div>\r\n"
         }
     ],
     "modules": [],
