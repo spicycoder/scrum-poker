@@ -1,0 +1,5 @@
+<div class="m-4 flex flex-wrap justify-center">
+  @for (point of transformedPoints(); track point.display) {
+    <app-poker-card [card]="point" [show]="show()"></app-poker-card>
+  }
+</div>

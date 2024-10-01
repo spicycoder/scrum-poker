@@ -1,0 +1,385 @@
+{
+    "pipes": [],
+    "interfaces": [
+        {
+            "name": "CardDetails",
+            "id": "interface-CardDetails-ba8559bbcd4f47af811b68fe57e9427c5801909211dc63ce13db80879f1b75012a9b7ac9edaccf08e6780b1c53f2a3c0e4a4971c334f9c3c17d98325ee63a0c8",
+            "file": "src/app/models/CardDetails.ts",
+            "deprecated": false,
+            "deprecationMessage": "",
+            "type": "interface",
+            "sourceCode": "export default interface CardDetails {\r\n  display: string | null;\r\n  selected: boolean;\r\n  value: string | null;\r\n}\r\n",
+            "properties": [
+                {
+                    "name": "display",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "string | null",
+                    "optional": false,
+                    "description": "",
+                    "line": 2
+                },
+                {
+                    "name": "selected",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "boolean",
+                    "optional": false,
+                    "description": "",
+                    "line": 3
+                },
+                {
+                    "name": "value",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "string | null",
+                    "optional": false,
+                    "description": "",
+                    "line": 4
+                }
+            ],
+            "indexSignatures": [],
+            "kind": 171,
+            "methods": [],
+            "extends": []
+        },
+        {
+            "name": "User",
+            "id": "interface-User-d4821beac0e4a852e513391b7470981c4353fdd95a18628bb68136c8695b489ee15b926e2e5031bc26cf30e1508e0a362c3ee13a06734702b4d15af140e485d5",
+            "file": "src/stories/user.ts",
+            "deprecated": false,
+            "deprecationMessage": "",
+            "type": "interface",
+            "sourceCode": "export interface User {\n  name: string;\n}\n",
+            "properties": [
+                {
+                    "name": "name",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "string",
+                    "optional": false,
+                    "description": "",
+                    "line": 2
+                }
+            ],
+            "indexSignatures": [],
+            "kind": 171,
+            "methods": [],
+            "extends": []
+        }
+    ],
+    "injectables": [],
+    "guards": [],
+    "interceptors": [],
+    "classes": [],
+    "directives": [],
+    "components": [
+        {
+            "name": "AppComponent",
+            "id": "component-AppComponent-bcc66d62eb67ced14a69cb01bd5853ddbc2083841612ea07dfd77cb758a5f882590036cc73486fe19d03e2a674ea754ee1faa3cfee3af2a4c4a4c9107c1b548d",
+            "file": "src/app/app.component.ts",
+            "encapsulation": [],
+            "entryComponents": [],
+            "inputs": [],
+            "outputs": [],
+            "providers": [],
+            "selector": "app-root",
+            "styleUrls": [],
+            "styles": [],
+            "templateUrl": [
+                "./app.component.html"
+            ],
+            "viewProviders": [],
+            "hostDirectives": [],
+            "inputsClass": [],
+            "outputsClass": [],
+            "propertiesClass": [
+                {
+                    "name": "title",
+                    "defaultValue": "'scrum-poker'",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "string",
+                    "optional": false,
+                    "description": "",
+                    "line": 13
+                }
+            ],
+            "methodsClass": [],
+            "deprecated": false,
+            "deprecationMessage": "",
+            "hostBindings": [],
+            "hostListeners": [],
+            "standalone": true,
+            "imports": [
+                {
+                    "name": "RouterOutlet"
+                },
+                {
+                    "name": "PokerCardComponent",
+                    "type": "component"
+                }
+            ],
+            "description": "",
+            "rawdescription": "\n",
+            "type": "component",
+            "sourceCode": "import { Component } from '@angular/core';\r\nimport { RouterOutlet } from '@angular/router';\r\nimport { PokerCardComponent } from './components/poker-card/poker-card.component';\r\n\r\n@Component({\r\n  selector: 'app-root',\r\n  standalone: true,\r\n  imports: [RouterOutlet, PokerCardComponent],\r\n  templateUrl: './app.component.html',\r\n  styleUrl: './app.component.css'\r\n})\r\nexport class AppComponent {\r\n  title = 'scrum-poker';\r\n}\r\n",
+            "styleUrl": "./app.component.css",
+            "assetsDirs": [],
+            "styleUrlsData": "",
+            "stylesData": "",
+            "extends": [],
+            "templateData": "<app-poker-card display=\"John Doe\"></app-poker-card>\r\n"
+        },
+        {
+            "name": "PlayersComponent",
+            "id": "component-PlayersComponent-393d48f66c77920fde626f7a97577fc56a52abaf9ed5a4e11a65390dd56b48c1b9ac54398766d36850ac7864df048851447439110c31bfae75ffbfe40757f835",
+            "file": "src/app/components/players/players.component.ts",
+            "encapsulation": [],
+            "entryComponents": [],
+            "inputs": [],
+            "outputs": [],
+            "providers": [],
+            "selector": "app-players",
+            "styleUrls": [],
+            "styles": [],
+            "templateUrl": [
+                "./players.component.html"
+            ],
+            "viewProviders": [],
+            "hostDirectives": [],
+            "inputsClass": [],
+            "outputsClass": [],
+            "propertiesClass": [
+                {
+                    "name": "players",
+                    "defaultValue": "input<CardDetails[]>()",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "",
+                    "optional": false,
+                    "description": "",
+                    "line": 13
+                }
+            ],
+            "methodsClass": [],
+            "deprecated": false,
+            "deprecationMessage": "",
+            "hostBindings": [],
+            "hostListeners": [],
+            "standalone": true,
+            "imports": [
+                {
+                    "name": "PokerCardComponent",
+                    "type": "component"
+                }
+            ],
+            "description": "",
+            "rawdescription": "\n",
+            "type": "component",
+            "sourceCode": "import { Component, input, Input } from '@angular/core';\r\nimport CardDetails from '../../models/CardDetails';\r\nimport { PokerCardComponent } from \"../poker-card/poker-card.component\";\r\n\r\n@Component({\r\n  selector: 'app-players',\r\n  standalone: true,\r\n  imports: [PokerCardComponent],\r\n  templateUrl: './players.component.html',\r\n  styleUrl: './players.component.css'\r\n})\r\nexport class PlayersComponent {\r\n  players = input<CardDetails[]>();\r\n  // @Input() players: CardDetails[] = [];\r\n}\r\n",
+            "styleUrl": "./players.component.css",
+            "assetsDirs": [],
+            "styleUrlsData": "",
+            "stylesData": "",
+            "extends": [],
+            "templateData": "<div class=\"m-4 flex flex-wrap justify-center\">\r\n  @for (player of players; track player.display) {\r\n    <app-poker-card [card]=\"player\"></app-poker-card>\r\n  }\r\n</div>\r\n"
+        },
+        {
+            "name": "PointsComponent",
+            "id": "component-PointsComponent-8cb2d61f416e668f85328372d3e3dcbeb7d77ba0c38134284f70823bdb07936be16c2c116453200a7f488da5b138af95f2dd6fbfb2bd062e198c9e8efc21f844",
+            "file": "src/app/components/points/points.component.ts",
+            "encapsulation": [],
+            "entryComponents": [],
+            "inputs": [],
+            "outputs": [],
+            "providers": [],
+            "selector": "app-points",
+            "styleUrls": [],
+            "styles": [],
+            "templateUrl": [
+                "./points.component.html"
+            ],
+            "viewProviders": [],
+            "hostDirectives": [],
+            "inputsClass": [],
+            "outputsClass": [],
+            "propertiesClass": [],
+            "methodsClass": [],
+            "deprecated": false,
+            "deprecationMessage": "",
+            "hostBindings": [],
+            "hostListeners": [],
+            "standalone": true,
+            "imports": [],
+            "description": "",
+            "rawdescription": "\n",
+            "type": "component",
+            "sourceCode": "import { Component } from '@angular/core';\r\n\r\n@Component({\r\n  selector: 'app-points',\r\n  standalone: true,\r\n  imports: [],\r\n  templateUrl: './points.component.html',\r\n  styleUrl: './points.component.css'\r\n})\r\nexport class PointsComponent {\r\n\r\n}\r\n",
+            "styleUrl": "./points.component.css",
+            "assetsDirs": [],
+            "styleUrlsData": "",
+            "stylesData": "",
+            "extends": [],
+            "templateData": "<p>points works!</p>\r\n"
+        },
+        {
+            "name": "PokerCardComponent",
+            "id": "component-PokerCardComponent-dd7090b31706b6f1aea0893499835417f7bb897b5c2e294e7b5918d19531130da1b5aab2c9e23c2a2de97e4b4c1eeb85f55573b87052516ff683ce507e0d5fe5",
+            "file": "src/app/components/poker-card/poker-card.component.ts",
+            "encapsulation": [],
+            "entryComponents": [],
+            "inputs": [],
+            "outputs": [],
+            "providers": [],
+            "selector": "app-poker-card",
+            "styleUrls": [],
+            "styles": [],
+            "templateUrl": [
+                "./poker-card.component.html"
+            ],
+            "viewProviders": [],
+            "hostDirectives": [],
+            "inputsClass": [
+                {
+                    "name": "card",
+                    "defaultValue": "{ display: '', selected: false, value: '' }",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "line": 13,
+                    "type": "CardDetails",
+                    "decorators": []
+                }
+            ],
+            "outputsClass": [],
+            "propertiesClass": [],
+            "methodsClass": [],
+            "deprecated": false,
+            "deprecationMessage": "",
+            "hostBindings": [],
+            "hostListeners": [],
+            "standalone": true,
+            "imports": [
+                {
+                    "name": "NgClass"
+                }
+            ],
+            "description": "",
+            "rawdescription": "\n",
+            "type": "component",
+            "sourceCode": "import { NgClass } from '@angular/common';\r\nimport { Component, Input } from '@angular/core';\r\nimport CardDetails from '../../models/CardDetails';\r\n\r\n@Component({\r\n  selector: 'app-poker-card',\r\n  standalone: true,\r\n  imports: [NgClass],\r\n  templateUrl: './poker-card.component.html',\r\n  styleUrl: './poker-card.component.css'\r\n})\r\nexport class PokerCardComponent {\r\n  @Input() card: CardDetails = { display: '', selected: false, value: '' };\r\n}\r\n",
+            "styleUrl": "./poker-card.component.css",
+            "assetsDirs": [],
+            "styleUrlsData": "",
+            "stylesData": "",
+            "extends": [],
+            "templateData": "<div class=\"flex items-center justify-center w-24 h-36 rounded-2xl m-2 indicator\" [ngClass]=\"{'cursor-pointer hover:bg-cyan-900 bg-cyan-700 text-cyan-100': !card.selected, 'bg-sky-700 text-sky-100': card.selected}\">\r\n  @if (card.value) {\r\n    <span class=\"indicator-item badge badge-accent\">{{card.value}}</span>\r\n  }\r\n  <div class=\"text-xs\">{{card.display}}</div>\r\n</div>\r\n"
+        }
+    ],
+    "modules": [],
+    "miscellaneous": {
+        "variables": [
+            {
+                "name": "appConfig",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "src/app/app.config.ts",
+                "deprecated": false,
+                "deprecationMessage": "",
+                "type": "ApplicationConfig",
+                "defaultValue": "{\r\n  providers: [provideZoneChangeDetection({ eventCoalescing: true }), provideRouter(routes)]\r\n}"
+            }
+        ],
+        "functions": [],
+        "typealiases": [],
+        "enumerations": [],
+        "groupedVariables": {
+            "src/app/app.config.ts": [
+                {
+                    "name": "appConfig",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/app/app.config.ts",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "ApplicationConfig",
+                    "defaultValue": "{\r\n  providers: [provideZoneChangeDetection({ eventCoalescing: true }), provideRouter(routes)]\r\n}"
+                }
+            ]
+        },
+        "groupedFunctions": {},
+        "groupedEnumerations": {},
+        "groupedTypeAliases": {}
+    },
+    "routes": [],
+    "coverage": {
+        "count": 0,
+        "status": "low",
+        "files": [
+            {
+                "filePath": "src/app/app.component.ts",
+                "type": "component",
+                "linktype": "component",
+                "name": "AppComponent",
+                "coveragePercent": 0,
+                "coverageCount": "0/2",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/app.config.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "appConfig",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/components/players/players.component.ts",
+                "type": "component",
+                "linktype": "component",
+                "name": "PlayersComponent",
+                "coveragePercent": 0,
+                "coverageCount": "0/2",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/components/points/points.component.ts",
+                "type": "component",
+                "linktype": "component",
+                "name": "PointsComponent",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/components/poker-card/poker-card.component.ts",
+                "type": "component",
+                "linktype": "component",
+                "name": "PokerCardComponent",
+                "coveragePercent": 0,
+                "coverageCount": "0/2",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/models/CardDetails.ts",
+                "type": "interface",
+                "linktype": "interface",
+                "name": "CardDetails",
+                "coveragePercent": 0,
+                "coverageCount": "0/4",
+                "status": "low"
+            },
+            {
+                "filePath": "src/stories/user.ts",
+                "type": "interface",
+                "linktype": "interface",
+                "name": "User",
+                "coveragePercent": 0,
+                "coverageCount": "0/2",
+                "status": "low"
+            }
+        ]
+    }
+}

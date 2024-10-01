@@ -1,0 +1,5 @@
+<div class="m-4 flex flex-wrap justify-center">
+  @for (player of players(); track player.display) {
+    <app-poker-card [card]="player" [show]="show()"></app-poker-card>
+  }
+</div>
