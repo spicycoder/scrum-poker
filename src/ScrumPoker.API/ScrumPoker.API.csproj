@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.StackExchange.Redis" />
+    <PackageReference Include="AspNetCore.SwaggerUI.Themes" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" />
+    <PackageReference Include="WolverineFx.Http.FluentValidation" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ScrumPoker.Application\ScrumPoker.Application.csproj" />
+    <ProjectReference Include="..\ScrumPoker.Infrastructure\ScrumPoker.Infrastructure.csproj" />
+    <ProjectReference Include="..\ScrumPoker.Persistence\ScrumPoker.Persistence.csproj" />
+    <ProjectReference Include="..\ScrumPoker.ServiceDefaults\ScrumPoker.ServiceDefaults.csproj" />
+  </ItemGroup>
+
+</Project>

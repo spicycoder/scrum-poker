@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ScrumPoker.API/ScrumPoker.API.csproj" />
+    <Project Path="src/ScrumPoker.AppHost/ScrumPoker.AppHost.csproj" Id="74ef92ad-ac45-4944-97ea-6d5e0fb699da" />
+    <Project Path="src/ScrumPoker.Application/ScrumPoker.Application.csproj" />
+    <Project Path="src/ScrumPoker.Domain/ScrumPoker.Domain.csproj" />
+    <Project Path="src/ScrumPoker.Infrastructure/ScrumPoker.Infrastructure.csproj" />
+    <Project Path="src/ScrumPoker.Persistence/ScrumPoker.Persistence.csproj" />
+    <Project Path="src/ScrumPoker.ServiceDefaults/ScrumPoker.ServiceDefaults.csproj" />
+  </Folder>
+</Solution>

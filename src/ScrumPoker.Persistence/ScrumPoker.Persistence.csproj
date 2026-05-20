@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\ScrumPoker.Application\ScrumPoker.Application.csproj" />
+    <ProjectReference Include="..\ScrumPoker.Domain\ScrumPoker.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.StackExchange.Redis" />
+  </ItemGroup>
+
+</Project>
