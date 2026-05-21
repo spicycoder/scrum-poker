@@ -3,6 +3,7 @@ using AspNetCore.Swagger.Themes;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 
+using ScrumPoker.API.Middleware;
 using ScrumPoker.Application;
 using ScrumPoker.Infrastructure;
 using ScrumPoker.Infrastructure.Realtime;
@@ -20,6 +21,9 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
 builder.Services.AddPersistence();
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 builder.Services.AddControllers();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
@@ -27,6 +31,8 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
+
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {

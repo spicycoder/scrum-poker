@@ -20,6 +20,8 @@ public sealed class RoomController : ControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType(typeof(GameStateResponse), 201)]
+    [ProducesResponseType(400)]
     public async Task<IActionResult> Create([FromBody] CreateRoomRequest request, CancellationToken ct)
     {
         var command = new CreateRoomCommand(request.PlayerName);
@@ -28,6 +30,10 @@ public sealed class RoomController : ControllerBase
     }
 
     [HttpPost("{id:int}/join")]
+    [ProducesResponseType(typeof(GameStateResponse), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(409)]
     public async Task<IActionResult> Join([FromRoute] int id, [FromBody] JoinRoomRequest request, CancellationToken ct)
     {
         if (id <= 0)
@@ -43,7 +49,7 @@ public sealed class RoomController : ControllerBase
             JoinRoomResult.Success(var room) => Ok(GameStateMapper.ToResponse(room)),
             JoinRoomResult.RoomNotFound => NotFound(),
             JoinRoomResult.PlayerAlreadyInRoom => Conflict(),
-            _ => StatusCode(500)
+            _ => throw new InvalidOperationException($"Unknown result type: {result.GetType().Name}")
         };
     }
 }
