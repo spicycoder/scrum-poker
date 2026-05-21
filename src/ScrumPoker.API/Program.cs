@@ -1,23 +1,28 @@
 using AspNetCore.Swagger.Themes;
+
+using FluentValidation;
+using FluentValidation.AspNetCore;
+
 using ScrumPoker.Application;
 using ScrumPoker.Infrastructure;
 using ScrumPoker.Infrastructure.Realtime;
 using ScrumPoker.Persistence;
-using Wolverine.Http;
-using Wolverine.Http.FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 builder.AddRedisClient("redis");
 
-builder.Services.AddOpenApi(options =>
-{
-    options.OpenApiVersion = Microsoft.OpenApi.OpenApiSpecVersion.OpenApi3_0;
-});
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
 builder.Services.AddPersistence();
+
+builder.Services.AddControllers();
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 var app = builder.Build();
 
@@ -25,20 +30,15 @@ app.MapDefaultEndpoints();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
     app.UseSwaggerUI(Theme.Futuristic, options =>
     {
-        options.SwaggerEndpoint("/openapi/v1.json", "Scrum Poker API");
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Scrum Poker API");
     });
 }
 
 app.UseHttpsRedirection();
-
-app.MapWolverineEndpoints(opts =>
-{
-    opts.UseFluentValidationProblemDetailMiddleware();
-});
-
+app.MapControllers();
 app.MapHub<PokerHub>("/hub");
 
 app.Run();

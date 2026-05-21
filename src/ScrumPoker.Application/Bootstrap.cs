@@ -1,6 +1,6 @@
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Wolverine;
-using Wolverine.FluentValidation;
 
 namespace ScrumPoker.Application;
 
@@ -11,8 +11,9 @@ public static class Bootstrap
         services.AddWolverine(opts =>
         {
             opts.Discovery.IncludeAssembly(typeof(Bootstrap).Assembly);
-            opts.UseFluentValidation();
         });
+
+        services.AddValidatorsFromAssembly(typeof(Bootstrap).Assembly);
 
         return services;
     }

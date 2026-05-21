@@ -14,12 +14,14 @@ public sealed class RoomRepository(IConnectionMultiplexer redis, IOptions<GameSe
 
     public async Task<Room?> GetByIdAsync(int id, CancellationToken ct = default)
     {
+        _ = ct;
         var value = await _db.StringGetAsync(id.ToString());
         return value.IsNullOrEmpty ? null : JsonSerializer.Deserialize<Room>(value.ToString());
     }
 
     public async Task<Room> SaveAsync(Room room, CancellationToken ct = default)
     {
+        _ = ct;
         var id = room.Id == 0 ? await GenerateIdAsync() : room.Id;
         var saved = room with { Id = id };
 
@@ -33,7 +35,9 @@ public sealed class RoomRepository(IConnectionMultiplexer redis, IOptions<GameSe
         {
             var id = RandomNumberGenerator.GetInt32(1000, 10000);
             if (!await _db.KeyExistsAsync(id.ToString()))
+            {
                 return id;
+            }
         }
     }
 }

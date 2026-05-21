@@ -1,0 +1,5 @@
+{
+    "appHost": {
+        "path": "src\\ScrumPoker.AppHost\\ScrumPoker.AppHost.csproj"
+    }
+}

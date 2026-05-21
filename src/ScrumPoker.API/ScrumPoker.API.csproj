@@ -3,9 +3,8 @@
   <ItemGroup>
     <PackageReference Include="Aspire.StackExchange.Redis" />
     <PackageReference Include="AspNetCore.SwaggerUI.Themes" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" />
-    <PackageReference Include="WolverineFx.Http.FluentValidation" />
+    <PackageReference Include="Swashbuckle.AspNetCore" />
+
   </ItemGroup>
 
   <ItemGroup>
