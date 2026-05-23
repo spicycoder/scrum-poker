@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NSubstitute" />
+    <ProjectReference Include="..\..\src\ScrumPoker.Application\ScrumPoker.Application.csproj" />
+  </ItemGroup>
+
+</Project>

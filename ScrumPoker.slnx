@@ -18,4 +18,9 @@
     <Project Path="src/ScrumPoker.Persistence/ScrumPoker.Persistence.csproj" />
     <Project Path="src/ScrumPoker.ServiceDefaults/ScrumPoker.ServiceDefaults.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ScrumPoker.API.IntegrationTests/ScrumPoker.API.IntegrationTests.csproj" />
+    <Project Path="tests/ScrumPoker.API.UnitTests/ScrumPoker.API.UnitTests.csproj" />
+    <Project Path="tests/ScrumPoker.Application.UnitTests/ScrumPoker.Application.UnitTests.csproj" />
+  </Folder>
 </Solution>

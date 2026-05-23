@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat Code Coverage">
+        <Configuration>
+          <!-- 
+            Include all ScrumPoker.* assemblies (production code).
+            Use [assembly]class syntax: [ScrumPoker.Domain]* etc.
+          -->
+          <Include>
+            [ScrumPoker.Domain]*
+            [ScrumPoker.Application]*
+            [ScrumPoker.Infrastructure]*
+            [ScrumPoker.Persistence]*
+            [ScrumPoker.API]*
+            [ScrumPoker.ServiceDefaults]*
+            [ScrumPoker.AppHost]*
+          </Include>
+          <!-- Exclude test assemblies -->
+          <Exclude>
+            [*.Tests*]*
+          </Exclude>
+          <!-- Exclude methods/classes with these attributes -->
+          <ExcludeByAttribute>
+            Obsolete,
+            GeneratedCodeAttribute,
+            ExcludeFromCodeCoverageAttribute
+          </ExcludeByAttribute>
+          <!-- Exclude boilerplate files from coverage -->
+          <ExcludeByFile>
+            **/Program.cs,
+            **/Bootstrap.cs,
+            **/AppHost.cs
+          </ExcludeByFile>
+          <!-- Output formats: cobertura for ReportGenerator, json for IDE -->
+          <Format>cobertura,json</Format>
+          <!-- Include both source and orphaned nodes (partial coverage) -->
+          <IncludeTestAssembly>false</IncludeTestAssembly>
+          <SingleHit>false</SingleHit>
+          <!-- Use deterministic source roots for CI portability -->
+          <DeterministicReport>true</DeterministicReport>
+          <!-- Verbosity for debugging coverage issues -->
+          <Verbosity>Info</Verbosity>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

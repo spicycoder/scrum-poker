@@ -57,6 +57,9 @@ nunit-*.xml
 [Rr]eleasePS/
 dlldata.c
 
+# Code Coverage reports
+.coverage/
+
 # Benchmark Results
 BenchmarkDotNet.Artifacts/
 
