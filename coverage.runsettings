@@ -14,7 +14,6 @@
             [ScrumPoker.Infrastructure]*
             [ScrumPoker.Persistence]*
             [ScrumPoker.API]*
-            [ScrumPoker.ServiceDefaults]*
             [ScrumPoker.AppHost]*
           </Include>
           <!-- Exclude test assemblies -->
