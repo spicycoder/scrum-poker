@@ -15,7 +15,7 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.15.1" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.1" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="10.1.7" />
-    <PackageVersion Include="WolverineFx" Version="5.39.3" />
+    <PackageVersion Include="WolverineFx" Version="6.0.0" />
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="Aspire.Hosting.Testing" Version="13.3.5" />
