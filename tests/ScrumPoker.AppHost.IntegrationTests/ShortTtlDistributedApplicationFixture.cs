@@ -1,3 +1,4 @@
+using System.Net.Http;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
@@ -30,10 +31,12 @@ public sealed class ShortTtlDistributedApplicationFixture : IAsyncLifetime
             .WaitForResourceHealthyAsync("scrumpoker-api", ct)
             .WaitAsync(ct);
 
-        HttpClient = _app.CreateHttpClient("scrumpoker-api", new HttpClientHandler
+        var baseAddress = _app.GetEndpoint("scrumpoker-api");
+        HttpClient = new HttpClient(new HttpClientHandler
         {
-            ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
-        });
+            ServerCertificateCustomValidationCallback =
+                HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+        }) { BaseAddress = baseAddress };
     }
 
     public async ValueTask DisposeAsync()
