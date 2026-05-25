@@ -26,7 +26,10 @@ public sealed class DistributedApplicationFixture : IAsyncLifetime
             .WaitForResourceHealthyAsync("scrumpoker-api", ct)
             .WaitAsync(ct);
 
-        HttpClient = _app.CreateHttpClient("scrumpoker-api");
+        HttpClient = _app.CreateHttpClient("scrumpoker-api", new HttpClientHandler
+        {
+            ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+        });
     }
 
     public async ValueTask DisposeAsync()

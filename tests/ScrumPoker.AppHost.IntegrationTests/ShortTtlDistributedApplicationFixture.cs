@@ -30,7 +30,10 @@ public sealed class ShortTtlDistributedApplicationFixture : IAsyncLifetime
             .WaitForResourceHealthyAsync("scrumpoker-api", ct)
             .WaitAsync(ct);
 
-        HttpClient = _app.CreateHttpClient("scrumpoker-api");
+        HttpClient = _app.CreateHttpClient("scrumpoker-api", new HttpClientHandler
+        {
+            ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+        });
     }
 
     public async ValueTask DisposeAsync()
