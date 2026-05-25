@@ -4,7 +4,7 @@
     <PackageReference Include="Aspire.StackExchange.Redis" />
     <PackageReference Include="AspNetCore.SwaggerUI.Themes" />
     <PackageReference Include="Swashbuckle.AspNetCore" />
-
+    <PackageReference Include="WolverineFx.RuntimeCompilation" />
   </ItemGroup>
 
   <ItemGroup>

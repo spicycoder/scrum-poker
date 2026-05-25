@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <IsTestProject>true</IsTestProject>
@@ -9,6 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\ScrumPoker.AppHost\ScrumPoker.AppHost.csproj" />
     <ProjectReference Include="..\..\src\ScrumPoker.API\ScrumPoker.API.csproj" />
   </ItemGroup>
 

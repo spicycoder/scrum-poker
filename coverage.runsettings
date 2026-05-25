@@ -2,45 +2,18 @@
 <RunSettings>
   <DataCollectionRunSettings>
     <DataCollectors>
-      <DataCollector friendlyName="XPlat Code Coverage">
+      <DataCollector friendlyName="Code Coverage" uri="datacollector://Microsoft/CodeCoverage/2.0">
         <Configuration>
-          <!-- 
-            Include all ScrumPoker.* assemblies (production code).
-            Use [assembly]class syntax: [ScrumPoker.Domain]* etc.
-          -->
-          <Include>
-            [ScrumPoker.Domain]*
-            [ScrumPoker.Application]*
-            [ScrumPoker.Infrastructure]*
-            [ScrumPoker.Persistence]*
-            [ScrumPoker.API]*
-            [ScrumPoker.AppHost]*
-          </Include>
-          <!-- Exclude test assemblies -->
-          <Exclude>
-            [*.Tests*]*
-          </Exclude>
-          <!-- Exclude methods/classes with these attributes -->
-          <ExcludeByAttribute>
-            Obsolete,
-            GeneratedCodeAttribute,
-            ExcludeFromCodeCoverageAttribute
-          </ExcludeByAttribute>
-          <!-- Exclude boilerplate files from coverage -->
-          <ExcludeByFile>
-            **/Program.cs,
-            **/Bootstrap.cs,
-            **/AppHost.cs
-          </ExcludeByFile>
-          <!-- Output formats: cobertura for ReportGenerator, json for IDE -->
-          <Format>cobertura,json</Format>
-          <!-- Include both source and orphaned nodes (partial coverage) -->
-          <IncludeTestAssembly>false</IncludeTestAssembly>
-          <SingleHit>false</SingleHit>
-          <!-- Use deterministic source roots for CI portability -->
-          <DeterministicReport>true</DeterministicReport>
-          <!-- Verbosity for debugging coverage issues -->
-          <Verbosity>Info</Verbosity>
+          <CodeCoverage>
+            <!-- Required: attach the profiler to child processes spawned by the test host
+                 so Aspire-orchestrated resources (API, etc.) contribute to coverage. -->
+            <CollectFromChildProcesses>True</CollectFromChildProcesses>
+            <ModulePaths>
+              <Include>
+                <ModulePath>.*[\\/]ScrumPoker\.[^.\\\/]+\.dll$</ModulePath>
+              </Include>
+            </ModulePaths>
+          </CodeCoverage>
         </Configuration>
       </DataCollector>
     </DataCollectors>

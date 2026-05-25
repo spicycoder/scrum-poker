@@ -18,11 +18,26 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
-      - name: Restore dependencies
-        run: dotnet restore
+      - name: Restore tools
+        run: dotnet tool restore
+
+      - name: Restore
+        run: dotnet restore ./ScrumPoker.slnx
 
       - name: Build
-        run: dotnet build --no-restore --configuration Release
+        run: dotnet build --no-restore -c Release ./ScrumPoker.slnx
 
-      - name: Test
-        run: dotnet test --no-build --configuration Release --verbosity normal
+      - name: Test with coverage
+        run: |
+          dotnet dotnet-coverage collect \
+            --settings ./coverage.runsettings \
+            --output ./.coverage/coverage.cobertura.xml \
+            --output-format cobertura \
+            "dotnet test --no-build -c Release ./ScrumPoker.slnx"
+
+      - name: Upload coverage to Codecov
+        if: always()
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./.coverage/coverage.cobertura.xml
