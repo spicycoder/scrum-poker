@@ -3,8 +3,10 @@ using NSubstitute;
 using ScrumPoker.API.Features.Common;
 using ScrumPoker.API.Features.CreateRoom;
 using ScrumPoker.API.Features.JoinRoom;
+using ScrumPoker.API.Features.Vote;
 using ScrumPoker.Application.Features.CreateRoom;
 using ScrumPoker.Application.Features.JoinRoom;
+using ScrumPoker.Application.Features.Vote;
 using ScrumPoker.Domain.Rooms;
 using Wolverine;
 
@@ -153,5 +155,101 @@ public sealed class RoomControllerTests
         await _bus.Received(1).InvokeAsync<JoinRoomResult>(
             Arg.Is<JoinRoomCommand>(c => c.RoomId == 1 && c.PlayerName == "Bob"),
             ct);
+    }
+
+    [Fact]
+    public async Task Vote_Should_Return_200Ok_When_Success()
+    {
+        var request = new VoteRequest("Alice", "5");
+        var room = new Room { Id = 1, Players = [new Player("Alice", "5")] };
+        _bus.InvokeAsync<VoteResult>(Arg.Any<VoteCommand>(), Arg.Any<CancellationToken>())
+            .Returns(new VoteResult.Success(room));
+
+        var result = await _sut.Vote(1, request, TestContext.Current.CancellationToken);
+
+        var ok = result.ShouldBeOfType<OkObjectResult>();
+        ok.StatusCode.ShouldBe(200);
+
+        var response = ok.Value.ShouldBeOfType<GameStateResponse>();
+        response.GameId.ShouldBe(1);
+        response.Players.ShouldHaveSingleItem();
+        response.Players[0].Name.ShouldBe("Alice");
+        response.Players[0].Value.ShouldBe("5");
+    }
+
+    [Fact]
+    public async Task Vote_Should_Return_404NotFound_When_RoomNotFound()
+    {
+        var request = new VoteRequest("Bob", "5");
+        _bus.InvokeAsync<VoteResult>(Arg.Any<VoteCommand>(), Arg.Any<CancellationToken>())
+            .Returns(new VoteResult.RoomNotFound());
+
+        var result = await _sut.Vote(1, request, TestContext.Current.CancellationToken);
+
+        result.ShouldBeOfType<NotFoundResult>();
+    }
+
+    [Fact]
+    public async Task Vote_Should_Return_404NotFound_When_PlayerNotInRoom()
+    {
+        var request = new VoteRequest("Bob", "5");
+        _bus.InvokeAsync<VoteResult>(Arg.Any<VoteCommand>(), Arg.Any<CancellationToken>())
+            .Returns(new VoteResult.PlayerNotInRoom());
+
+        var result = await _sut.Vote(1, request, TestContext.Current.CancellationToken);
+
+        result.ShouldBeOfType<NotFoundResult>();
+    }
+
+    [Fact]
+    public async Task Vote_Should_Return_400BadRequest_When_IdIsZero()
+    {
+        var request = new VoteRequest("Bob", "5");
+
+        var result = await _sut.Vote(0, request, TestContext.Current.CancellationToken);
+
+        result.ShouldBeOfType<BadRequestResult>();
+        await _bus.DidNotReceiveWithAnyArgs().InvokeAsync<VoteResult>(default!, default(CancellationToken));
+    }
+
+    [Fact]
+    public async Task Vote_Should_Return_400BadRequest_When_IdIsNegative()
+    {
+        var request = new VoteRequest("Bob", "5");
+
+        var result = await _sut.Vote(-5, request, TestContext.Current.CancellationToken);
+
+        result.ShouldBeOfType<BadRequestResult>();
+        await _bus.DidNotReceiveWithAnyArgs().InvokeAsync<VoteResult>(default!, default(CancellationToken));
+    }
+
+    [Fact]
+    public async Task Vote_Should_Pass_CancellationToken()
+    {
+        var request = new VoteRequest("Alice", "5");
+        var cts = new CancellationTokenSource();
+        var ct = cts.Token;
+        _bus.InvokeAsync<VoteResult>(Arg.Any<VoteCommand>(), Arg.Any<CancellationToken>())
+            .Returns(new VoteResult.Success(new Room()));
+
+        await _sut.Vote(1, request, ct);
+
+        await _bus.Received(1).InvokeAsync<VoteResult>(
+            Arg.Is<VoteCommand>(c => c.RoomId == 1 && c.PlayerName == "Alice" && c.Value == "5"),
+            ct);
+    }
+
+    [Fact]
+    public async Task Vote_Should_Throw_InvalidOperationException_For_UnknownResultType()
+    {
+        var request = new VoteRequest("Bob", "5");
+        var unknownResult = Substitute.For<VoteResult>();
+        _bus.InvokeAsync<VoteResult>(Arg.Any<VoteCommand>(), Arg.Any<CancellationToken>())
+            .Returns(unknownResult);
+
+        var exception = await Should.ThrowAsync<InvalidOperationException>(() =>
+            _sut.Vote(1, request, TestContext.Current.CancellationToken));
+
+        exception.Message.ShouldContain("Unknown result type");
     }
 }

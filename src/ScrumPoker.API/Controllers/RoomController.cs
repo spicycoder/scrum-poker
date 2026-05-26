@@ -2,8 +2,10 @@ using Microsoft.AspNetCore.Mvc;
 using ScrumPoker.API.Features.Common;
 using ScrumPoker.API.Features.CreateRoom;
 using ScrumPoker.API.Features.JoinRoom;
+using ScrumPoker.API.Features.Vote;
 using ScrumPoker.Application.Features.CreateRoom;
 using ScrumPoker.Application.Features.JoinRoom;
+using ScrumPoker.Application.Features.Vote;
 using Wolverine;
 
 namespace ScrumPoker.API.Controllers;
@@ -49,6 +51,29 @@ public sealed class RoomController : ControllerBase
             JoinRoomResult.Success(var room) => Ok(GameStateMapper.ToResponse(room)),
             JoinRoomResult.RoomNotFound => NotFound(),
             JoinRoomResult.PlayerAlreadyInRoom => Conflict(),
+            _ => throw new InvalidOperationException($"Unknown result type: {result.GetType().Name}")
+        };
+    }
+
+    [HttpPost("{id:int}/vote")]
+    [ProducesResponseType(typeof(GameStateResponse), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> Vote([FromRoute] int id, [FromBody] VoteRequest request, CancellationToken ct)
+    {
+        if (id <= 0)
+        {
+            return BadRequest();
+        }
+
+        var command = new VoteCommand(id, request.PlayerName, request.Value);
+        var result = await _bus.InvokeAsync<VoteResult>(command, ct);
+
+        return result switch
+        {
+            VoteResult.Success(var room) => Ok(GameStateMapper.ToResponse(room)),
+            VoteResult.RoomNotFound => NotFound(),
+            VoteResult.PlayerNotInRoom => NotFound(),
             _ => throw new InvalidOperationException($"Unknown result type: {result.GetType().Name}")
         };
     }

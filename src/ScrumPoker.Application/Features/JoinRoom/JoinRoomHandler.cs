@@ -1,9 +1,10 @@
 using ScrumPoker.Application.Abstractions;
 using ScrumPoker.Domain.Rooms;
+using Wolverine;
 
 namespace ScrumPoker.Application.Features.JoinRoom;
 
-public sealed class JoinRoomHandler(IRoomRepository repository)
+public sealed class JoinRoomHandler(IRoomRepository repository, IMessageBus bus)
 {
     public async Task<JoinRoomResult> Handle(JoinRoomCommand command, CancellationToken ct)
     {
@@ -13,13 +14,16 @@ public sealed class JoinRoomHandler(IRoomRepository repository)
             return new JoinRoomResult.RoomNotFound();
         }
 
-        if (room.Players.Any(p => p.Name == command.PlayerName))
+        try
+        {
+            var (updated, @event) = room.Join(command.PlayerName);
+            var saved = await repository.SaveAsync(updated, ct);
+            await bus.PublishAsync(@event);
+            return new JoinRoomResult.Success(saved);
+        }
+        catch (InvalidOperationException)
         {
             return new JoinRoomResult.PlayerAlreadyInRoom();
         }
-
-        room = room with { Players = [.. room.Players, new Player(command.PlayerName, null)] };
-        room = await repository.SaveAsync(room, ct);
-        return new JoinRoomResult.Success(room);
     }
 }

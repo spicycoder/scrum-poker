@@ -22,5 +22,6 @@
     <Project Path="tests/ScrumPoker.API.UnitTests/ScrumPoker.API.UnitTests.csproj" />
     <Project Path="tests/ScrumPoker.AppHost.IntegrationTests/ScrumPoker.AppHost.IntegrationTests.csproj" />
     <Project Path="tests/ScrumPoker.Application.UnitTests/ScrumPoker.Application.UnitTests.csproj" />
+    <Project Path="tests/ScrumPoker.Domain.UnitTests/ScrumPoker.Domain.UnitTests.csproj" />
   </Folder>
 </Solution>

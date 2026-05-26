@@ -1,17 +1,16 @@
 using ScrumPoker.Application.Abstractions;
 using ScrumPoker.Domain.Rooms;
+using Wolverine;
 
 namespace ScrumPoker.Application.Features.CreateRoom;
 
-public sealed class CreateRoomHandler(IRoomRepository repository)
+public sealed class CreateRoomHandler(IRoomRepository repository, IMessageBus bus)
 {
     public async Task<Room> Handle(CreateRoomCommand command, CancellationToken ct)
     {
-        var room = new Room
-        {
-            Players = [new Player(command.PlayerName, null)]
-        };
-
-        return await repository.SaveAsync(room, ct);
+        var (room, @event) = Room.Create(command.PlayerName);
+        var saved = await repository.SaveAsync(room, ct);
+        await bus.PublishAsync(@event with { RoomId = saved.Id });
+        return saved;
     }
 }
