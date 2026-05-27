@@ -17,7 +17,7 @@ builder.AddRedisClient("redis");
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddApplication();
+builder.Services.AddApplication(typeof(PokerHub).Assembly);
 builder.Services.AddInfrastructure();
 builder.Services.AddPersistence();
 
