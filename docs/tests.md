@@ -35,6 +35,7 @@
 
 | Project | Scope | What it tests | Speed |
 |---|---|---|---|
-| `ScrumPoker.Application.UnitTests` | Unit | `CreateRoomHandler`, `JoinRoomHandler`, `CreateRoomCommandValidator`, `JoinRoomCommandValidator` | Fast |
-| `ScrumPoker.API.UnitTests` | Unit | `RoomController` (all status code branches), `CreateRoomRequestValidator`, `JoinRoomRequestValidator` | Fast |
-| `ScrumPoker.API.IntegrationTests` | Integration | Full HTTP pipeline via Aspire: controller -> handler -> Redis -> response | Slow |
+| `ScrumPoker.Domain.UnitTests` | Unit | `Room` aggregate logic (pure domain, no mocks) | Fast |
+| `ScrumPoker.Application.UnitTests` | Unit | Command/query handlers, command validators | Fast |
+| `ScrumPoker.API.UnitTests` | Unit | `RoomController` (all status code branches), request validators, `GameStateMapper`, `GlobalExceptionHandler` | Fast |
+| `ScrumPoker.AppHost.IntegrationTests` | Integration | Full HTTP pipeline via Aspire: controller -> handler -> Redis -> response, SignalR | Slow |

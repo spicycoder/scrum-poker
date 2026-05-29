@@ -7,6 +7,7 @@ public sealed record Room
     public int Id { get; init; }
     public List<Player> Players { get; init; } = [];
     public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
+    public bool Revealed { get; init; }
 
     public static (Room Room, RoomCreated Event) Create(string playerName)
     {
@@ -32,13 +33,30 @@ public sealed record Room
             throw new InvalidOperationException($"Player '{playerName}' is not in room.");
         }
 
+        var updatedPlayers = Players
+            .Select(p => p.Name == playerName ? p with { Value = value } : p)
+            .ToList();
+
         var updated = this with
         {
-            Players = Players
-                .Select(p => p.Name == playerName ? p with { Value = value } : p)
-                .ToList()
+            Players = updatedPlayers,
+            Revealed = updatedPlayers.All(p => p.Value is not null)
         };
 
         return (updated, new VoteCast(Id, playerName, value));
+    }
+
+    public Room Reveal()
+    {
+        return this with { Revealed = true };
+    }
+
+    public Room ResetVotes()
+    {
+        return this with
+        {
+            Players = Players.Select(p => p with { Value = null }).ToList(),
+            Revealed = false
+        };
     }
 }

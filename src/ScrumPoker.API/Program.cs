@@ -43,8 +43,17 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
+app.UseCors(policy => policy
+    .AllowAnyOrigin()
+    .AllowAnyHeader()
+    .AllowAnyMethod());
+
 app.MapControllers();
-app.MapHub<PokerHub>("/hub");
+app.MapHub<PokerHub>("/api/hub");
 
 app.Run();

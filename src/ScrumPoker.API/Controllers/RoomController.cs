@@ -3,15 +3,18 @@ using ScrumPoker.API.Features.Common;
 using ScrumPoker.API.Features.CreateRoom;
 using ScrumPoker.API.Features.JoinRoom;
 using ScrumPoker.API.Features.Vote;
-using ScrumPoker.Application.Features.CreateRoom;
-using ScrumPoker.Application.Features.JoinRoom;
-using ScrumPoker.Application.Features.Vote;
+using ScrumPoker.Application.Features.Commands.CreateRoom;
+using ScrumPoker.Application.Features.Commands.JoinRoom;
+using ScrumPoker.Application.Features.Commands.RevealVotes;
+using ScrumPoker.Application.Features.Commands.ResetVotes;
+using ScrumPoker.Application.Features.Commands.Vote;
+using ScrumPoker.Application.Features.Queries.GetGameState;
 using Wolverine;
 
 namespace ScrumPoker.API.Controllers;
 
 [ApiController]
-[Route("rooms")]
+[Route("api/rooms")]
 public sealed class RoomController : ControllerBase
 {
     private readonly IMessageBus _bus;
@@ -22,17 +25,39 @@ public sealed class RoomController : ControllerBase
     }
 
     [HttpPost]
-    [ProducesResponseType(typeof(GameStateResponse), 201)]
+    [ProducesResponseType(201)]
     [ProducesResponseType(400)]
     public async Task<IActionResult> Create([FromBody] CreateRoomRequest request, CancellationToken ct)
     {
         var command = new CreateRoomCommand(request.PlayerName);
         var room = await _bus.InvokeAsync<Domain.Rooms.Room>(command, ct);
-        return Created($"/rooms/{room.Id}", GameStateMapper.ToResponse(room));
+        Response.Headers.Location = $"/api/rooms/{room.Id}";
+        return StatusCode(201);
+    }
+
+    [HttpGet("{id:int}")]
+    [ProducesResponseType(typeof(GameStateResponse), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> Get([FromRoute] int id, CancellationToken ct)
+    {
+        if (id <= 0)
+        {
+            return BadRequest();
+        }
+
+        var result = await _bus.InvokeAsync<GetGameStateResult>(new GetGameStateQuery(id), ct);
+
+        return result switch
+        {
+            GetGameStateResult.Success(var room) => Ok(GameStateMapper.ToResponse(room)),
+            GetGameStateResult.RoomNotFound => NotFound(),
+            _ => throw new InvalidOperationException($"Unknown result type: {result.GetType().Name}")
+        };
     }
 
     [HttpPost("{id:int}/join")]
-    [ProducesResponseType(typeof(GameStateResponse), 200)]
+    [ProducesResponseType(201)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     [ProducesResponseType(409)]
@@ -48,7 +73,7 @@ public sealed class RoomController : ControllerBase
 
         return result switch
         {
-            JoinRoomResult.Success(var room) => Ok(GameStateMapper.ToResponse(room)),
+            JoinRoomResult.Success => StatusCode(201),
             JoinRoomResult.RoomNotFound => NotFound(),
             JoinRoomResult.PlayerAlreadyInRoom => Conflict(),
             _ => throw new InvalidOperationException($"Unknown result type: {result.GetType().Name}")
@@ -56,7 +81,7 @@ public sealed class RoomController : ControllerBase
     }
 
     [HttpPost("{id:int}/vote")]
-    [ProducesResponseType(typeof(GameStateResponse), 200)]
+    [ProducesResponseType(201)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> Vote([FromRoute] int id, [FromBody] VoteRequest request, CancellationToken ct)
@@ -71,9 +96,51 @@ public sealed class RoomController : ControllerBase
 
         return result switch
         {
-            VoteResult.Success(var room) => Ok(GameStateMapper.ToResponse(room)),
+            VoteResult.Success => StatusCode(201),
             VoteResult.RoomNotFound => NotFound(),
             VoteResult.PlayerNotInRoom => NotFound(),
+            _ => throw new InvalidOperationException($"Unknown result type: {result.GetType().Name}")
+        };
+    }
+
+    [HttpPost("{id:int}/reveal")]
+    [ProducesResponseType(201)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> Reveal([FromRoute] int id, CancellationToken ct)
+    {
+        if (id <= 0)
+        {
+            return BadRequest();
+        }
+
+        var result = await _bus.InvokeAsync<RevealVotesResult>(new RevealVotesCommand(id), ct);
+
+        return result switch
+        {
+            RevealVotesResult.Success => StatusCode(201),
+            RevealVotesResult.RoomNotFound => NotFound(),
+            _ => throw new InvalidOperationException($"Unknown result type: {result.GetType().Name}")
+        };
+    }
+
+    [HttpPost("{id:int}/reset")]
+    [ProducesResponseType(201)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> Reset([FromRoute] int id, CancellationToken ct)
+    {
+        if (id <= 0)
+        {
+            return BadRequest();
+        }
+
+        var result = await _bus.InvokeAsync<ResetVotesResult>(new ResetVotesCommand(id), ct);
+
+        return result switch
+        {
+            ResetVotesResult.Success => StatusCode(201),
+            ResetVotesResult.RoomNotFound => NotFound(),
             _ => throw new InvalidOperationException($"Unknown result type: {result.GetType().Name}")
         };
     }

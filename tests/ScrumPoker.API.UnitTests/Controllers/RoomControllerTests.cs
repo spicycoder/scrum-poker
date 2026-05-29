@@ -4,9 +4,10 @@ using ScrumPoker.API.Features.Common;
 using ScrumPoker.API.Features.CreateRoom;
 using ScrumPoker.API.Features.JoinRoom;
 using ScrumPoker.API.Features.Vote;
-using ScrumPoker.Application.Features.CreateRoom;
-using ScrumPoker.Application.Features.JoinRoom;
-using ScrumPoker.Application.Features.Vote;
+using ScrumPoker.Application.Features.Commands.CreateRoom;
+using ScrumPoker.Application.Features.Commands.JoinRoom;
+using ScrumPoker.Application.Features.Commands.Vote;
+using ScrumPoker.Application.Features.Queries.GetGameState;
 using ScrumPoker.Domain.Rooms;
 using Wolverine;
 
@@ -23,24 +24,19 @@ public sealed class RoomControllerTests
     }
 
     [Fact]
-    public async Task Create_Should_Return_201Created_With_GameStateResponse()
+    public async Task Create_Should_Return_201Created_With_LocationHeader()
     {
         var request = new CreateRoomRequest("Alice");
         var room = new Room { Id = 42, Players = [new Player("Alice", null)] };
         _bus.InvokeAsync<Room>(Arg.Any<CreateRoomCommand>(), Arg.Any<CancellationToken>())
             .Returns(room);
 
-        var result =        await _sut.Create(request, TestContext.Current.CancellationToken);
+        var result = await _sut.Create(request, TestContext.Current.CancellationToken);
 
-        var created = result.ShouldBeOfType<CreatedResult>();
-        created.StatusCode.ShouldBe(201);
-        created.Location.ShouldBe("/rooms/42");
+        var statusCode = result.ShouldBeOfType<StatusCodeResult>();
+        statusCode.StatusCode.ShouldBe(201);
 
-        var response = created.Value.ShouldBeOfType<GameStateResponse>();
-        response.GameId.ShouldBe(42);
-        response.Players.ShouldHaveSingleItem();
-        response.Players[0].Name.ShouldBe("Alice");
-        response.Players[0].Value.ShouldBeNull();
+        _sut.Response.Headers.Location.ToString().ShouldBe("/api/rooms/42");
 
         await _bus.Received(1).InvokeAsync<Room>(
             Arg.Is<CreateRoomCommand>(c => c.PlayerName == "Alice"),
@@ -64,7 +60,7 @@ public sealed class RoomControllerTests
     }
 
     [Fact]
-    public async Task Join_Should_Return_200Ok_When_Success()
+    public async Task Join_Should_Return_201Created_When_Success()
     {
         var request = new JoinRoomRequest("Bob");
         var room = new Room { Id = 1, Players = [new Player("Alice", null), new Player("Bob", null)] };
@@ -73,12 +69,8 @@ public sealed class RoomControllerTests
 
         var result = await _sut.Join(1, request, TestContext.Current.CancellationToken);
 
-        var ok = result.ShouldBeOfType<OkObjectResult>();
-        ok.StatusCode.ShouldBe(200);
-
-        var response = ok.Value.ShouldBeOfType<GameStateResponse>();
-        response.GameId.ShouldBe(1);
-        response.Players.Count.ShouldBe(2);
+        var statusCode = result.ShouldBeOfType<StatusCodeResult>();
+        statusCode.StatusCode.ShouldBe(201);
     }
 
     [Fact]
@@ -158,7 +150,7 @@ public sealed class RoomControllerTests
     }
 
     [Fact]
-    public async Task Vote_Should_Return_200Ok_When_Success()
+    public async Task Vote_Should_Return_201Created_When_Success()
     {
         var request = new VoteRequest("Alice", "5");
         var room = new Room { Id = 1, Players = [new Player("Alice", "5")] };
@@ -167,14 +159,8 @@ public sealed class RoomControllerTests
 
         var result = await _sut.Vote(1, request, TestContext.Current.CancellationToken);
 
-        var ok = result.ShouldBeOfType<OkObjectResult>();
-        ok.StatusCode.ShouldBe(200);
-
-        var response = ok.Value.ShouldBeOfType<GameStateResponse>();
-        response.GameId.ShouldBe(1);
-        response.Players.ShouldHaveSingleItem();
-        response.Players[0].Name.ShouldBe("Alice");
-        response.Players[0].Value.ShouldBe("5");
+        var statusCode = result.ShouldBeOfType<StatusCodeResult>();
+        statusCode.StatusCode.ShouldBe(201);
     }
 
     [Fact]
@@ -251,5 +237,52 @@ public sealed class RoomControllerTests
             _sut.Vote(1, request, TestContext.Current.CancellationToken));
 
         exception.Message.ShouldContain("Unknown result type");
+    }
+
+    [Fact]
+    public async Task Get_Should_Return_200Ok_When_RoomExists()
+    {
+        var room = new Room { Id = 42, Players = [new Player("Alice", null)] };
+        _bus.InvokeAsync<GetGameStateResult>(Arg.Any<GetGameStateQuery>(), Arg.Any<CancellationToken>())
+            .Returns(new GetGameStateResult.Success(room));
+
+        var result = await _sut.Get(42, TestContext.Current.CancellationToken);
+
+        var ok = result.ShouldBeOfType<OkObjectResult>();
+        ok.StatusCode.ShouldBe(200);
+
+        var response = ok.Value.ShouldBeOfType<GameStateResponse>();
+        response.GameId.ShouldBe(42);
+        response.Players.ShouldHaveSingleItem();
+        response.Players[0].Name.ShouldBe("Alice");
+    }
+
+    [Fact]
+    public async Task Get_Should_Return_404NotFound_When_RoomNotFound()
+    {
+        _bus.InvokeAsync<GetGameStateResult>(Arg.Any<GetGameStateQuery>(), Arg.Any<CancellationToken>())
+            .Returns(new GetGameStateResult.RoomNotFound());
+
+        var result = await _sut.Get(99, TestContext.Current.CancellationToken);
+
+        result.ShouldBeOfType<NotFoundResult>();
+    }
+
+    [Fact]
+    public async Task Get_Should_Return_400BadRequest_When_IdIsZero()
+    {
+        var result = await _sut.Get(0, TestContext.Current.CancellationToken);
+
+        result.ShouldBeOfType<BadRequestResult>();
+        await _bus.DidNotReceiveWithAnyArgs().InvokeAsync<GetGameStateResult>(default!, default(CancellationToken));
+    }
+
+    [Fact]
+    public async Task Get_Should_Return_400BadRequest_When_IdIsNegative()
+    {
+        var result = await _sut.Get(-5, TestContext.Current.CancellationToken);
+
+        result.ShouldBeOfType<BadRequestResult>();
+        await _bus.DidNotReceiveWithAnyArgs().InvokeAsync<GetGameStateResult>(default!, default(CancellationToken));
     }
 }

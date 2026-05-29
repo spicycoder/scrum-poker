@@ -17,23 +17,15 @@ public sealed class CreateRoomTests
     }
 
     [Fact]
-    public async Task Should_Return_201_With_GameStateResponse()
+    public async Task Should_Return_201Created()
     {
         var request = new CreateRoomRequest("Alice");
 
-        var response = await _httpClient.PostAsJsonAsync("/rooms", request,
+        var response = await _httpClient.PostAsJsonAsync("/api/rooms", request,
             TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Created);
-
-        var gameState = await response.Content
-            .ReadFromJsonAsync<GameStateResponse>(TestContext.Current.CancellationToken);
-
-        gameState.ShouldNotBeNull();
-        gameState.GameId.ShouldBeGreaterThan(0);
-        gameState.Players.ShouldHaveSingleItem();
-        gameState.Players[0].Name.ShouldBe("Alice");
-        gameState.Players[0].Value.ShouldBeNull();
+        response.Headers.Location.ShouldNotBeNull();
     }
 
     [Fact]
@@ -41,7 +33,7 @@ public sealed class CreateRoomTests
     {
         var request = new CreateRoomRequest("");
 
-        var response = await _httpClient.PostAsJsonAsync("/rooms", request,
+        var response = await _httpClient.PostAsJsonAsync("/api/rooms", request,
             TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -50,21 +42,16 @@ public sealed class CreateRoomTests
     [Fact]
     public async Task Before_Expiry_Room_Should_Be_Accessible()
     {
-        var request = new CreateRoomRequest("Alice");
-
-        var createResponse = await _httpClient.PostAsJsonAsync("/rooms", request,
-            TestContext.Current.CancellationToken);
+        var createResponse = await _httpClient.PostAsJsonAsync("/api/rooms",
+            new CreateRoomRequest("Alice"), TestContext.Current.CancellationToken);
         createResponse.StatusCode.ShouldBe(HttpStatusCode.Created);
-
-        var created = await createResponse.Content
-            .ReadFromJsonAsync<GameStateResponse>(TestContext.Current.CancellationToken);
-        created.ShouldNotBeNull();
+        var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
 
         var joinResponse = await _httpClient.PostAsJsonAsync(
-            $"/rooms/{created.GameId}/join",
+            $"/api/rooms/{roomId}/join",
             new JoinRoomRequest("Bob"), TestContext.Current.CancellationToken);
 
-        joinResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+        joinResponse.StatusCode.ShouldBe(HttpStatusCode.Created);
     }
 }
 
@@ -74,16 +61,14 @@ public sealed class CreateRoomExpiryTests(ShortTtlDistributedApplicationFixture 
     [Fact]
     public async Task After_Expiry_Room_Should_Return_404()
     {
-        var createResponse = await fixture.HttpClient.PostAsJsonAsync("/rooms",
+        var createResponse = await fixture.HttpClient.PostAsJsonAsync("/api/rooms",
             new CreateRoomRequest("Alice"), TestContext.Current.CancellationToken);
-        var created = await createResponse.Content
-            .ReadFromJsonAsync<GameStateResponse>(TestContext.Current.CancellationToken);
-        created.ShouldNotBeNull();
+        var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
 
         await Task.Delay(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
 
         var joinResponse = await fixture.HttpClient.PostAsJsonAsync(
-            $"/rooms/{created.GameId}/join",
+            $"/api/rooms/{roomId}/join",
             new JoinRoomRequest("Bob"), TestContext.Current.CancellationToken);
 
         joinResponse.StatusCode.ShouldBe(HttpStatusCode.NotFound);

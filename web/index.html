@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrum Poker - SignalR Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@microsoft/signalr@latest/dist/browser/signalr.min.js"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
+    <div class="max-w-3xl mx-auto w-full p-6 flex flex-col gap-6 flex-1">
+        <h1 class="text-2xl font-bold text-center">Scrum Poker - SignalR Test</h1>
+
+        <!-- Connection -->
+        <div class="bg-gray-800 rounded-lg p-4 flex flex-col gap-3">
+            <div class="flex gap-3 items-end">
+                <div class="flex-1">
+                    <label class="text-sm text-gray-400 mb-1 block">Room ID</label>
+                    <input id="roomId" type="text" placeholder="e.g. 4821"
+                        class="w-full px-3 py-2 rounded bg-gray-700 border border-gray-600 focus:border-blue-500 focus:outline-none" />
+                </div>
+                <button id="connectBtn" onclick="connectAndJoin()"
+                    class="px-4 py-2 rounded bg-green-600 hover:bg-green-700 font-medium whitespace-nowrap">
+                    Connect & Join
+                </button>
+                <button id="leaveBtn" onclick="leaveRoom()" disabled
+                    class="px-4 py-2 rounded bg-red-600 hover:bg-red-700 font-medium disabled:opacity-40 disabled:cursor-not-allowed">
+                    Leave
+                </button>
+            </div>
+            <div id="status" class="text-sm text-gray-400">Disconnected</div>
+        </div>
+
+        <!-- Events -->
+        <div class="bg-gray-800 rounded-lg p-4 flex-1 flex flex-col min-h-0">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="font-semibold">Events</h2>
+                <button onclick="clearLog()" class="text-sm text-gray-400 hover:text-gray-200">Clear</button>
+            </div>
+            <div id="log" class="flex-1 overflow-y-auto font-mono text-sm space-y-1 max-h-96"></div>
+        </div>
+    </div>
+
+    <script>
+        const roomIdEl = document.getElementById("roomId");
+        const connectBtn = document.getElementById("connectBtn");
+        const leaveBtn = document.getElementById("leaveBtn");
+        const statusEl = document.getElementById("status");
+        const logEl = document.getElementById("log");
+        let connection;
+        let currentRoomId;
+
+        // Add new event names here as they are created
+        const knownEvents = ["RoomCreated", "PlayerJoined", "VoteCast"];
+
+        function setStatus(text, color = "text-gray-400") {
+            statusEl.textContent = text;
+            statusEl.className = `text-sm ${color}`;
+        }
+
+        function appendLog(eventType, data) {
+            const time = new Date().toLocaleTimeString();
+            const entry = document.createElement("div");
+            entry.className = "flex gap-3 py-1 border-b border-gray-700/50";
+            entry.innerHTML = `
+                <span class="text-gray-500 shrink-0">${time}</span>
+                <span class="text-yellow-400 shrink-0 w-28">${eventType}</span>
+                <span class="text-gray-200 break-all">${JSON.stringify(data)}</span>
+            `;
+            logEl.appendChild(entry);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        function clearLog() {
+            logEl.innerHTML = "";
+        }
+
+        async function connectAndJoin() {
+            const roomId = roomIdEl.value.trim();
+            if (!roomId) { setStatus("Enter a room ID", "text-red-400"); return; }
+
+            connectBtn.disabled = true;
+            setStatus("Connecting...", "text-yellow-400");
+
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl("https://localhost:5002/api/hub", { withCredentials: false })
+                .build();
+
+            connection.onclose(() => {
+                setStatus("Disconnected", "text-gray-400");
+                connectBtn.disabled = false;
+                leaveBtn.disabled = true;
+            });
+
+            // Register handlers for all known events
+            knownEvents.forEach(name => {
+                connection.on(name, (data) => {
+                    if (data.roomId == currentRoomId) {
+                        appendLog(name, data);
+                    }
+                });
+            });
+
+            try {
+                await connection.start();
+                await connection.invoke("JoinRoom", roomId);
+                currentRoomId = roomId;
+                setStatus(`Connected to room ${roomId}`, "text-green-400");
+                leaveBtn.disabled = false;
+                connectBtn.disabled = true;
+            } catch (err) {
+                setStatus(`Error: ${err.message || err}`, "text-red-400");
+                connectBtn.disabled = false;
+            }
+        }
+
+        async function leaveRoom() {
+            if (!connection || !currentRoomId) return;
+            try {
+                await connection.invoke("LeaveRoom", currentRoomId);
+                setStatus("Disconnected", "text-gray-400");
+                currentRoomId = null;
+                connectBtn.disabled = false;
+                leaveBtn.disabled = true;
+            } catch (err) {
+                setStatus(`Error: ${err.message || err}`, "text-red-400");
+            }
+        }
+
+        roomIdEl.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") connectAndJoin();
+        });
+    </script>
+</body>
+</html>

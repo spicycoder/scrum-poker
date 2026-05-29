@@ -1,7 +1,6 @@
 using System.Globalization;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.SignalR.Client;
-using ScrumPoker.API.Features.Common;
 using ScrumPoker.API.Features.CreateRoom;
 using ScrumPoker.API.Features.JoinRoom;
 using ScrumPoker.API.Features.Vote;
@@ -26,24 +25,23 @@ public sealed class SignalRTests
     {
         var ct = TestContext.Current.CancellationToken;
 
-        var createResponse = await _fixture.HttpClient.PostAsJsonAsync("/rooms",
+        var createResponse = await _fixture.HttpClient.PostAsJsonAsync("/api/rooms",
             new CreateRoomRequest("Alice"), ct);
-        var created = await createResponse.Content.ReadFromJsonAsync<GameStateResponse>(ct);
-        created.ShouldNotBeNull();
+        var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
 
         await using var connection = BuildHubConnection();
         var received = new TaskCompletionSource<PlayerJoined>(TaskCreationOptions.RunContinuationsAsynchronously);
         connection.On<PlayerJoined>(nameof(PlayerJoined), @event => received.TrySetResult(@event));
 
         await connection.StartAsync(ct);
-        await connection.InvokeAsync("JoinRoom", created.GameId.ToString(CultureInfo.InvariantCulture), ct);
+        await connection.InvokeAsync("JoinRoom", roomId.ToString(CultureInfo.InvariantCulture), ct);
 
         await _fixture.HttpClient.PostAsJsonAsync(
-            $"/rooms/{created.GameId}/join",
+            $"/api/rooms/{roomId}/join",
             new JoinRoomRequest("Bob"), ct);
 
         var @event = await received.Task.WaitAsync(ReceiveTimeout, ct);
-        @event.RoomId.ShouldBe(created.GameId);
+        @event.RoomId.ShouldBe(roomId);
         @event.PlayerName.ShouldBe("Bob");
     }
 
@@ -52,24 +50,23 @@ public sealed class SignalRTests
     {
         var ct = TestContext.Current.CancellationToken;
 
-        var createResponse = await _fixture.HttpClient.PostAsJsonAsync("/rooms",
+        var createResponse = await _fixture.HttpClient.PostAsJsonAsync("/api/rooms",
             new CreateRoomRequest("Alice"), ct);
-        var created = await createResponse.Content.ReadFromJsonAsync<GameStateResponse>(ct);
-        created.ShouldNotBeNull();
+        var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
 
         await using var connection = BuildHubConnection();
         var received = new TaskCompletionSource<VoteCast>(TaskCreationOptions.RunContinuationsAsynchronously);
         connection.On<VoteCast>(nameof(VoteCast), @event => received.TrySetResult(@event));
 
         await connection.StartAsync(ct);
-        await connection.InvokeAsync("JoinRoom", created.GameId.ToString(CultureInfo.InvariantCulture), ct);
+        await connection.InvokeAsync("JoinRoom", roomId.ToString(CultureInfo.InvariantCulture), ct);
 
         await _fixture.HttpClient.PostAsJsonAsync(
-            $"/rooms/{created.GameId}/vote",
+            $"/api/rooms/{roomId}/vote",
             new VoteRequest("Alice", "5"), ct);
 
         var @event = await received.Task.WaitAsync(ReceiveTimeout, ct);
-        @event.RoomId.ShouldBe(created.GameId);
+        @event.RoomId.ShouldBe(roomId);
         @event.PlayerName.ShouldBe("Alice");
         @event.Value.ShouldBe("5");
     }
@@ -79,15 +76,13 @@ public sealed class SignalRTests
     {
         var ct = TestContext.Current.CancellationToken;
 
-        var roomAResp = await _fixture.HttpClient.PostAsJsonAsync("/rooms",
+        var roomAResp = await _fixture.HttpClient.PostAsJsonAsync("/api/rooms",
             new CreateRoomRequest("Alice"), ct);
-        var roomA = await roomAResp.Content.ReadFromJsonAsync<GameStateResponse>(ct);
-        roomA.ShouldNotBeNull();
+        var roomAId = IntegrationTestHelpers.GetRoomIdFromLocation(roomAResp);
 
-        var roomBResp = await _fixture.HttpClient.PostAsJsonAsync("/rooms",
+        var roomBResp = await _fixture.HttpClient.PostAsJsonAsync("/api/rooms",
             new CreateRoomRequest("Carol"), ct);
-        var roomB = await roomBResp.Content.ReadFromJsonAsync<GameStateResponse>(ct);
-        roomB.ShouldNotBeNull();
+        var roomBId = IntegrationTestHelpers.GetRoomIdFromLocation(roomBResp);
 
         await using var connection = BuildHubConnection();
         var leakReceived = new TaskCompletionSource<PlayerJoined>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -95,10 +90,10 @@ public sealed class SignalRTests
 
         await connection.StartAsync(ct);
         // Subscribe ONLY to room A. Event will fire in room B.
-        await connection.InvokeAsync("JoinRoom", roomA.GameId.ToString(CultureInfo.InvariantCulture), ct);
+        await connection.InvokeAsync("JoinRoom", roomAId.ToString(CultureInfo.InvariantCulture), ct);
 
         await _fixture.HttpClient.PostAsJsonAsync(
-            $"/rooms/{roomB.GameId}/join",
+            $"/api/rooms/{roomBId}/join",
             new JoinRoomRequest("Dave"), ct);
 
         var completed = await Task.WhenAny(leakReceived.Task, Task.Delay(TimeSpan.FromSeconds(2), ct));
@@ -110,22 +105,21 @@ public sealed class SignalRTests
     {
         var ct = TestContext.Current.CancellationToken;
 
-        var createResponse = await _fixture.HttpClient.PostAsJsonAsync("/rooms",
+        var createResponse = await _fixture.HttpClient.PostAsJsonAsync("/api/rooms",
             new CreateRoomRequest("Alice"), ct);
-        var created = await createResponse.Content.ReadFromJsonAsync<GameStateResponse>(ct);
-        created.ShouldNotBeNull();
+        var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
 
         await using var connection = BuildHubConnection();
         var received = new TaskCompletionSource<PlayerJoined>(TaskCreationOptions.RunContinuationsAsynchronously);
         connection.On<PlayerJoined>(nameof(PlayerJoined), @event => received.TrySetResult(@event));
 
         await connection.StartAsync(ct);
-        var roomKey = created.GameId.ToString(CultureInfo.InvariantCulture);
+        var roomKey = roomId.ToString(CultureInfo.InvariantCulture);
         await connection.InvokeAsync("JoinRoom", roomKey, ct);
         await connection.InvokeAsync("LeaveRoom", roomKey, ct);
 
         await _fixture.HttpClient.PostAsJsonAsync(
-            $"/rooms/{created.GameId}/join",
+            $"/api/rooms/{roomId}/join",
             new JoinRoomRequest("Bob"), ct);
 
         var completed = await Task.WhenAny(received.Task, Task.Delay(TimeSpan.FromSeconds(2), ct));
@@ -134,7 +128,7 @@ public sealed class SignalRTests
 
     private HubConnection BuildHubConnection()
     {
-        var hubUrl = new UriBuilder(_fixture.HttpClient.BaseAddress!) { Path = "/hub" }.Uri;
+        var hubUrl = new UriBuilder(_fixture.HttpClient.BaseAddress!) { Path = "/api/hub" }.Uri;
         return new HubConnectionBuilder()
             .WithUrl(hubUrl, options =>
             {

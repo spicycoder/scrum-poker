@@ -6,7 +6,7 @@ public sealed class VoteRequestValidator : AbstractValidator<VoteRequest>
 {
     private static readonly HashSet<string> AllowedValues = new(StringComparer.OrdinalIgnoreCase)
     {
-        "0", "0.5", "1", "2", "3", "5", "8", "13", "20", "?"
+        "0", "0.5", "1", "2", "3", "5", "8", "13", "21", "?"
     };
 
     public VoteRequestValidator()

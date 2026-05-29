@@ -109,4 +109,79 @@ public sealed class RoomTests
         updated.Players.ShouldContain(p => p.Name == "Alice" && p.Value == "5");
         updated.Players.ShouldContain(p => p.Name == "Bob" && p.Value == null);
     }
+
+    [Fact]
+    public void Vote_Should_AutoReveal_When_AllPlayersVoted()
+    {
+        var (room, _) = Room.Create("Alice");
+        var roomWithId = room with { Id = 1 };
+        var (withBob, _) = roomWithId.Join("Bob");
+
+        var (afterAlice, _) = withBob.Vote("Alice", "5");
+        var (afterBob, _) = afterAlice.Vote("Bob", "8");
+
+        afterBob.Revealed.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Vote_Should_NotReveal_When_NotAllPlayersVoted()
+    {
+        var (room, _) = Room.Create("Alice");
+        var roomWithId = room with { Id = 1 };
+        var (withBob, _) = roomWithId.Join("Bob");
+
+        var (updated, _) = withBob.Vote("Alice", "5");
+
+        updated.Revealed.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void Reveal_Should_SetRevealedTrue()
+    {
+        var (room, _) = Room.Create("Alice");
+        var roomWithId = room with { Id = 1 };
+
+        var revealed = roomWithId.Reveal();
+
+        revealed.Revealed.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Reveal_Should_Not_Affect_Players()
+    {
+        var (room, _) = Room.Create("Alice");
+        var roomWithId = room with { Id = 1 };
+        var (voted, _) = roomWithId.Vote("Alice", "5");
+
+        var revealed = voted.Reveal();
+
+        revealed.Players.ShouldHaveSingleItem();
+        revealed.Players[0].Value.ShouldBe("5");
+    }
+
+    [Fact]
+    public void ResetVotes_Should_ClearAllValues()
+    {
+        var (room, _) = Room.Create("Alice");
+        var roomWithId = room with { Id = 1 };
+        var (withBob, _) = roomWithId.Join("Bob");
+        var (voted, _) = withBob.Vote("Alice", "5");
+
+        var reset = voted.ResetVotes();
+
+        reset.Players.Count.ShouldBe(2);
+        reset.Players.ShouldAllBe(p => p.Value == null);
+    }
+
+    [Fact]
+    public void ResetVotes_Should_SetRevealedFalse()
+    {
+        var (room, _) = Room.Create("Alice");
+        var roomWithId = room with { Id = 1 };
+        var revealed = roomWithId.Reveal();
+
+        var reset = revealed.ResetVotes();
+
+        reset.Revealed.ShouldBeFalse();
+    }
 }
