@@ -13,7 +13,7 @@ public sealed class ResetVotesEndpointTests
     private readonly IMessageBus _bus = Substitute.For<IMessageBus>();
     private readonly RoomController _sut;
 
-    public ResetVotesControllerTests()
+    public ResetVotesEndpointTests()
     {
         _sut = new RoomController(_bus)
         {
