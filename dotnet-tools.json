@@ -15,6 +15,13 @@
         "dotnet-coverage"
       ],
       "rollForward": false
+    },
+    "aspire.cli": {
+      "version": "13.3.5",
+      "commands": [
+        "aspire"
+      ],
+      "rollForward": false
     }
   }
 }
