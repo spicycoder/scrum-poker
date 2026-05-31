@@ -54,8 +54,8 @@ jobs:
           fi
 
           # Update gist
-          echo "{\"schemaVersion\":1,\"label\":\"tests\",\"message\":\"unit: ${UNIT}\",\"color\":\"blueviolet\"}" > unit.json
-          echo "{\"schemaVersion\":1,\"label\":\"tests\",\"message\":\"int: ${INT}\",\"color\":\"orange\"}" > integration.json
+          echo "{\"schemaVersion\":1,\"label\":\"Unit Tests\",\"message\":\"${UNIT}\",\"color\":\"blueviolet\"}" > unit.json
+          echo "{\"schemaVersion\":1,\"label\":\"Int Tests\",\"message\":\"${INT}\",\"color\":\"orange\"}" > integration.json
           gh api -X PATCH /gists/eca658a13dc5df0c2abb154ae9aeb820 \
             -f "files[coverage.json][content]=$(cat coverage.json)" \
             -f "files[unit.json][content]=$(cat unit.json)" \
