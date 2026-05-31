@@ -46,8 +46,8 @@ jobs:
 
           # Parse coverage (skip if file missing)
           if [ -f ./.coverage/coverage.cobertura.xml ]; then
-            RATE=$(grep -oP 'line-rate="\K[^"]+' ./.coverage/coverage.cobertura.xml)
-            PCT=$(echo "$RATE * 100" | bc | xargs printf "%.0f")
+            RATE=$(head -5 ./.coverage/coverage.cobertura.xml | grep -oP 'line-rate="\K[^"]+' | head -1)
+            PCT=$(printf "%.0f" "$(echo "$RATE * 100" | bc)")
             echo "{\"schemaVersion\":1,\"label\":\"coverage\",\"message\":\"${PCT}%\",\"color\":\"blue\"}" > coverage.json
           else
             echo '{"schemaVersion":1,"label":"coverage","message":"N/A","color":"lightgrey"}' > coverage.json
