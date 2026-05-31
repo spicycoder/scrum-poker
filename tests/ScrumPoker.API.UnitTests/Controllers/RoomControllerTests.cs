@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
 using ScrumPoker.API.Features.Common;
@@ -6,6 +7,8 @@ using ScrumPoker.API.Features.JoinRoom;
 using ScrumPoker.API.Features.Vote;
 using ScrumPoker.Application.Features.Commands.CreateRoom;
 using ScrumPoker.Application.Features.Commands.JoinRoom;
+using ScrumPoker.Application.Features.Commands.ResetVotes;
+using ScrumPoker.Application.Features.Commands.RevealVotes;
 using ScrumPoker.Application.Features.Commands.Vote;
 using ScrumPoker.Application.Features.Queries.GetGameState;
 using ScrumPoker.Domain.Rooms;
@@ -20,7 +23,10 @@ public sealed class RoomControllerTests
 
     public RoomControllerTests()
     {
-        _sut = new RoomController(_bus);
+        _sut = new RoomController(_bus)
+        {
+            ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
+        };
     }
 
     [Fact]
@@ -49,14 +55,15 @@ public sealed class RoomControllerTests
         var request = new CreateRoomRequest("Bob");
         var cts = new CancellationTokenSource();
         var ct = cts.Token;
-        _bus.InvokeAsync<Room>(Arg.Any<CreateRoomCommand>(), Arg.Any<CancellationToken>())
+        _bus.InvokeAsync<Room>(Arg.Any<CreateRoomCommand>(), Arg.Any<CancellationToken>(), Arg.Any<TimeSpan?>())
             .Returns(new Room());
 
         await _sut.Create(request, ct);
 
         await _bus.Received(1).InvokeAsync<Room>(
             Arg.Any<CreateRoomCommand>(),
-            ct);
+            ct,
+            Arg.Any<TimeSpan?>());
     }
 
     [Fact]
@@ -284,5 +291,126 @@ public sealed class RoomControllerTests
 
         result.ShouldBeOfType<BadRequestResult>();
         await _bus.DidNotReceiveWithAnyArgs().InvokeAsync<GetGameStateResult>(default!, default(CancellationToken));
+    }
+
+    [Fact]
+    public async Task Get_Should_Throw_InvalidOperationException_For_UnknownResultType()
+    {
+        var unknownResult = Substitute.For<GetGameStateResult>();
+        _bus.InvokeAsync<GetGameStateResult>(Arg.Any<GetGameStateQuery>(), Arg.Any<CancellationToken>())
+            .Returns(unknownResult);
+
+        var exception = await Should.ThrowAsync<InvalidOperationException>(() =>
+            _sut.Get(1, TestContext.Current.CancellationToken));
+
+        exception.Message.ShouldContain("Unknown result type");
+    }
+
+    [Fact]
+    public async Task Reveal_Should_Return_201Created_When_Success()
+    {
+        _bus.InvokeAsync<RevealVotesResult>(Arg.Any<RevealVotesCommand>(), Arg.Any<CancellationToken>())
+            .Returns(new RevealVotesResult.Success(new Room()));
+
+        var result = await _sut.Reveal(1, TestContext.Current.CancellationToken);
+
+        var statusCode = result.ShouldBeOfType<StatusCodeResult>();
+        statusCode.StatusCode.ShouldBe(201);
+    }
+
+    [Fact]
+    public async Task Reveal_Should_Return_404NotFound_When_RoomNotFound()
+    {
+        _bus.InvokeAsync<RevealVotesResult>(Arg.Any<RevealVotesCommand>(), Arg.Any<CancellationToken>())
+            .Returns(new RevealVotesResult.RoomNotFound());
+
+        var result = await _sut.Reveal(1, TestContext.Current.CancellationToken);
+
+        result.ShouldBeOfType<NotFoundResult>();
+    }
+
+    [Fact]
+    public async Task Reveal_Should_Return_400BadRequest_When_IdIsZero()
+    {
+        var result = await _sut.Reveal(0, TestContext.Current.CancellationToken);
+
+        result.ShouldBeOfType<BadRequestResult>();
+        await _bus.DidNotReceiveWithAnyArgs().InvokeAsync<RevealVotesResult>(default!, default(CancellationToken));
+    }
+
+    [Fact]
+    public async Task Reveal_Should_Return_400BadRequest_When_IdIsNegative()
+    {
+        var result = await _sut.Reveal(-5, TestContext.Current.CancellationToken);
+
+        result.ShouldBeOfType<BadRequestResult>();
+        await _bus.DidNotReceiveWithAnyArgs().InvokeAsync<RevealVotesResult>(default!, default(CancellationToken));
+    }
+
+    [Fact]
+    public async Task Reveal_Should_Throw_InvalidOperationException_For_UnknownResultType()
+    {
+        var unknownResult = Substitute.For<RevealVotesResult>();
+        _bus.InvokeAsync<RevealVotesResult>(Arg.Any<RevealVotesCommand>(), Arg.Any<CancellationToken>())
+            .Returns(unknownResult);
+
+        var exception = await Should.ThrowAsync<InvalidOperationException>(() =>
+            _sut.Reveal(1, TestContext.Current.CancellationToken));
+
+        exception.Message.ShouldContain("Unknown result type");
+    }
+
+    [Fact]
+    public async Task Reset_Should_Return_201Created_When_Success()
+    {
+        _bus.InvokeAsync<ResetVotesResult>(Arg.Any<ResetVotesCommand>(), Arg.Any<CancellationToken>())
+            .Returns(new ResetVotesResult.Success(new Room()));
+
+        var result = await _sut.Reset(1, TestContext.Current.CancellationToken);
+
+        var statusCode = result.ShouldBeOfType<StatusCodeResult>();
+        statusCode.StatusCode.ShouldBe(201);
+    }
+
+    [Fact]
+    public async Task Reset_Should_Return_404NotFound_When_RoomNotFound()
+    {
+        _bus.InvokeAsync<ResetVotesResult>(Arg.Any<ResetVotesCommand>(), Arg.Any<CancellationToken>())
+            .Returns(new ResetVotesResult.RoomNotFound());
+
+        var result = await _sut.Reset(1, TestContext.Current.CancellationToken);
+
+        result.ShouldBeOfType<NotFoundResult>();
+    }
+
+    [Fact]
+    public async Task Reset_Should_Return_400BadRequest_When_IdIsZero()
+    {
+        var result = await _sut.Reset(0, TestContext.Current.CancellationToken);
+
+        result.ShouldBeOfType<BadRequestResult>();
+        await _bus.DidNotReceiveWithAnyArgs().InvokeAsync<ResetVotesResult>(default!, default(CancellationToken));
+    }
+
+    [Fact]
+    public async Task Reset_Should_Return_400BadRequest_When_IdIsNegative()
+    {
+        var result = await _sut.Reset(-5, TestContext.Current.CancellationToken);
+
+        result.ShouldBeOfType<BadRequestResult>();
+        await _bus.DidNotReceiveWithAnyArgs().InvokeAsync<ResetVotesResult>(default!, default(CancellationToken));
+    }
+
+    [Fact]
+    public async Task Reset_Should_Throw_InvalidOperationException_For_UnknownResultType()
+    {
+        var unknownResult = Substitute.For<ResetVotesResult>();
+        _bus.InvokeAsync<ResetVotesResult>(Arg.Any<ResetVotesCommand>(), Arg.Any<CancellationToken>())
+            .Returns(unknownResult);
+
+        var exception = await Should.ThrowAsync<InvalidOperationException>(() =>
+            _sut.Reset(1, TestContext.Current.CancellationToken));
+
+        exception.Message.ShouldContain("Unknown result type");
     }
 }
