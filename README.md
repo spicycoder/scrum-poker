@@ -1,5 +1,7 @@
 # Scrum Poker
 
+[![CI](https://github.com/spicycoder/scrum-poker/actions/workflows/ci.yml/badge.svg)](https://github.com/spicycoder/scrum-poker/actions/workflows/ci.yml)
+
 Online, real-time, multiplayer game
 
 ---
