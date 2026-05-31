@@ -8,12 +8,9 @@
 
 ## Coverage
 
-[![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/spicycoder/eca658a13dc5df0c2abb154ae9aeb820/raw/coverage.json)](https://github.com/spicycoder/scrum-poker/actions)
-
-| Layer | Count |
-| --- | --- |
-| Unit | ![Unit Tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/spicycoder/eca658a13dc5df0c2abb154ae9aeb820/raw/unit.json) |
-| Integration | ![Integration Tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/spicycoder/eca658a13dc5df0c2abb154ae9aeb820/raw/integration.json) |
+| Total Coverage % | Unit Tests # | Integration Tests # |
+| --- | --- | --- |
+| [![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/spicycoder/eca658a13dc5df0c2abb154ae9aeb820/raw/coverage.json)](https://github.com/spicycoder/scrum-poker/actions) | ![Unit Tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/spicycoder/eca658a13dc5df0c2abb154ae9aeb820/raw/unit.json) | ![Integration Tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/spicycoder/eca658a13dc5df0c2abb154ae9aeb820/raw/integration.json) |
 
 ## Prerequisites
 
