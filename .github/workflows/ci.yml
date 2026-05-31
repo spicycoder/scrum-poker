@@ -56,4 +56,7 @@ jobs:
           # Update gist
           echo "{\"schemaVersion\":1,\"label\":\"tests\",\"message\":\"unit: ${UNIT}\",\"color\":\"blueviolet\"}" > unit.json
           echo "{\"schemaVersion\":1,\"label\":\"tests\",\"message\":\"int: ${INT}\",\"color\":\"orange\"}" > integration.json
-          gh gist edit eca658a13dc5df0c2abb154ae9aeb820 -f coverage.json -f unit.json -f integration.json
+          gh api -X PATCH /gists/eca658a13dc5df0c2abb154ae9aeb820 \
+            -f "files[coverage.json][content]=$(cat coverage.json)" \
+            -f "files[unit.json][content]=$(cat unit.json)" \
+            -f "files[integration.json][content]=$(cat integration.json)"
