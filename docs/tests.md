@@ -1,35 +1,7 @@
 # Tests
 
-## Test Pyramid
-
-```
-                                /\
-                               /  \
-                              /    \
-                             /      \
-                            /        \
-                           /          \
-                          /            \
-                         /              \
-                        /      API       \
-                       / IntegrationTests \
-                      /       Aspire       \
-                     /                      \
-                    /       few · 🐌         \
-                   /────────────────────────  \
-                  /                            \
-                 /                              \
-                /       API.UnitTests            \
-               /   controllers · validators       \
-              /                🐎                  \
-             /───────────────────────────────────── \
-            /                                        \
-           /                                          \
-          /         Application.UnitTests              \
-         /       handlers · domain logic                \
-        /                many · 🚀                       \
-       /__________________________________________________\
-```
+- [x] Maximum coverage with Unit tests
+- [x] Just enough Integration Tests
 
 ## Projects
 
