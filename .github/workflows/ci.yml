@@ -35,9 +35,21 @@ jobs:
             --output-format cobertura \
             "dotnet test --no-build -c Release ./ScrumPoker.slnx"
 
-      - name: Upload coverage to Codecov
+      - name: Update test badges
         if: always()
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./.coverage/coverage.cobertura.xml
+        env:
+          GH_TOKEN: ${{ secrets.GIST_TOKEN }}
+        run: |
+          # Parse coverage
+          RATE=$(grep -oP 'line-rate="\K[^"]+' ./.coverage/coverage.cobertura.xml)
+          PCT=$(echo "$RATE * 100" | bc | xargs printf "%.0f")
+
+          # Count tests
+          UNIT=$(grep -rc '\[Fact\]\|\[Theory\]' tests/ScrumPoker.API.UnitTests tests/ScrumPoker.Application.UnitTests tests/ScrumPoker.Domain.UnitTests --include='*.cs' | grep -v '/obj/' | cut -d: -f2 | paste -sd+ | bc)
+          INT=$(grep -rc '\[Fact\]\|\[Theory\]' tests/ScrumPoker.AppHost.IntegrationTests --include='*.cs' | grep -v '/obj/' | cut -d: -f2 | paste -sd+ | bc)
+
+          # Update gist
+          echo "{\"schemaVersion\":1,\"label\":\"coverage\",\"message\":\"${PCT}%\",\"color\":\"blue\"}" > coverage.json
+          echo "{\"schemaVersion\":1,\"label\":\"tests\",\"message\":\"unit: ${UNIT}\",\"color\":\"blueviolet\"}" > unit.json
+          echo "{\"schemaVersion\":1,\"label\":\"tests\",\"message\":\"int: ${INT}\",\"color\":\"orange\"}" > integration.json
+          gh gist edit eca658a13dc5df0c2abb154ae9aeb820 -f coverage.json -f unit.json -f integration.json
