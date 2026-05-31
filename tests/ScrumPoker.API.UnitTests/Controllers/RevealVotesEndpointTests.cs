@@ -13,7 +13,7 @@ public sealed class RevealVotesEndpointTests
     private readonly IMessageBus _bus = Substitute.For<IMessageBus>();
     private readonly RoomController _sut;
 
-    public RevealVotesControllerTests()
+    public RevealVotesEndpointTests()
     {
         _sut = new RoomController(_bus)
         {

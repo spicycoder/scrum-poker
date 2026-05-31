@@ -14,7 +14,7 @@ public sealed class VoteEndpointTests
     private readonly IMessageBus _bus = Substitute.For<IMessageBus>();
     private readonly RoomController _sut;
 
-    public VoteControllerTests()
+    public VoteEndpointTests()
     {
         _sut = new RoomController(_bus)
         {
