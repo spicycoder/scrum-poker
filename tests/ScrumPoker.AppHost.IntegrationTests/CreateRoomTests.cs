@@ -19,7 +19,7 @@ public sealed class CreateRoomTests
     [Fact]
     public async Task Should_Return_201Created()
     {
-        var request = new CreateRoomRequest("Alice");
+        var request = new CreateRoomRequest("Alice", ["0", "1"]);
 
         var response = await _httpClient.PostAsJsonAsync("/api/rooms", request,
             TestContext.Current.CancellationToken);
@@ -31,7 +31,7 @@ public sealed class CreateRoomTests
     [Fact]
     public async Task With_EmptyName_Should_Return_400()
     {
-        var request = new CreateRoomRequest("");
+        var request = new CreateRoomRequest("", []);
 
         var response = await _httpClient.PostAsJsonAsync("/api/rooms", request,
             TestContext.Current.CancellationToken);
@@ -43,7 +43,7 @@ public sealed class CreateRoomTests
     public async Task Before_Expiry_Room_Should_Be_Accessible()
     {
         var createResponse = await _httpClient.PostAsJsonAsync("/api/rooms",
-            new CreateRoomRequest("Alice"), TestContext.Current.CancellationToken);
+            new CreateRoomRequest("Alice", ["0", "1"]), TestContext.Current.CancellationToken);
         createResponse.StatusCode.ShouldBe(HttpStatusCode.Created);
         var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
 
@@ -62,7 +62,7 @@ public sealed class CreateRoomExpiryTests(ShortTtlDistributedApplicationFixture 
     public async Task After_Expiry_Room_Should_Return_404()
     {
         var createResponse = await fixture.HttpClient.PostAsJsonAsync("/api/rooms",
-            new CreateRoomRequest("Alice"), TestContext.Current.CancellationToken);
+            new CreateRoomRequest("Alice", ["0", "1"]), TestContext.Current.CancellationToken);
         var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
 
         await Task.Delay(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);

@@ -20,7 +20,7 @@ public sealed class RevealVotesTests
     public async Task Should_Return_201Created()
     {
         var createResponse = await _httpClient.PostAsJsonAsync("/api/rooms",
-            new CreateRoomRequest("Alice"), TestContext.Current.CancellationToken);
+            new CreateRoomRequest("Alice", ["0", "1"]), TestContext.Current.CancellationToken);
         var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
 
         var response = await _httpClient.PostAsync($"/api/rooms/{roomId}/reveal",
@@ -33,7 +33,7 @@ public sealed class RevealVotesTests
     public async Task Should_SetRevealedTrue()
     {
         var createResponse = await _httpClient.PostAsJsonAsync("/api/rooms",
-            new CreateRoomRequest("Alice"), TestContext.Current.CancellationToken);
+            new CreateRoomRequest("Alice", ["0", "1"]), TestContext.Current.CancellationToken);
         var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
 
         await _httpClient.PostAsync($"/api/rooms/{roomId}/reveal",
@@ -51,7 +51,7 @@ public sealed class RevealVotesTests
     public async Task Should_PersistRevealedState()
     {
         var createResponse = await _httpClient.PostAsJsonAsync("/api/rooms",
-            new CreateRoomRequest("Alice"), TestContext.Current.CancellationToken);
+            new CreateRoomRequest("Alice", ["0", "1"]), TestContext.Current.CancellationToken);
         var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
 
         await _httpClient.PostAsync($"/api/rooms/{roomId}/reveal",
@@ -69,7 +69,7 @@ public sealed class RevealVotesTests
     public async Task Should_KeepVotesVisible()
     {
         var createResponse = await _httpClient.PostAsJsonAsync("/api/rooms",
-            new CreateRoomRequest("Alice"), TestContext.Current.CancellationToken);
+            new CreateRoomRequest("Alice", ["0", "1"]), TestContext.Current.CancellationToken);
         var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
 
         await _httpClient.PostAsJsonAsync($"/api/rooms/{roomId}/vote",

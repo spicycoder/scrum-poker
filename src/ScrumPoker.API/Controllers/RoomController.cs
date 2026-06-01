@@ -31,7 +31,7 @@ public sealed class RoomController : ControllerBase
     [ProducesResponseType(400)]
     public async Task<IActionResult> Create([FromBody] CreateRoomRequest request, CancellationToken ct)
     {
-        var command = new CreateRoomCommand(request.PlayerName);
+        var command = new CreateRoomCommand(request.PlayerName, request.CardSet);
         var room = await _bus.InvokeAsync<Domain.Rooms.Room>(command, ct);
         Response.Headers.Location = $"/api/rooms/{room.Id}";
         return StatusCode(201);

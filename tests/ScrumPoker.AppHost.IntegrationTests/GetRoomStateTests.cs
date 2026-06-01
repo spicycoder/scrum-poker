@@ -19,7 +19,7 @@ public sealed class GetRoomStateTests
     public async Task Should_Return_200_With_GameStateResponse()
     {
         var createResponse = await _httpClient.PostAsJsonAsync("/api/rooms",
-            new CreateRoomRequest("Alice"), TestContext.Current.CancellationToken);
+            new CreateRoomRequest("Alice", ["0", "1"]), TestContext.Current.CancellationToken);
         var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
 
         var getResponse = await _httpClient.GetAsync($"/api/rooms/{roomId}",

@@ -22,7 +22,7 @@ public sealed class LeaveRoomTests
     {
         var ct = TestContext.Current.CancellationToken;
         var createResponse = await _httpClient.PostAsJsonAsync("/api/rooms",
-            new CreateRoomRequest("Alice"), ct);
+            new CreateRoomRequest("Alice", ["0", "1"]), ct);
         var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
 
         await _httpClient.PostAsJsonAsync($"/api/rooms/{roomId}/join",
@@ -39,7 +39,7 @@ public sealed class LeaveRoomTests
     {
         var ct = TestContext.Current.CancellationToken;
         var createResponse = await _httpClient.PostAsJsonAsync("/api/rooms",
-            new CreateRoomRequest("Alice"), ct);
+            new CreateRoomRequest("Alice", ["0", "1"]), ct);
         var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
 
         await _httpClient.PostAsJsonAsync($"/api/rooms/{roomId}/join",
@@ -70,7 +70,7 @@ public sealed class LeaveRoomTests
     {
         var ct = TestContext.Current.CancellationToken;
         var createResponse = await _httpClient.PostAsJsonAsync("/api/rooms",
-            new CreateRoomRequest("Alice"), ct);
+            new CreateRoomRequest("Alice", ["0", "1"]), ct);
         var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
 
         var response = await _httpClient.PostAsJsonAsync($"/api/rooms/{roomId}/leave",

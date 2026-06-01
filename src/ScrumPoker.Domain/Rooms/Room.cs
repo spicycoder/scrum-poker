@@ -8,10 +8,11 @@ public sealed record Room
     public List<Player> Players { get; init; } = [];
     public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
     public bool Revealed { get; init; }
+    public List<string> CardSet { get; init; } = [];
 
-    public static (Room Room, RoomCreated Event) Create(string playerName)
+    public static (Room Room, RoomCreated Event) Create(string playerName, List<string>? cardSet = null)
     {
-        var room = new Room { Players = [new Player(playerName, null)] };
+        var room = new Room { Players = [new Player(playerName, null)], CardSet = cardSet ?? [] };
         return (room, new RoomCreated(room.Id, playerName, room));
     }
 

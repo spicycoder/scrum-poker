@@ -3,6 +3,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.3.5" />
     <PackageVersion Include="Aspire.Hosting.Redis" Version="13.3.5" />
     <PackageVersion Include="Aspire.StackExchange.Redis" Version="13.3.5" />
     <PackageVersion Include="AspNetCore.SwaggerUI.Themes" Version="3.0.2" />

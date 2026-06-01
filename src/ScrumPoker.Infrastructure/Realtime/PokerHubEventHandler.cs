@@ -21,7 +21,8 @@ public sealed class PokerHubEventHandler(IHubContext<PokerHub> hub)
         {
             gameId = room.Id,
             players = room.Players.ToDictionary(p => p.Name, p => p.Value),
-            revealed = room.Revealed
+            revealed = room.Revealed,
+            cardSet = room.CardSet
         };
         return hub.Clients.Group(GroupKey(room.Id)).SendAsync(eventName, response, ct);
     }

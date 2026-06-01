@@ -9,5 +9,8 @@ public sealed class CreateRoomRequestValidator : AbstractValidator<CreateRoomReq
         RuleFor(x => x.PlayerName)
             .NotEmpty()
             .MaximumLength(50);
+
+        RuleFor(x => x.CardSet)
+            .NotEmpty();
     }
 }

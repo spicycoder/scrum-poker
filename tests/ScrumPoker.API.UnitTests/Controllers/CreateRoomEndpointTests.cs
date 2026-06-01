@@ -25,7 +25,7 @@ public sealed class CreateRoomEndpointTests
     [Fact]
     public async Task Should_Return_201Created_With_LocationHeader()
     {
-        var request = new CreateRoomRequest("Alice");
+        var request = new CreateRoomRequest("Alice", ["0", "1"]);
         var room = new Room { Id = 42, Players = [new Player("Alice", null)] };
         _bus.InvokeAsync<Room>(Arg.Any<CreateRoomCommand>(), Arg.Any<CancellationToken>(), Arg.Any<TimeSpan?>())
             .Returns(room);
@@ -40,7 +40,7 @@ public sealed class CreateRoomEndpointTests
     [Fact]
     public async Task Should_Pass_Command_To_Bus()
     {
-        var request = new CreateRoomRequest("Alice");
+        var request = new CreateRoomRequest("Alice", ["0", "1"]);
         _bus.InvokeAsync<Room>(Arg.Any<CreateRoomCommand>(), Arg.Any<CancellationToken>(), Arg.Any<TimeSpan?>())
             .Returns(new Room());
 

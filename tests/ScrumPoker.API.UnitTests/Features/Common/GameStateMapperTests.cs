@@ -24,6 +24,7 @@ public sealed class GameStateMapperTests
 
         response.Players["Alice"].ShouldBe("5");
         response.Players["Bob"].ShouldBe("8");
+        response.CardSet.ShouldBeEmpty();
     }
 
     [Fact]

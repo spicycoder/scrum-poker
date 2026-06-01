@@ -8,7 +8,7 @@ public sealed class LeaveTests
     [Fact]
     public void Should_ReturnRoom_WithoutPlayer()
     {
-        var (room, _) = Room.Create("Alice");
+        var (room, _) = Room.Create("Alice", []);
         var (withBob, _) = room.Join("Bob");
 
         var (updated, _) = withBob.Leave("Bob");
@@ -20,7 +20,7 @@ public sealed class LeaveTests
     [Fact]
     public void Should_ReturnPlayerLeftEvent()
     {
-        var (room, _) = Room.Create("Alice");
+        var (room, _) = Room.Create("Alice", []);
         var roomWithId = room with { Id = 1 };
         var (withBob, _) = roomWithId.Join("Bob");
 
@@ -34,7 +34,7 @@ public sealed class LeaveTests
     [Fact]
     public void Should_Throw_When_PlayerNotInRoom()
     {
-        var (room, _) = Room.Create("Alice");
+        var (room, _) = Room.Create("Alice", []);
 
         var ex = Should.Throw<InvalidOperationException>(() => room.Leave("Bob"));
         ex.Message.ShouldContain("Bob");
@@ -44,7 +44,7 @@ public sealed class LeaveTests
     [Fact]
     public void Should_Not_Affect_Other_Players()
     {
-        var (room, _) = Room.Create("Alice");
+        var (room, _) = Room.Create("Alice", []);
         var (withBob, _) = room.Join("Bob");
         var (voted, _) = withBob.Vote("Alice", "5");
 

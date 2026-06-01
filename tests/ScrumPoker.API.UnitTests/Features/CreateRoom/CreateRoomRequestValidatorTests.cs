@@ -7,7 +7,7 @@ public sealed class CreateRoomRequestValidatorTests
     [Fact]
     public void Validate_Should_Fail_When_PlayerName_IsEmpty()
     {
-        var request = new CreateRoomRequest(string.Empty);
+        var request = new CreateRoomRequest(string.Empty, []);
 
         var result = _sut.Validate(request);
 
@@ -18,7 +18,7 @@ public sealed class CreateRoomRequestValidatorTests
     [Fact]
     public void Validate_Should_Fail_When_PlayerName_ExceedsMaxLength()
     {
-        var request = new CreateRoomRequest(new string('A', 51));
+        var request = new CreateRoomRequest(new string('A', 51), []);
 
         var result = _sut.Validate(request);
 
@@ -29,7 +29,7 @@ public sealed class CreateRoomRequestValidatorTests
     [Fact]
     public void Validate_Should_Pass_When_PlayerName_IsValid()
     {
-        var request = new CreateRoomRequest("Alice");
+        var request = new CreateRoomRequest("Alice", ["0", "1"]);
 
         var result = _sut.Validate(request);
 

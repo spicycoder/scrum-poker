@@ -20,7 +20,7 @@ public sealed class CreateRoomHandlerTests
     [Fact]
     public async Task Handle_Should_CreateRoom_WithPlayer()
     {
-        var command = new CreateRoomCommand("Alice");
+        var command = new CreateRoomCommand("Alice", ["0", "1"]);
         var savedRoom = new Room { Id = 1, Players = [new Player("Alice", null)] };
         _repository.SaveAsync(Arg.Any<Room>(), Arg.Any<CancellationToken>()).Returns(savedRoom);
 
@@ -39,7 +39,7 @@ public sealed class CreateRoomHandlerTests
     [Fact]
     public async Task Handle_Should_PublishRoomCreatedEvent()
     {
-        var command = new CreateRoomCommand("Alice");
+        var command = new CreateRoomCommand("Alice", ["0", "1"]);
         var savedRoom = new Room { Id = 42, Players = [new Player("Alice", null)] };
         _repository.SaveAsync(Arg.Any<Room>(), Arg.Any<CancellationToken>()).Returns(savedRoom);
 

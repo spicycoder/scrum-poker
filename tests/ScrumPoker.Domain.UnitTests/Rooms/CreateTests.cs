@@ -8,7 +8,7 @@ public sealed class CreateTests
     [Fact]
     public void Should_ReturnRoom_WithPlayer()
     {
-        var (room, _) = Room.Create("Alice");
+        var (room, _) = Room.Create("Alice", []);
 
         room.Players.ShouldHaveSingleItem();
         room.Players[0].Name.ShouldBe("Alice");
@@ -18,7 +18,7 @@ public sealed class CreateTests
     [Fact]
     public void Should_ReturnRoomCreatedEvent()
     {
-        var (_, @event) = Room.Create("Alice");
+        var (_, @event) = Room.Create("Alice", []);
 
         @event.ShouldBeOfType<RoomCreated>();
         @event.PlayerName.ShouldBe("Alice");

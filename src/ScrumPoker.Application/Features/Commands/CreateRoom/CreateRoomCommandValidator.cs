@@ -9,5 +9,8 @@ public sealed class CreateRoomCommandValidator : AbstractValidator<CreateRoomCom
         RuleFor(x => x.PlayerName)
             .NotEmpty()
             .MaximumLength(50);
+
+        RuleFor(x => x.CardSet)
+            .NotEmpty();
     }
 }

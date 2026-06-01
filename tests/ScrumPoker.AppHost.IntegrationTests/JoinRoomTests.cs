@@ -19,7 +19,7 @@ public sealed class JoinRoomTests
     public async Task Should_Return_201Created_When_Success()
     {
         var createResponse = await _httpClient.PostAsJsonAsync("/api/rooms",
-            new CreateRoomRequest("Alice"), TestContext.Current.CancellationToken);
+            new CreateRoomRequest("Alice", ["0", "1"]), TestContext.Current.CancellationToken);
         var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
 
         var joinResponse = await _httpClient.PostAsJsonAsync(
@@ -42,7 +42,7 @@ public sealed class JoinRoomTests
     public async Task WithDuplicateName_Should_Return_409()
     {
         var createResponse = await _httpClient.PostAsJsonAsync("/api/rooms",
-            new CreateRoomRequest("Alice"), TestContext.Current.CancellationToken);
+            new CreateRoomRequest("Alice", ["0", "1"]), TestContext.Current.CancellationToken);
         var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
 
         var joinResponse = await _httpClient.PostAsJsonAsync(
@@ -56,7 +56,7 @@ public sealed class JoinRoomTests
     public async Task Before_Expiry_Room_Should_Be_Accessible()
     {
         var createResponse = await _httpClient.PostAsJsonAsync("/api/rooms",
-            new CreateRoomRequest("Alice"), TestContext.Current.CancellationToken);
+            new CreateRoomRequest("Alice", ["0", "1"]), TestContext.Current.CancellationToken);
         var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
 
         await _httpClient.PostAsJsonAsync(
@@ -80,7 +80,7 @@ public sealed class JoinRoomExpiryTests(ShortTtlDistributedApplicationFixture fi
     public async Task Join_Should_Reset_Expiry_Timer()
     {
         var createResponse = await fixture.HttpClient.PostAsJsonAsync("/api/rooms",
-            new CreateRoomRequest("Alice"), TestContext.Current.CancellationToken);
+            new CreateRoomRequest("Alice", ["0", "1"]), TestContext.Current.CancellationToken);
         var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
 
         await Task.Delay(TimeSpan.FromSeconds(2), TestContext.Current.CancellationToken);
@@ -105,7 +105,7 @@ public sealed class JoinRoomExpiryTests(ShortTtlDistributedApplicationFixture fi
     public async Task After_Expiry_Room_Should_Return_404()
     {
         var createResponse = await fixture.HttpClient.PostAsJsonAsync("/api/rooms",
-            new CreateRoomRequest("Alice"), TestContext.Current.CancellationToken);
+            new CreateRoomRequest("Alice", ["0", "1"]), TestContext.Current.CancellationToken);
         var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
 
         await Task.Delay(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);

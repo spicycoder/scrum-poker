@@ -7,7 +7,7 @@ public sealed class CreateRoomCommandValidatorTests
     [Fact]
     public void Validate_Should_Fail_When_PlayerName_IsEmpty()
     {
-        var command = new CreateRoomCommand(string.Empty);
+        var command = new CreateRoomCommand(string.Empty, []);
 
         var result = _sut.Validate(command);
 
@@ -18,7 +18,7 @@ public sealed class CreateRoomCommandValidatorTests
     [Fact]
     public void Validate_Should_Fail_When_PlayerName_ExceedsMaxLength()
     {
-        var command = new CreateRoomCommand(new string('A', 51));
+        var command = new CreateRoomCommand(new string('A', 51), []);
 
         var result = _sut.Validate(command);
 
@@ -29,7 +29,7 @@ public sealed class CreateRoomCommandValidatorTests
     [Fact]
     public void Validate_Should_Pass_When_PlayerName_IsValid()
     {
-        var command = new CreateRoomCommand("Alice");
+        var command = new CreateRoomCommand("Alice", ["0", "1"]);
 
         var result = _sut.Validate(command);
 

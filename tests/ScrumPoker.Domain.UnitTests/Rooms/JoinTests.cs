@@ -8,7 +8,7 @@ public sealed class JoinTests
     [Fact]
     public void Should_ReturnRoom_WithNewPlayer()
     {
-        var (room, _) = Room.Create("Alice");
+        var (room, _) = Room.Create("Alice", []);
 
         var (updated, _) = room.Join("Bob");
 
@@ -20,7 +20,7 @@ public sealed class JoinTests
     [Fact]
     public void Should_ReturnPlayerJoinedEvent()
     {
-        var (room, _) = Room.Create("Alice");
+        var (room, _) = Room.Create("Alice", []);
         var roomWithId = room with { Id = 1 };
 
         var (_, @event) = roomWithId.Join("Bob");
@@ -33,7 +33,7 @@ public sealed class JoinTests
     [Fact]
     public void Should_Throw_When_PlayerAlreadyInRoom()
     {
-        var (room, _) = Room.Create("Alice");
+        var (room, _) = Room.Create("Alice", []);
 
         var ex = Should.Throw<InvalidOperationException>(() => room.Join("Alice"));
         ex.Message.ShouldContain("Alice");

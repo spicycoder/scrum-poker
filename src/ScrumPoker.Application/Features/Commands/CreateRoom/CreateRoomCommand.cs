@@ -1,3 +1,3 @@
 namespace ScrumPoker.Application.Features.Commands.CreateRoom;
 
-public sealed record CreateRoomCommand(string PlayerName);
+public sealed record CreateRoomCommand(string PlayerName, List<string> CardSet);

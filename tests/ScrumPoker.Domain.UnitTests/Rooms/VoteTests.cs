@@ -8,7 +8,7 @@ public sealed class VoteTests
     [Fact]
     public void Should_UpdatePlayerValue()
     {
-        var (room, _) = Room.Create("Alice");
+        var (room, _) = Room.Create("Alice", []);
         var roomWithId = room with { Id = 1 };
 
         var (updated, _) = roomWithId.Vote("Alice", "5");
@@ -20,7 +20,7 @@ public sealed class VoteTests
     [Fact]
     public void Should_ReturnVoteCastEvent()
     {
-        var (room, _) = Room.Create("Alice");
+        var (room, _) = Room.Create("Alice", []);
         var roomWithId = room with { Id = 1 };
 
         var (_, @event) = roomWithId.Vote("Alice", "8");
@@ -34,7 +34,7 @@ public sealed class VoteTests
     [Fact]
     public void Should_Throw_When_PlayerNotInRoom()
     {
-        var (room, _) = Room.Create("Alice");
+        var (room, _) = Room.Create("Alice", []);
         var roomWithId = room with { Id = 1 };
 
         var ex = Should.Throw<InvalidOperationException>(() => roomWithId.Vote("Bob", "5"));
@@ -45,7 +45,7 @@ public sealed class VoteTests
     [Fact]
     public void Should_Not_Affect_Other_Players()
     {
-        var (room, _) = Room.Create("Alice");
+        var (room, _) = Room.Create("Alice", []);
         var roomWithId = room with { Id = 1 };
         var (withBob, _) = roomWithId.Join("Bob");
 
@@ -59,7 +59,7 @@ public sealed class VoteTests
     [Fact]
     public void Should_AutoReveal_When_AllPlayersVoted()
     {
-        var (room, _) = Room.Create("Alice");
+        var (room, _) = Room.Create("Alice", []);
         var roomWithId = room with { Id = 1 };
         var (withBob, _) = roomWithId.Join("Bob");
 
@@ -72,7 +72,7 @@ public sealed class VoteTests
     [Fact]
     public void Should_NotReveal_When_NotAllPlayersVoted()
     {
-        var (room, _) = Room.Create("Alice");
+        var (room, _) = Room.Create("Alice", []);
         var roomWithId = room with { Id = 1 };
         var (withBob, _) = roomWithId.Join("Bob");
 

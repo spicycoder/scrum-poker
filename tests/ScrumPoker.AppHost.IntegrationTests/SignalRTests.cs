@@ -8,7 +8,7 @@ using ScrumPoker.API.Features.Vote;
 
 namespace ScrumPoker.AppHost.IntegrationTests;
 
-public sealed record GameStateResponse(int GameId, Dictionary<string, string?> Players, bool Revealed);
+public sealed record GameStateResponse(int GameId, Dictionary<string, string?> Players, bool Revealed, List<string> CardSet);
 
 [Collection(DistributedApplicationCollection.Name)]
 public sealed class SignalRTests
@@ -28,7 +28,7 @@ public sealed class SignalRTests
         var ct = TestContext.Current.CancellationToken;
 
         var createResponse = await _fixture.HttpClient.PostAsJsonAsync("/api/rooms",
-            new CreateRoomRequest("Alice"), ct);
+            new CreateRoomRequest("Alice", ["0", "1"]), ct);
         var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
 
         await using var connection = BuildHubConnection();
@@ -53,7 +53,7 @@ public sealed class SignalRTests
         var ct = TestContext.Current.CancellationToken;
 
         var createResponse = await _fixture.HttpClient.PostAsJsonAsync("/api/rooms",
-            new CreateRoomRequest("Alice"), ct);
+            new CreateRoomRequest("Alice", ["0", "1"]), ct);
         var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
 
         await using var connection = BuildHubConnection();
@@ -78,11 +78,11 @@ public sealed class SignalRTests
         var ct = TestContext.Current.CancellationToken;
 
         var roomAResp = await _fixture.HttpClient.PostAsJsonAsync("/api/rooms",
-            new CreateRoomRequest("Alice"), ct);
+            new CreateRoomRequest("Alice", ["0", "1"]), ct);
         var roomAId = IntegrationTestHelpers.GetRoomIdFromLocation(roomAResp);
 
         var roomBResp = await _fixture.HttpClient.PostAsJsonAsync("/api/rooms",
-            new CreateRoomRequest("Carol"), ct);
+            new CreateRoomRequest("Carol", ["0", "1"]), ct);
         var roomBId = IntegrationTestHelpers.GetRoomIdFromLocation(roomBResp);
 
         await using var connection = BuildHubConnection();
@@ -107,7 +107,7 @@ public sealed class SignalRTests
         var ct = TestContext.Current.CancellationToken;
 
         var createResponse = await _fixture.HttpClient.PostAsJsonAsync("/api/rooms",
-            new CreateRoomRequest("Alice"), ct);
+            new CreateRoomRequest("Alice", ["0", "1"]), ct);
         var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
 
         await using var connection = BuildHubConnection();
@@ -133,7 +133,7 @@ public sealed class SignalRTests
         var ct = TestContext.Current.CancellationToken;
 
         var createResponse = await _fixture.HttpClient.PostAsJsonAsync("/api/rooms",
-            new CreateRoomRequest("Alice"), ct);
+            new CreateRoomRequest("Alice", ["0", "1"]), ct);
         var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
 
         await _fixture.HttpClient.PostAsJsonAsync(
@@ -161,7 +161,7 @@ public sealed class SignalRTests
         var ct = TestContext.Current.CancellationToken;
 
         var createResponse = await _fixture.HttpClient.PostAsJsonAsync("/api/rooms",
-            new CreateRoomRequest("Alice"), ct);
+            new CreateRoomRequest("Alice", ["0", "1"]), ct);
         var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
 
         await _fixture.HttpClient.PostAsJsonAsync(
@@ -189,7 +189,7 @@ public sealed class SignalRTests
         var ct = TestContext.Current.CancellationToken;
 
         var createResponse = await _fixture.HttpClient.PostAsJsonAsync("/api/rooms",
-            new CreateRoomRequest("Alice"), ct);
+            new CreateRoomRequest("Alice", ["0", "1"]), ct);
         var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
 
         await _fixture.HttpClient.PostAsJsonAsync($"/api/rooms/{roomId}/join",

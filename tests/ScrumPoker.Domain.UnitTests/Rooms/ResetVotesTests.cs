@@ -8,7 +8,7 @@ public sealed class ResetVotesTests
     [Fact]
     public void Should_ClearAllValues()
     {
-        var (room, _) = Room.Create("Alice");
+        var (room, _) = Room.Create("Alice", []);
         var roomWithId = room with { Id = 1 };
         var (withBob, _) = roomWithId.Join("Bob");
         var (voted, _) = withBob.Vote("Alice", "5");
@@ -22,7 +22,7 @@ public sealed class ResetVotesTests
     [Fact]
     public void Should_SetRevealedFalse()
     {
-        var (room, _) = Room.Create("Alice");
+        var (room, _) = Room.Create("Alice", []);
         var roomWithId = room with { Id = 1 };
         var (revealed, _) = roomWithId.Reveal();
 
@@ -34,7 +34,7 @@ public sealed class ResetVotesTests
     [Fact]
     public void Should_ReturnVotesResetEvent()
     {
-        var (room, _) = Room.Create("Alice");
+        var (room, _) = Room.Create("Alice", []);
         var roomWithId = room with { Id = 1 };
         var (voted, _) = roomWithId.Vote("Alice", "5");
 
