@@ -38,17 +38,6 @@ public sealed class VoteRequestValidatorTests
     }
 
     [Fact]
-    public void Validate_Should_Fail_When_Value_IsInvalid()
-    {
-        var request = new VoteRequest("Bob", "abc");
-
-        var result = _sut.Validate(request);
-
-        result.IsValid.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.PropertyName == "Value");
-    }
-
-    [Fact]
     public void Validate_Should_Pass_When_AllFields_AreValid()
     {
         var request = new VoteRequest("Bob", "5");

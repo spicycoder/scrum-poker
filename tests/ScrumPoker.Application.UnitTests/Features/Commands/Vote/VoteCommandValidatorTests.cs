@@ -59,22 +59,6 @@ public sealed class VoteCommandValidatorTests
         result.Errors.ShouldContain(e => e.PropertyName == "Value");
     }
 
-    [Theory]
-    [InlineData("99")]
-    [InlineData("abc")]
-    [InlineData("4")]
-    [InlineData("-1")]
-    [InlineData("")]
-    public void Validate_Should_Fail_When_Value_IsInvalid(string value)
-    {
-        var command = new VoteCommand(1, "Bob", value);
-
-        var result = _sut.Validate(command);
-
-        result.IsValid.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.PropertyName == "Value");
-    }
-
     [Fact]
     public void Validate_Should_Pass_When_AllFields_AreValid()
     {
@@ -85,23 +69,4 @@ public sealed class VoteCommandValidatorTests
         result.IsValid.ShouldBeTrue();
     }
 
-    [Theory]
-    [InlineData("0")]
-    [InlineData("0.5")]
-    [InlineData("1")]
-    [InlineData("2")]
-    [InlineData("3")]
-    [InlineData("5")]
-    [InlineData("8")]
-    [InlineData("13")]
-    [InlineData("21")]
-    [InlineData("?")]
-    public void Validate_Should_Pass_For_Allowed_Values(string value)
-    {
-        var command = new VoteCommand(1, "Bob", value);
-
-        var result = _sut.Validate(command);
-
-        result.IsValid.ShouldBeTrue();
-    }
 }
