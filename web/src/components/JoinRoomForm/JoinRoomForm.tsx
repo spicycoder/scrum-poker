@@ -1,8 +1,10 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Card, CardContent } from '../ui/card'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '../ui/input-otp'
+import { joinRoom } from '../../lib/api'
 
 function getStoredName(): string {
   return localStorage.getItem('playerName') ?? ''
@@ -13,11 +15,26 @@ interface JoinRoomFormProps {
 }
 
 export default function JoinRoomForm({ roomId }: JoinRoomFormProps) {
+  const navigate = useNavigate()
   const [name, setName] = useState(getStoredName)
   const [otp, setOtp] = useState(roomId?.replace(/\D/g, '').slice(0, 4) ?? '')
+  const [loading, setLoading] = useState(false)
 
-  function handleJoin() {
-    localStorage.setItem('playerName', name.trim())
+  async function handleJoin() {
+    const trimmed = name.trim()
+    if (!trimmed || otp.length !== 4) return
+
+    localStorage.setItem('playerName', trimmed)
+    setLoading(true)
+    try {
+      const id = parseInt(otp, 10)
+      await joinRoom(id, trimmed)
+      navigate(`/room/${id}`)
+    } catch (err) {
+      console.error('Failed to join room:', err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   function handleClear() {
@@ -25,7 +42,7 @@ export default function JoinRoomForm({ roomId }: JoinRoomFormProps) {
     setOtp('')
   }
 
-  const canSubmit = name.trim().length > 0 && otp.length === 4
+  const canSubmit = name.trim().length > 0 && otp.length === 4 && !loading
 
   return (
     <Card>
@@ -62,7 +79,7 @@ export default function JoinRoomForm({ roomId }: JoinRoomFormProps) {
             disabled={!canSubmit}
             onClick={handleJoin}
           >
-            Join
+            {loading ? 'Joining...' : 'Join'}
           </Button>
           <Button
             variant="outline"

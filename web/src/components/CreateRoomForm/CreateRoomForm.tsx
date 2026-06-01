@@ -1,11 +1,18 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Hash, Shirt } from 'lucide-react'
 import { Card, CardContent } from '../ui/card'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group'
+import { createRoom } from '../../lib/api'
 
 type VoteSeries = 'fib' | 'tshirt'
+
+const seriesValues: Record<VoteSeries, string[]> = {
+  fib: ['0', '0.5', '1', '2', '3', '5', '8', '13', '21', '?'],
+  tshirt: ['XS', 'S', 'M', 'L', 'XL', '?'],
+}
 
 const seriesLabels: Record<VoteSeries, string> = {
   fib: '0, 0.5, 1, 2, 3, 5, 8, 13, 21, ?',
@@ -23,18 +30,32 @@ function getStoredName(): string {
 }
 
 export default function CreateRoomForm() {
+  const navigate = useNavigate()
   const [name, setName] = useState(getStoredName)
   const [series, setSeries] = useState<VoteSeries>(getStoredSeries)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     localStorage.setItem('voteSeries', series)
   }, [series])
 
-  function handleCreate() {
-    localStorage.setItem('playerName', name.trim())
+  async function handleCreate() {
+    const trimmed = name.trim()
+    if (!trimmed) return
+
+    localStorage.setItem('playerName', trimmed)
+    setLoading(true)
+    try {
+      const roomId = await createRoom(trimmed, seriesValues[series])
+      navigate(`/room/${roomId}`)
+    } catch (err) {
+      console.error('Failed to create room:', err)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const canSubmit = name.trim().length > 0
+  const canSubmit = name.trim().length > 0 && !loading
 
   return (
     <Card>
@@ -74,7 +95,7 @@ export default function CreateRoomForm() {
             disabled={!canSubmit}
             onClick={handleCreate}
           >
-            Create
+            {loading ? 'Creating...' : 'Create'}
           </Button>
           <Button
             variant="outline"
