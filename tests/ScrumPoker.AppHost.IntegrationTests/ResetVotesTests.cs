@@ -47,7 +47,7 @@ public sealed class ResetVotesTests
         var gameState = await getResponse.Content
             .ReadFromJsonAsync<GameStateResponse>(TestContext.Current.CancellationToken);
         gameState.ShouldNotBeNull();
-        gameState.Players.ShouldAllBe(p => p.Value == null);
+        gameState.Players.Values.ShouldAllBe(v => v == null);
     }
 
     [Fact]
@@ -90,7 +90,7 @@ public sealed class ResetVotesTests
             .ReadFromJsonAsync<GameStateResponse>(TestContext.Current.CancellationToken);
         gameState.ShouldNotBeNull();
         gameState.Revealed.ShouldBeFalse();
-        gameState.Players.ShouldAllBe(p => p.Value == null);
+        gameState.Players.Values.ShouldAllBe(v => v == null);
     }
 
     [Fact]

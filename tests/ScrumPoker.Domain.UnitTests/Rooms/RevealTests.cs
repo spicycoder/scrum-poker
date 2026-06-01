@@ -1,4 +1,5 @@
 using ScrumPoker.Domain.Rooms;
+using ScrumPoker.Domain.Rooms.Events;
 
 namespace ScrumPoker.Domain.UnitTests.Rooms;
 
@@ -10,7 +11,7 @@ public sealed class RevealTests
         var (room, _) = Room.Create("Alice");
         var roomWithId = room with { Id = 1 };
 
-        var revealed = roomWithId.Reveal();
+        var (revealed, _) = roomWithId.Reveal();
 
         revealed.Revealed.ShouldBeTrue();
     }
@@ -22,9 +23,21 @@ public sealed class RevealTests
         var roomWithId = room with { Id = 1 };
         var (voted, _) = roomWithId.Vote("Alice", "5");
 
-        var revealed = voted.Reveal();
+        var (revealed, _) = voted.Reveal();
 
         revealed.Players.ShouldHaveSingleItem();
         revealed.Players[0].Value.ShouldBe("5");
+    }
+
+    [Fact]
+    public void Should_ReturnVotesRevealedEvent()
+    {
+        var (room, _) = Room.Create("Alice");
+        var roomWithId = room with { Id = 1 };
+
+        var (_, @event) = roomWithId.Reveal();
+
+        @event.ShouldBeOfType<VotesRevealed>();
+        @event.RoomId.ShouldBe(1);
     }
 }

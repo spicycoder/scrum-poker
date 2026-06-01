@@ -1,8 +1,9 @@
 using ScrumPoker.Application.Abstractions;
+using Wolverine;
 
 namespace ScrumPoker.Application.Features.Commands.ResetVotes;
 
-public sealed class ResetVotesHandler(IRoomRepository repository)
+public sealed class ResetVotesHandler(IRoomRepository repository, IMessageBus bus)
 {
     public async Task<ResetVotesResult> Handle(ResetVotesCommand command, CancellationToken ct)
     {
@@ -12,8 +13,9 @@ public sealed class ResetVotesHandler(IRoomRepository repository)
             return new ResetVotesResult.RoomNotFound();
         }
 
-        var updated = room.ResetVotes();
+        var (updated, @event) = room.ResetVotes();
         await repository.SaveAsync(updated, ct);
+        await bus.PublishAsync(@event);
         return new ResetVotesResult.Success(updated);
     }
 }

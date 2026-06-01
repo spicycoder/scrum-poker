@@ -37,7 +37,7 @@ public sealed class GetRoomStateEndpointTests
         var response = ok.Value.ShouldBeOfType<GameStateResponse>();
         response.GameId.ShouldBe(42);
         response.Players.ShouldHaveSingleItem();
-        response.Players[0].Name.ShouldBe("Alice");
+        response.Players.ShouldContainKey("Alice");
     }
 
     [Fact]

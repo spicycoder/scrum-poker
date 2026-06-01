@@ -12,7 +12,7 @@ public sealed record Room
     public static (Room Room, RoomCreated Event) Create(string playerName)
     {
         var room = new Room { Players = [new Player(playerName, null)] };
-        return (room, new RoomCreated(room.Id, playerName));
+        return (room, new RoomCreated(room.Id, playerName, room));
     }
 
     public (Room Room, PlayerJoined Event) Join(string playerName)
@@ -23,7 +23,7 @@ public sealed record Room
         }
 
         var updated = this with { Players = [.. Players, new Player(playerName, null)] };
-        return (updated, new PlayerJoined(Id, playerName));
+        return (updated, new PlayerJoined(Id, playerName, updated));
     }
 
     public (Room Room, VoteCast Event) Vote(string playerName, string value)
@@ -43,20 +43,36 @@ public sealed record Room
             Revealed = updatedPlayers.All(p => p.Value is not null)
         };
 
-        return (updated, new VoteCast(Id, playerName, value));
+        return (updated, new VoteCast(Id, playerName, value, updated));
     }
 
-    public Room Reveal()
+    public (Room Room, VotesRevealed Event) Reveal()
     {
-        return this with { Revealed = true };
+        var updated = this with { Revealed = true };
+        return (updated, new VotesRevealed(Id, updated));
     }
 
-    public Room ResetVotes()
+    public (Room Room, VotesReset Event) ResetVotes()
     {
-        return this with
+        var updated = this with
         {
             Players = Players.Select(p => p with { Value = null }).ToList(),
             Revealed = false
         };
+        return (updated, new VotesReset(Id, updated));
+    }
+
+    public (Room Room, PlayerLeft Event) Leave(string playerName)
+    {
+        if (!Players.Any(p => p.Name == playerName))
+        {
+            throw new InvalidOperationException($"Player '{playerName}' is not in room.");
+        }
+
+        var updated = this with
+        {
+            Players = Players.Where(p => p.Name != playerName).ToList()
+        };
+        return (updated, new PlayerLeft(Id, playerName, updated));
     }
 }

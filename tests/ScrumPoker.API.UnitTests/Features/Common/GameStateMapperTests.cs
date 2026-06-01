@@ -22,10 +22,8 @@ public sealed class GameStateMapperTests
         response.GameId.ShouldBe(42);
         response.Players.Count.ShouldBe(2);
 
-        response.Players[0].Name.ShouldBe("Alice");
-        response.Players[0].Value.ShouldBe("5");
-        response.Players[1].Name.ShouldBe("Bob");
-        response.Players[1].Value.ShouldBe("8");
+        response.Players["Alice"].ShouldBe("5");
+        response.Players["Bob"].ShouldBe("8");
     }
 
     [Fact]
@@ -39,8 +37,7 @@ public sealed class GameStateMapperTests
 
         var response = GameStateMapper.ToResponse(room);
 
-        response.Players[0].Name.ShouldBe("Charlie");
-        response.Players[0].Value.ShouldBeNull();
+        response.Players["Charlie"].ShouldBeNull();
     }
 
     [Fact]

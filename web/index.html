@@ -51,7 +51,7 @@
         let currentRoomId;
 
         // Add new event names here as they are created
-        const knownEvents = ["RoomCreated", "PlayerJoined", "VoteCast"];
+        const knownEvents = ["RoomCreated", "PlayerJoined", "VoteCast", "VotesRevealed", "VotesReset", "PlayerLeft"];
 
         function setStatus(text, color = "text-gray-400") {
             statusEl.textContent = text;
@@ -95,9 +95,7 @@
             // Register handlers for all known events
             knownEvents.forEach(name => {
                 connection.on(name, (data) => {
-                    if (data.roomId == currentRoomId) {
-                        appendLog(name, data);
-                    }
+                    appendLog(name, data);
                 });
             });
 

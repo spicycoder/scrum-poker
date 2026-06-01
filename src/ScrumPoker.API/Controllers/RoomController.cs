@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using ScrumPoker.API.Features.Common;
 using ScrumPoker.API.Features.CreateRoom;
 using ScrumPoker.API.Features.JoinRoom;
+using ScrumPoker.API.Features.LeaveRoom;
 using ScrumPoker.API.Features.Vote;
 using ScrumPoker.Application.Features.Commands.CreateRoom;
 using ScrumPoker.Application.Features.Commands.JoinRoom;
+using ScrumPoker.Application.Features.Commands.LeaveRoom;
 using ScrumPoker.Application.Features.Commands.RevealVotes;
 using ScrumPoker.Application.Features.Commands.ResetVotes;
 using ScrumPoker.Application.Features.Commands.Vote;
@@ -141,6 +143,29 @@ public sealed class RoomController : ControllerBase
         {
             ResetVotesResult.Success => StatusCode(201),
             ResetVotesResult.RoomNotFound => NotFound(),
+            _ => throw new InvalidOperationException($"Unknown result type: {result.GetType().Name}")
+        };
+    }
+
+    [HttpPost("{id:int}/leave")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> Leave([FromRoute] int id, [FromBody] LeaveRoomRequest request, CancellationToken ct)
+    {
+        if (id <= 0)
+        {
+            return BadRequest();
+        }
+
+        var command = new LeaveRoomCommand(id, request.PlayerName);
+        var result = await _bus.InvokeAsync<LeaveRoomResult>(command, ct);
+
+        return result switch
+        {
+            LeaveRoomResult.Success => NoContent(),
+            LeaveRoomResult.RoomNotFound => NotFound(),
+            LeaveRoomResult.PlayerNotInRoom => NotFound(),
             _ => throw new InvalidOperationException($"Unknown result type: {result.GetType().Name}")
         };
     }

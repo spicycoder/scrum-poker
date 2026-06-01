@@ -85,7 +85,7 @@ public sealed class RevealVotesTests
         gameState.ShouldNotBeNull();
         gameState.Revealed.ShouldBeTrue();
         gameState.Players.ShouldHaveSingleItem();
-        gameState.Players[0].Value.ShouldBe("8");
+        gameState.Players["Alice"].ShouldBe("8");
     }
 
     [Fact]

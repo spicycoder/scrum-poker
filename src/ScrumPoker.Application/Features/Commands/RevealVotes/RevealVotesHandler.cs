@@ -1,8 +1,9 @@
 using ScrumPoker.Application.Abstractions;
+using Wolverine;
 
 namespace ScrumPoker.Application.Features.Commands.RevealVotes;
 
-public sealed class RevealVotesHandler(IRoomRepository repository)
+public sealed class RevealVotesHandler(IRoomRepository repository, IMessageBus bus)
 {
     public async Task<RevealVotesResult> Handle(RevealVotesCommand command, CancellationToken ct)
     {
@@ -12,8 +13,9 @@ public sealed class RevealVotesHandler(IRoomRepository repository)
             return new RevealVotesResult.RoomNotFound();
         }
 
-        var updated = room.Reveal();
+        var (updated, @event) = room.Reveal();
         await repository.SaveAsync(updated, ct);
+        await bus.PublishAsync(@event);
         return new RevealVotesResult.Success(updated);
     }
 }

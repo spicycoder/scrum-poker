@@ -31,7 +31,7 @@ public sealed class GetRoomStateTests
         gameState.ShouldNotBeNull();
         gameState.GameId.ShouldBe(roomId);
         gameState.Players.ShouldHaveSingleItem();
-        gameState.Players[0].Name.ShouldBe("Alice");
+        gameState.Players.ShouldContainKey("Alice");
     }
 
     [Fact]
