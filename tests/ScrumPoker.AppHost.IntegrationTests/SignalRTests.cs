@@ -211,6 +211,41 @@ public sealed class SignalRTests
         state.Players.ShouldNotContainKey("Bob");
     }
 
+    [Fact]
+    public async Task Disconnect_Should_RemovePlayer_AfterGracePeriod()
+    {
+        var ct = TestContext.Current.CancellationToken;
+
+        // Arrange: create room with Alice, join Bob
+        var createResponse = await _fixture.HttpClient.PostAsJsonAsync("/api/rooms",
+            new CreateRoomRequest("Alice", ["0", "1"]), ct);
+        var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
+
+        await _fixture.HttpClient.PostAsJsonAsync($"/api/rooms/{roomId}/join",
+            new JoinRoomRequest("Bob"), ct);
+
+        // Act: connect SignalR as Bob to register in PlayerConnectionTracker
+        await using var connection = BuildHubConnection();
+        await connection.StartAsync(ct);
+        await connection.InvokeAsync("JoinRoom", roomId.ToString(CultureInfo.InvariantCulture), "Bob", ct);
+
+        // Disconnect — triggers OnDisconnectedAsync → tracker.Leave → 5s grace period
+        await connection.StopAsync(ct);
+
+        // Wait for grace period to expire (5s) + buffer
+        await Task.Delay(TimeSpan.FromSeconds(7), ct);
+
+        // Assert: Bob should have been removed by the PlayerRemoved callback
+        var getResponse = await _fixture.HttpClient.GetAsync($"/api/rooms/{roomId}", ct);
+        var gameState = await getResponse.Content
+            .ReadFromJsonAsync<GameStateResponse>(ct);
+
+        gameState.ShouldNotBeNull();
+        gameState.GameId.ShouldBe(roomId);
+        gameState.Players.ShouldContainKey("Alice");
+        gameState.Players.ShouldNotContainKey("Bob");
+    }
+
     private HubConnection BuildHubConnection()
     {
         var hubUrl = new UriBuilder(_fixture.HttpClient.BaseAddress!) { Path = "/api/hub" }.Uri;

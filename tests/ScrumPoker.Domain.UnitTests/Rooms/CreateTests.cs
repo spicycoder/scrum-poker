@@ -23,4 +23,12 @@ public sealed class CreateTests
         @event.ShouldBeOfType<RoomCreated>();
         @event.PlayerName.ShouldBe("Alice");
     }
+
+    [Fact]
+    public void Should_DefaultCardSet_ToEmptyList_WhenNotProvided()
+    {
+        var (room, _) = Room.Create("Alice");
+
+        room.CardSet.ShouldBeEmpty();
+    }
 }
