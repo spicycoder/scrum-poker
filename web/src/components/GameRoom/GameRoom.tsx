@@ -30,7 +30,6 @@ export default function GameRoom() {
     connect(id).then(() => {
       const { currentPlayerName, players } = useGameStore.getState()
       if (currentPlayerName && !(currentPlayerName in players)) {
-        localStorage.removeItem('playerName')
         disconnect()
         navigate(`/${roomId}`)
       }
@@ -46,7 +45,6 @@ export default function GameRoom() {
 
   async function handleCopy() {
     await navigator.clipboard.writeText(window.location.href)
-    localStorage.removeItem('playerName')
     toast.success('Link copied to clipboard')
   }
 
