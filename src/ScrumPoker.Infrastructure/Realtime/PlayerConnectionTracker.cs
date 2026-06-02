@@ -6,7 +6,7 @@ public sealed class PlayerConnectionTracker
 {
     private readonly ConcurrentDictionary<(int RoomId, string PlayerName), ConcurrentDictionary<string, byte>> _connections = new();
     private readonly ConcurrentDictionary<(int RoomId, string PlayerName), CancellationTokenSource> _pendingRemovals = new();
-    private static readonly TimeSpan GracePeriod = TimeSpan.FromSeconds(3);
+    private static readonly TimeSpan GracePeriod = TimeSpan.FromSeconds(5);
 
     public Func<int, string, Task>? PlayerRemoved { get; set; }
 
