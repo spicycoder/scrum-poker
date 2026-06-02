@@ -145,6 +145,13 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
   };
   useEffect(() => {
     if (!navRef.current || !containerRef.current) return;
+    if (activeIndex === -1) {
+      textRef.current?.classList.remove('active');
+      textRef.current!.innerText = '';
+      filterRef.current!.style.width = '0';
+      filterRef.current!.style.height = '0';
+      return;
+    }
     const activeLi = navRef.current.querySelectorAll('li')[activeIndex] as HTMLElement;
     if (activeLi) {
       updateEffectPosition(activeLi);

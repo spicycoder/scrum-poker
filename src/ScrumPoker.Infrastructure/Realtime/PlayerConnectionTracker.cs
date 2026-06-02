@@ -36,8 +36,10 @@ public sealed class PlayerConnectionTracker
         if (set.IsEmpty)
         {
             var cts = new CancellationTokenSource();
-            _pendingRemovals.TryAdd(key, cts);
-            _ = RemoveAfterGracePeriod(key, cts.Token);
+            if (_pendingRemovals.TryAdd(key, cts))
+            {
+                _ = RemoveAfterGracePeriod(key, cts.Token);
+            }
         }
     }
 
