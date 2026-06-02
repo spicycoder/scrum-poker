@@ -1,8 +1,10 @@
 import { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import { useGameStore } from '../../store/gameStore'
 import { Card, CardContent } from '../ui/card'
 import { Button } from '../ui/button'
+import GooeyNav from '../GooeyNav/GooeyNav'
 
 export default function GameRoom() {
   const { roomId } = useParams<{ roomId: string }>()
@@ -16,7 +18,6 @@ export default function GameRoom() {
     connectionStatus,
     connect,
     disconnect,
-    leaveRoom,
   } = useGameStore()
 
   useEffect(() => {
@@ -33,9 +34,10 @@ export default function GameRoom() {
     }
   }, [roomId]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  async function handleLeave() {
-    await leaveRoom()
-    navigate('/')
+  async function handleCopy() {
+    await navigator.clipboard.writeText(window.location.href)
+    localStorage.removeItem('playerName')
+    toast.success('Link copied to clipboard')
   }
 
   if (connectionStatus !== 'connected' || gameId === null) {
@@ -48,19 +50,20 @@ export default function GameRoom() {
 
   return (
     <div className="flex flex-col items-center gap-6 px-6 pt-8">
+      <button
+        onClick={handleCopy}
+        className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+      >
+        🔗 {window.location.href}
+      </button>
+
       <Card className="w-full max-w-md">
         <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Room {gameId}</h2>
-            <span className="text-sm text-muted-foreground">
-              {connectionStatus}
-            </span>
-          </div>
-
+          <h3 className="text-lg font-bold mb-2">Players</h3>
           <div className="space-y-2 mb-6">
             {Object.entries(players).map(([name, value]) => (
               <div key={name} className="flex items-center justify-between">
-                <span className={name === currentPlayerName ? 'font-bold' : ''}>
+                <span>
                   {name} {name === currentPlayerName && '(you)'}
                 </span>
                 <span className="text-muted-foreground">
@@ -71,31 +74,31 @@ export default function GameRoom() {
           </div>
 
           {!revealed && cardSet.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-4">
-              {cardSet.map((card) => (
-                <Button
-                  key={card}
-                  variant={players[currentPlayerName] === card ? 'default' : 'outline'}
-                  onClick={() => useGameStore.getState().castVote(card)}
-                >
-                  {card}
-                </Button>
-              ))}
+            <div className="mb-4">
+              <GooeyNav
+                items={cardSet.map((card) => ({
+                  label: card,
+                  onClick: () => useGameStore.getState().castVote(card),
+                }))}
+                activeIndex={cardSet.indexOf(players[currentPlayerName] ?? '')}
+                particleCount={10}
+                particleDistances={[60, 8]}
+                particleR={80}
+                animationTime={400}
+                timeVariance={200}
+                colors={[1, 2, 3, 4]}
+              />
             </div>
           )}
 
           <div className="flex gap-3">
-            {!revealed ? (
+            {!revealed && (
               <Button className="flex-1" onClick={() => useGameStore.getState().revealVotes()}>
                 Reveal
               </Button>
-            ) : (
-              <Button className="flex-1" variant="outline" onClick={() => useGameStore.getState().resetVotes()}>
-                Reset
-              </Button>
             )}
-            <Button variant="destructive" onClick={handleLeave}>
-              Leave
+            <Button className="flex-1" variant="outline" onClick={() => useGameStore.getState().resetVotes()}>
+              Reset
             </Button>
           </div>
         </CardContent>

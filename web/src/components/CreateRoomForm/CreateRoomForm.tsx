@@ -5,6 +5,7 @@ import { Card, CardContent } from '../ui/card'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group'
+import { toast } from 'sonner'
 import { createRoom } from '../../lib/api'
 
 type VoteSeries = 'fib' | 'tshirt'
@@ -47,9 +48,10 @@ export default function CreateRoomForm() {
     setLoading(true)
     try {
       const roomId = await createRoom(trimmed, seriesValues[series])
-      navigate(`/room/${roomId}`)
+      navigate(`/${roomId}`)
     } catch (err) {
       console.error('Failed to create room:', err)
+      toast.error('Failed to create room')
     } finally {
       setLoading(false)
     }

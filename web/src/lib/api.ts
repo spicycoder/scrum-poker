@@ -5,6 +5,12 @@ export interface GameStateResponse {
   cardSet: string[]
 }
 
+export class ApiError extends Error {
+  constructor(public status: number, message: string) {
+    super(message)
+  }
+}
+
 function extractRoomId(response: Response): number {
   const location = response.headers.get('Location')
   if (!location) throw new Error('No Location header in response')
@@ -29,7 +35,7 @@ export async function joinRoom(roomId: number, playerName: string): Promise<void
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ playerName }),
   })
-  if (!res.ok) throw new Error(`Join room failed: ${res.status}`)
+  if (!res.ok) throw new ApiError(res.status, `Join room failed: ${res.status}`)
 }
 
 export async function getGameState(roomId: number): Promise<GameStateResponse> {

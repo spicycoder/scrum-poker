@@ -5,9 +5,11 @@ using FluentValidation.AspNetCore;
 
 using ScrumPoker.API.Middleware;
 using ScrumPoker.Application;
+using ScrumPoker.Application.Features.Commands.LeaveRoom;
 using ScrumPoker.Infrastructure;
 using ScrumPoker.Infrastructure.Realtime;
 using ScrumPoker.Persistence;
+using Wolverine;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +31,15 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 var app = builder.Build();
+
+var tracker = app.Services.GetRequiredService<PlayerConnectionTracker>();
+var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
+tracker.PlayerRemoved = (roomId, playerName) =>
+{
+    using var scope = scopeFactory.CreateScope();
+    var bus = scope.ServiceProvider.GetRequiredService<IMessageBus>();
+    return bus.InvokeAsync(new LeaveRoomCommand(roomId, playerName));
+};
 
 app.MapDefaultEndpoints();
 

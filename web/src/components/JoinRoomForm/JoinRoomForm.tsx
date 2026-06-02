@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card, CardContent } from '../ui/card'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '../ui/input-otp'
-import { joinRoom } from '../../lib/api'
+import { toast } from 'sonner'
+import { joinRoom, getGameState, ApiError } from '../../lib/api'
 
 function getStoredName(): string {
   return localStorage.getItem('playerName') ?? ''
@@ -19,6 +20,36 @@ export default function JoinRoomForm({ roomId }: JoinRoomFormProps) {
   const [name, setName] = useState(getStoredName)
   const [otp, setOtp] = useState(roomId?.replace(/\D/g, '').slice(0, 4) ?? '')
   const [loading, setLoading] = useState(false)
+  const [cardSet, setCardSet] = useState<string[] | null>(null)
+  const abortRef = useRef<AbortController | null>(null)
+
+  useEffect(() => {
+    if (otp.length !== 4) {
+      setCardSet(null)
+      return
+    }
+
+    abortRef.current?.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
+
+    const id = parseInt(otp, 10)
+    getGameState(id)
+      .then((state) => {
+        if (!controller.signal.aborted) {
+          setCardSet(state.cardSet)
+        }
+      })
+      .catch((err) => {
+        if (!controller.signal.aborted) {
+          setCardSet(null)
+          console.error('Room not found:', err)
+          toast.error('Room not found')
+        }
+      })
+
+    return () => controller.abort()
+  }, [otp])
 
   async function handleJoin() {
     const trimmed = name.trim()
@@ -29,9 +60,14 @@ export default function JoinRoomForm({ roomId }: JoinRoomFormProps) {
     try {
       const id = parseInt(otp, 10)
       await joinRoom(id, trimmed)
-      navigate(`/room/${id}`)
+      navigate(`/${id}`)
     } catch (err) {
       console.error('Failed to join room:', err)
+      if (err instanceof ApiError && err.status === 409) {
+        toast.error('Player name taken')
+      } else {
+        toast.error('Failed to join room')
+      }
     } finally {
       setLoading(false)
     }
@@ -40,9 +76,10 @@ export default function JoinRoomForm({ roomId }: JoinRoomFormProps) {
   function handleClear() {
     setName('')
     setOtp('')
+    setCardSet(null)
   }
 
-  const canSubmit = name.trim().length > 0 && otp.length === 4 && !loading
+  const canSubmit = name.trim().length > 0 && otp.length === 4 && cardSet !== null && !loading
 
   return (
     <Card>
@@ -69,9 +106,11 @@ export default function JoinRoomForm({ roomId }: JoinRoomFormProps) {
           </InputOTP>
         </div>
 
-        <p className="text-sm text-muted-foreground text-center">
-          XS, S, M, L, XL, ?
-        </p>
+        {cardSet && (
+          <p className="text-sm text-muted-foreground text-center">
+            {cardSet.join(', ')}
+          </p>
+        )}
 
         <div className="flex gap-3">
           <Button

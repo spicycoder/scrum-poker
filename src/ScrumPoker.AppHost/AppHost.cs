@@ -10,6 +10,7 @@ var api =builder.AddProject<Projects.ScrumPoker_API>("scrumpoker-api")
 var ui = builder
     .AddViteApp("web", "../../web")
     .WithPnpm()
+    .WaitFor(api)
     .WithReference(api);
 
 builder.Build().Run();

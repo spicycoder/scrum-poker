@@ -24,14 +24,14 @@ export default defineConfig({
   server: {
     host: true,
     proxy: {
-      '/api': {
-        target: apiTarget,
-        secure: false, // Aspire uses self-signed certs
-      },
       '/api/hub': {
         target: apiTarget,
         ws: true, // SignalR WebSocket
         secure: false,
+      },
+      '/api': {
+        target: apiTarget,
+        secure: false, // Aspire uses self-signed certs
       },
     },
   },

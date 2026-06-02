@@ -1,8 +1,9 @@
 import React, { useRef, useEffect, useState } from 'react';
 
-interface GooeyNavItem {
+export interface GooeyNavItem {
   label: string;
-  href: string;
+  href?: string;
+  onClick?: () => void;
 }
 
 export interface GooeyNavProps {
@@ -14,6 +15,7 @@ export interface GooeyNavProps {
   timeVariance?: number;
   colors?: number[];
   initialActiveIndex?: number;
+  activeIndex?: number;
 }
 
 const GooeyNav: React.FC<GooeyNavProps> = ({
@@ -24,13 +26,24 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
   particleR = 100,
   timeVariance = 300,
   colors = [1, 2, 3, 1, 2, 3, 1, 4],
-  initialActiveIndex = 0
+  initialActiveIndex = -1,
+  activeIndex: activeIndexProp
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLUListElement>(null);
   const filterRef = useRef<HTMLSpanElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
-  const [activeIndex, setActiveIndex] = useState<number>(initialActiveIndex);
+  const [internalIndex, setInternalIndex] = useState<number>(initialActiveIndex);
+  const activeIndex = activeIndexProp ?? internalIndex;
+  const setActiveIndex = (i: number) => {
+    setInternalIndex(i);
+  };
+
+  useEffect(() => {
+    if (activeIndexProp !== undefined) {
+      setInternalIndex(activeIndexProp);
+    }
+  }, [activeIndexProp]);
 
   const noise = (n = 1) => n / 2 - Math.random() * n;
   const getXY = (distance: number, pointIndex: number, totalPoints: number): [number, number] => {
@@ -98,10 +111,11 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
     textRef.current.innerText = element.innerText;
   };
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, index: number) => {
+    e.preventDefault();
     const liEl = e.currentTarget;
-    if (activeIndex === index) return;
     setActiveIndex(index);
     updateEffectPosition(liEl);
+    items[index].onClick?.();
     if (filterRef.current) {
       const particles = filterRef.current.querySelectorAll('.particle');
       particles.forEach(p => filterRef.current!.removeChild(p));
@@ -148,13 +162,12 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
 
   return (
     <>
-      {/* This effect is quite difficult to recreate faithfully using Tailwind, so a style tag is a necessary workaround */}
       <style>
         {`
           :root {
             --linear-ease: linear(0, 0.068, 0.19 2.7%, 0.804 8.1%, 1.037, 1.199 13.2%, 1.245, 1.27 15.8%, 1.274, 1.272 17.4%, 1.249 19.1%, 0.996 28%, 0.949, 0.928 33.3%, 0.926, 0.933 36.8%, 1.001 45.6%, 1.013, 1.019 50.8%, 1.018 54.4%, 1 63.1%, 0.995 68%, 1.001 85%, 1);
           }
-          .effect {
+          .gooey-effect {
             position: absolute;
             opacity: 1;
             pointer-events: none;
@@ -162,36 +175,48 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
             place-items: center;
             z-index: 1;
           }
-          .effect.text {
-            color: white;
+          .gooey-effect.text {
+            color: var(--foreground);
             transition: color 0.3s ease;
           }
-          .effect.text.active {
-            color: black;
+          .gooey-effect.text.active {
+            color: var(--card);
           }
-          .effect.filter {
+          .dark .gooey-effect.text.active {
+            color: var(--background);
+          }
+          .gooey-effect.filter {
             filter: blur(7px) contrast(100) blur(0);
-            mix-blend-mode: lighten;
+            mix-blend-mode: darken;
           }
-          .effect.filter::before {
+          .gooey-effect.filter::before {
             content: "";
             position: absolute;
             inset: -75px;
             z-index: -2;
-            background: black;
+            background: var(--muted);
           }
-          .effect.filter::after {
+          .gooey-effect.filter::after {
             content: "";
             position: absolute;
             inset: 0;
-            background: white;
+            background: var(--foreground);
             transform: scale(0);
             opacity: 0;
             z-index: -1;
             border-radius: 9999px;
           }
-          .effect.active::after {
+          .gooey-effect.active::after {
             animation: pill 0.3s ease both;
+          }
+          .dark .gooey-effect.filter {
+            mix-blend-mode: lighten;
+          }
+          .dark .gooey-effect.filter::before {
+            background: var(--background);
+          }
+          .dark .gooey-effect.filter::after {
+            background: var(--foreground);
           }
           @keyframes pill {
             to {
@@ -266,49 +291,52 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
               opacity: 0;
             }
           }
-          li.active {
-            color: black;
+          .gooey-nav li.active {
+            color: var(--card);
             text-shadow: none;
+            font-weight: 600;
           }
-          li.active::after {
+          .gooey-nav li.active::after {
             opacity: 1;
             transform: scale(1);
           }
-          li::after {
+          .gooey-nav li::after {
             content: "";
             position: absolute;
             inset: 0;
-            border-radius: 8px;
-            background: white;
+            border-radius: 9999px;
+            background: var(--foreground);
             opacity: 0;
             transform: scale(0);
             transition: all 0.3s ease;
             z-index: -1;
           }
+          .dark .gooey-nav li.active {
+            color: var(--background);
+          }
+          .dark .gooey-nav li::after {
+            background: var(--foreground);
+          }
         `}
       </style>
-      <div className="relative" ref={containerRef}>
-        <nav className="flex relative" style={{ transform: 'translate3d(0,0,0.01px)' }}>
+      <div className="gooey-container relative rounded-lg bg-muted p-2 overflow-hidden dark:bg-background" ref={containerRef}>
+        <nav className="gooey-nav flex relative" style={{ transform: 'translate3d(0,0,0.01px)' }}>
           <ul
             ref={navRef}
-            className="flex gap-8 list-none p-0 px-4 m-0 relative z-[3]"
-            style={{
-              color: 'white',
-              textShadow: '0 1px 1px hsl(205deg 30% 10% / 0.2)'
-            }}
+            className="flex gap-4 list-none p-0 px-4 m-0 relative z-[3] flex-wrap justify-center"
           >
             {items.map((item, index) => (
               <li
                 key={index}
-                className={`rounded-full relative cursor-pointer transition-[background-color_color_box-shadow] duration-300 ease shadow-[0_0_0.5px_1.5px_transparent] text-white ${
+                className={`rounded-full relative cursor-pointer transition-[background-color_color_box-shadow] duration-300 ease shadow-[0_0_0.5px_1.5px_transparent] text-foreground ${
                   activeIndex === index ? 'active' : ''
                 }`}
               >
                 <a
-                  href={item.href}
+                  href={item.href ?? '#'}
                   onClick={e => handleClick(e, index)}
                   onKeyDown={e => handleKeyDown(e, index)}
-                  className="outline-none py-[0.6em] px-[1em] inline-block"
+                  className="outline-none py-[0.6em] px-[1em] inline-block select-none"
                 >
                   {item.label}
                 </a>
@@ -316,8 +344,8 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
             ))}
           </ul>
         </nav>
-        <span className="effect filter" ref={filterRef} />
-        <span className="effect text" ref={textRef} />
+        <span className="gooey-effect filter" ref={filterRef} />
+        <span className="gooey-effect text" ref={textRef} />
       </div>
     </>
   );

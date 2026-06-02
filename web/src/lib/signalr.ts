@@ -4,13 +4,14 @@ import type { GameStateResponse } from './api'
 const GAME_EVENTS = [
   'RoomCreated',
   'PlayerJoined',
-  'VoteCast',
+  'PlayerVoted',
   'VotesRevealed',
   'VotesReset',
   'PlayerLeft',
 ] as const
 
-export type GameEventHandler = (state: GameStateResponse) => void
+export type GameEventName = typeof GAME_EVENTS[number]
+export type GameEventHandler = (event: GameEventName, state: GameStateResponse) => void
 
 export function createConnection(): HubConnection {
   return new HubConnectionBuilder()
@@ -26,13 +27,13 @@ export function registerGameStateHandlers(
 ): void {
   for (const event of GAME_EVENTS) {
     connection.on(event, (payload: GameStateResponse) => {
-      handler(payload)
+      handler(event, payload)
     })
   }
 }
 
-export async function joinRoomGroup(connection: HubConnection, roomId: number): Promise<void> {
-  await connection.invoke('JoinRoom', roomId.toString())
+export async function joinRoomGroup(connection: HubConnection, roomId: number, playerName: string): Promise<void> {
+  await connection.invoke('JoinRoom', roomId.toString(), playerName)
 }
 
 export async function leaveRoomGroup(connection: HubConnection, roomId: number): Promise<void> {

@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { toast } from 'sonner'
 import type { GameStateResponse } from '../lib/api'
 import * as api from '../lib/api'
 import {
@@ -55,6 +56,7 @@ export const useGameStore = create<GameState & GameActions>((set, get) => ({
   updateGameState: (payload) => set((state) => applyGameState(state, payload)),
 
   connect: async (roomId) => {
+    set({ currentPlayerName: localStorage.getItem('playerName') ?? '' })
     const existing = get().connection
     if (existing) {
       try { await existing.stop() } catch { /* ignore */ }
@@ -63,8 +65,32 @@ export const useGameStore = create<GameState & GameActions>((set, get) => ({
     set({ connectionStatus: 'connecting' })
 
     const connection = createConnection()
-    registerGameStateHandlers(connection, (payload) => {
+    registerGameStateHandlers(connection, (event, payload) => {
+      const prevPlayers = get().players
       get().updateGameState(payload)
+
+      if (event === 'PlayerJoined') {
+        const newPlayers = Object.keys(payload.players).filter(n => !(n in prevPlayers))
+        if (newPlayers.length > 0 && newPlayers[0] !== get().currentPlayerName) {
+          toast.info(`${newPlayers[0]} joined`)
+        }
+      } else if (event === 'PlayerLeft') {
+        const leftPlayers = Object.keys(prevPlayers).filter(n => !(n in payload.players))
+        if (leftPlayers.length > 0) {
+          toast.info(`${leftPlayers[0]} left`)
+        }
+      } else if (event === 'PlayerVoted') {
+        const voted = Object.keys(payload.players).filter(
+          n => prevPlayers[n] === null && payload.players[n] !== null
+        )
+        if (voted.length > 0) {
+          toast.info(`${voted[0]} voted`)
+        }
+      } else if (event === 'VotesRevealed') {
+        toast.info('Votes revealed')
+      } else if (event === 'VotesReset') {
+        toast.info('Votes reset')
+      }
     })
 
     connection.onreconnecting(() => set({ connectionStatus: 'connecting' }))
@@ -72,7 +98,7 @@ export const useGameStore = create<GameState & GameActions>((set, get) => ({
     connection.onclose(() => set({ connectionStatus: 'disconnected' }))
 
     await connection.start()
-    await joinRoomGroup(connection, roomId)
+    await joinRoomGroup(connection, roomId, get().currentPlayerName)
 
     set({ connection, connectionStatus: 'connected' })
 

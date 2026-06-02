@@ -8,9 +8,15 @@ function HomeRoute() {
   return <HomePage key={location.key} />
 }
 
-function JoinRoute() {
+function JoinOrGameRoute() {
   const location = useLocation()
   const { roomId } = useParams<{ roomId: string }>()
+  const storedName = localStorage.getItem('playerName')
+
+  if (storedName && roomId && /^\d{4}$/.test(roomId)) {
+    return <GameRoom key={location.key} />
+  }
+
   return <HomePage key={location.key} defaultTab="join" roomId={roomId} />
 }
 
@@ -19,8 +25,7 @@ function App() {
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<HomeRoute />} />
-        <Route path="/:roomId" element={<JoinRoute />} />
-        <Route path="/room/:roomId" element={<GameRoom />} />
+        <Route path="/:roomId" element={<JoinOrGameRoute />} />
       </Route>
     </Routes>
   )

@@ -8,6 +8,7 @@ public static class Bootstrap
     public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
         services.AddSignalR();
+        services.AddSingleton<PlayerConnectionTracker>();
         services.AddSingleton<PokerHubEventHandler>();
 
         return services;
