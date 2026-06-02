@@ -27,7 +27,17 @@ export default function GameRoom() {
       navigate('/')
       return
     }
-    connect(id)
+    connect(id).then(() => {
+      const { currentPlayerName, players } = useGameStore.getState()
+      if (currentPlayerName && !(currentPlayerName in players)) {
+        localStorage.removeItem('playerName')
+        disconnect()
+        navigate(`/${roomId}`)
+      }
+    }).catch(() => {
+      toast.error('Failed to connect')
+      navigate('/')
+    })
 
     return () => {
       disconnect()
@@ -91,16 +101,21 @@ export default function GameRoom() {
             </div>
           )}
 
-          <div className="flex gap-3">
-            {!revealed && (
-              <Button className="flex-1" onClick={() => useGameStore.getState().revealVotes()}>
-                Reveal
-              </Button>
-            )}
-            <Button className="flex-1" variant="outline" onClick={() => useGameStore.getState().resetVotes()}>
-              Reset
-            </Button>
-          </div>
+          {(() => {
+            const hasVotes = Object.values(players).some(v => v !== null)
+            return (
+              <div className="flex gap-3">
+                {!revealed && (
+                  <Button className="flex-1" disabled={!hasVotes} onClick={() => useGameStore.getState().revealVotes()}>
+                    Reveal
+                  </Button>
+                )}
+                <Button className="flex-1" variant="outline" disabled={!hasVotes} onClick={() => useGameStore.getState().resetVotes()}>
+                  Reset
+                </Button>
+              </div>
+            )
+          })()}
         </CardContent>
       </Card>
     </div>
