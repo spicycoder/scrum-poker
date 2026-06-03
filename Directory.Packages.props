@@ -18,7 +18,7 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.15.1" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.1" />
     <PackageVersion Include="Scalar.AspNetCore" Version="2.14.14" />
-    <PackageVersion Include="Swashbuckle.AspNetCore" Version="10.2.0" />
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="10.2.1" />
     <PackageVersion Include="Swashbuckle.AspNetCore.ReDoc" Version="10.2.0" />
     <PackageVersion Include="WolverineFx" Version="6.2.2" />
     <PackageVersion Include="WolverineFx.RuntimeCompilation" Version="6.2.2" />
