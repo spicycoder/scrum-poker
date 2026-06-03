@@ -20,7 +20,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddApplication(typeof(PokerHub).Assembly);
-builder.Services.AddInfrastructure();
+builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("redis"));
 builder.Services.AddPersistence();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

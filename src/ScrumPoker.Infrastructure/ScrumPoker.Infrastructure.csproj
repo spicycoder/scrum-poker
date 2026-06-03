@@ -8,4 +8,8 @@
     <ProjectReference Include="..\ScrumPoker.Domain\ScrumPoker.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.StackExchangeRedis" />
+  </ItemGroup>
+
 </Project>

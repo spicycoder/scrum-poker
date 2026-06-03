@@ -5,13 +5,19 @@ namespace ScrumPoker.Infrastructure;
 
 public static class Bootstrap
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, string? redisConnectionString = null)
     {
-        services.AddSignalR(options =>
+        var signalR = services.AddSignalR(options =>
         {
             options.ClientTimeoutInterval = TimeSpan.FromSeconds(5);
             options.KeepAliveInterval = TimeSpan.FromSeconds(2);
         });
+
+        if (!string.IsNullOrEmpty(redisConnectionString))
+        {
+            signalR.AddStackExchangeRedis(redisConnectionString);
+        }
+
         services.AddSingleton<PlayerConnectionTracker>();
         services.AddSingleton<PokerHubEventHandler>();
 

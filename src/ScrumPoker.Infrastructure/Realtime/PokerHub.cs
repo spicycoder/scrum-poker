@@ -7,15 +7,15 @@ public sealed class PokerHub(PlayerConnectionTracker tracker) : Hub
     private const string RoomIdKey = "roomId";
     private const string PlayerNameKey = "playerName";
 
-    public Task JoinRoom(string roomId, string playerName)
+    public async Task JoinRoom(string roomId, string playerName)
     {
         if (int.TryParse(roomId, out var id))
         {
             Context.Items[RoomIdKey] = id;
             Context.Items[PlayerNameKey] = playerName;
-            tracker.Join(id, playerName, Context.ConnectionId);
+            await tracker.Join(id, playerName, Context.ConnectionId);
         }
-        return Groups.AddToGroupAsync(Context.ConnectionId, roomId);
+        await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
     }
 
     public Task LeaveRoom(string roomId)
