@@ -15,8 +15,6 @@ spec:
         app.kubernetes.io/component: "scrumpoker-api"
         app.kubernetes.io/instance: "{{ .Release.Name }}"
     spec:
-      imagePullSecrets:
-        - name: ghcr-pull-secret
       containers:
         - image: "{{ .Values.parameters.scrumpoker_api.scrumpoker_api_image }}"
           name: "scrumpoker-api"
