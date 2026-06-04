@@ -11,11 +11,12 @@ export function useGameHub(
 ) {
   const navigate = useNavigate()
   const stateRef = useRef(onStateUpdate)
-  stateRef.current = onStateUpdate
   const resetRef = useRef(onVotesReset)
-  resetRef.current = onVotesReset
   const navRef = useRef(navigate)
-  navRef.current = navigate
+
+  useEffect(() => { stateRef.current = onStateUpdate })
+  useEffect(() => { resetRef.current = onVotesReset })
+  useEffect(() => { navRef.current = navigate })
 
   useEffect(() => {
     if (!roomId || !playerName) return

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, startTransition } from 'react';
 
 export interface GooeyNavItem {
   label: string;
@@ -41,22 +41,26 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
 
   useEffect(() => {
     if (activeIndexProp !== undefined) {
-      setInternalIndex(activeIndexProp);
+      startTransition(() => {
+        setInternalIndex(activeIndexProp);
+      })
     }
   }, [activeIndexProp]);
 
+  // eslint-disable-next-line react-hooks/purity
   const noise = (n = 1) => n / 2 - Math.random() * n;
   const getXY = (distance: number, pointIndex: number, totalPoints: number): [number, number] => {
     const angle = ((360 + noise(8)) / totalPoints) * pointIndex * (Math.PI / 180);
     return [distance * Math.cos(angle), distance * Math.sin(angle)];
   };
   const createParticle = (i: number, t: number, d: [number, number], r: number) => {
-    let rotate = noise(r / 10);
+    const rotate = noise(r / 10);
     return {
       start: getXY(d[0], particleCount - i, particleCount),
       end: getXY(d[1] + noise(7), particleCount - i, particleCount),
       time: t,
       scale: 1 + noise(0.2),
+      // eslint-disable-next-line react-hooks/purity
       color: colors[Math.floor(Math.random() * colors.length)],
       rotate: rotate > 0 ? (rotate + r / 20) * 10 : (rotate - r / 20) * 10
     };
@@ -91,7 +95,7 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
         setTimeout(() => {
           try {
             element.removeChild(particle);
-          } catch {}
+          } catch { /* empty */ }
         }, t);
       }, 30);
     }

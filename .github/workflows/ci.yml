@@ -17,6 +17,9 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
+      - name: Update Aspire workload
+        run: dotnet workload install aspire
+
       - name: Restore tools
         run: dotnet tool restore
 

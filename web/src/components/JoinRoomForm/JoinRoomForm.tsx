@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, startTransition } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card, CardContent } from '../ui/card'
 import { Input } from '../ui/input'
@@ -23,15 +23,19 @@ export default function JoinRoomForm({ roomId }: JoinRoomFormProps) {
 
   useEffect(() => {
     if (otp.length !== 4) {
-      setRoomState(null)
-      setJoinError(null)
+      startTransition(() => {
+        setRoomState(null)
+        setJoinError(null)
+      })
       return
     }
 
     const id = parseInt(otp, 10)
     const thisFetch = ++fetchId.current
 
-    setValidating(true)
+    startTransition(() => {
+      setValidating(true)
+    })
     getGameState(id)
       .then((state) => {
         if (thisFetch !== fetchId.current) return
