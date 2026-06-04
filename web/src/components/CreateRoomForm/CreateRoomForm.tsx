@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { Hash, Shirt } from 'lucide-react'
 import { Card, CardContent } from '../ui/card'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group'
-import { toast } from 'sonner'
-import { createRoom } from '../../lib/api'
+
+const STORAGE_KEY_NAME = 'playerName'
+const STORAGE_KEY_SERIES = 'voteSeries'
 
 type VoteSeries = 'fib' | 'tshirt'
 
@@ -20,44 +20,24 @@ const seriesLabels: Record<VoteSeries, string> = {
   tshirt: 'XS, S, M, L, XL, ?',
 }
 
-function getStoredSeries(): VoteSeries {
-  const stored = localStorage.getItem('voteSeries')
-  if (stored === 'tshirt') return 'tshirt'
-  return 'fib'
-}
-
-function getStoredName(): string {
-  return localStorage.getItem('playerName') ?? ''
-}
-
 export default function CreateRoomForm() {
-  const navigate = useNavigate()
-  const [name, setName] = useState(getStoredName)
-  const [series, setSeries] = useState<VoteSeries>(getStoredSeries)
-  const [loading, setLoading] = useState(false)
+  const [name, setName] = useState(() => localStorage.getItem(STORAGE_KEY_NAME) ?? '')
+  const [series, setSeries] = useState<VoteSeries>(() => {
+    const stored = localStorage.getItem(STORAGE_KEY_SERIES)
+    return stored === 'tshirt' ? 'tshirt' : 'fib'
+  })
 
   useEffect(() => {
-    localStorage.setItem('voteSeries', series)
+    localStorage.setItem(STORAGE_KEY_SERIES, series)
   }, [series])
 
-  async function handleCreate() {
+  function handleCreate() {
     const trimmed = name.trim()
     if (!trimmed) return
-
-    localStorage.setItem('playerName', trimmed)
-    setLoading(true)
-    try {
-      const roomId = await createRoom(trimmed, seriesValues[series])
-      navigate(`/${roomId}`)
-    } catch (err) {
-      console.error('Failed to create room:', err)
-      toast.error('Failed to create room')
-    } finally {
-      setLoading(false)
-    }
+    localStorage.setItem(STORAGE_KEY_NAME, trimmed)
   }
 
-  const canSubmit = name.trim().length > 0 && !loading
+  const canSubmit = name.trim().length > 0
 
   return (
     <Card>
@@ -97,7 +77,7 @@ export default function CreateRoomForm() {
             disabled={!canSubmit}
             onClick={handleCreate}
           >
-            {loading ? 'Creating...' : 'Create'}
+            Create
           </Button>
           <Button
             variant="outline"
