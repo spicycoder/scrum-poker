@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: ['**']
   pull_request:
     branches: [main]
 
@@ -60,3 +60,60 @@ jobs:
             -f "files[coverage.json][content]=$(cat coverage.json)" \
             -f "files[unit.json][content]=$(cat unit.json)" \
             -f "files[integration.json][content]=$(cat integration.json)"
+
+  publish:
+    name: Publish containers
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push'
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Log in to ghcr.io
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build API image
+        run: |
+          dotnet publish src/ScrumPoker.API \
+            /t:PublishContainer \
+            -c Release \
+            -p ContainerImageName=ghcr.io/spicycoder/scrumpoker-api \
+            -p ContainerImageTag=${{ github.sha }} \
+            -p ContainerRuntimeIdentifier=linux-x64
+
+      - name: Tag and push API image
+        run: |
+          docker tag ghcr.io/spicycoder/scrumpoker-api:${{ github.sha }} ghcr.io/spicycoder/scrumpoker-api:${{ github.ref_name }}
+          docker push ghcr.io/spicycoder/scrumpoker-api:${{ github.sha }}
+          docker push ghcr.io/spicycoder/scrumpoker-api:${{ github.ref_name }}
+          if [ '${{ github.ref_name }}' = 'main' ]; then
+            docker tag ghcr.io/spicycoder/scrumpoker-api:${{ github.sha }} ghcr.io/spicycoder/scrumpoker-api:latest
+            docker push ghcr.io/spicycoder/scrumpoker-api:latest
+          fi
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push web image
+        uses: docker/build-push-action@v6
+        with:
+          context: web
+          file: k8s/web.Dockerfile
+          push: true
+          tags: |
+            ghcr.io/spicycoder/scrumpoker-web:${{ github.sha }}
+            ghcr.io/spicycoder/scrumpoker-web:${{ github.ref_name }}
+            ${{ github.ref_name == 'main' && 'ghcr.io/spicycoder/scrumpoker-web:latest' || '' }}

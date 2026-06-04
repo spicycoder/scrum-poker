@@ -487,3 +487,5 @@ $RECYCLE.BIN/
 # AI
 graphify-out/
 .ai/
+
+# K8s — secrets are managed externally via kubectl, not in values files

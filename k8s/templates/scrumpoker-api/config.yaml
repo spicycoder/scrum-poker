@@ -1,0 +1,18 @@
+---
+apiVersion: "v1"
+kind: "ConfigMap"
+metadata:
+  name: "scrumpoker-api-config"
+  labels:
+    app.kubernetes.io/name: "{{ .Chart.Name }}"
+    app.kubernetes.io/component: "scrumpoker-api"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+data:
+  OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "{{ .Values.config.scrumpoker_api.OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY }}"
+  ASPNETCORE_FORWARDEDHEADERS_ENABLED: "{{ .Values.config.scrumpoker_api.ASPNETCORE_FORWARDEDHEADERS_ENABLED }}"
+  HTTP_PORTS: "{{ .Values.parameters.scrumpoker_api.port_http | int | toString }}"
+  REDIS_HOST: "{{ .Values.config.scrumpoker_api.REDIS_HOST }}"
+  REDIS_PORT: "{{ .Values.config.scrumpoker_api.REDIS_PORT }}"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "{{ .Values.config.scrumpoker_api.OTEL_EXPORTER_OTLP_ENDPOINT }}"
+  OTEL_EXPORTER_OTLP_PROTOCOL: "{{ .Values.config.scrumpoker_api.OTEL_EXPORTER_OTLP_PROTOCOL }}"
+  OTEL_SERVICE_NAME: "{{ .Values.config.scrumpoker_api.OTEL_SERVICE_NAME }}"

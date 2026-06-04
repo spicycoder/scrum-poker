@@ -1,0 +1,33 @@
+parameters:
+  scrumpoker_api:
+    port_http: 8080
+    scrumpoker_api_image: "ghcr.io/spicycoder/scrumpoker-api:latest"
+    replicas: 1
+  web:
+    web_image: "ghcr.io/spicycoder/scrumpoker-web:latest"
+secrets:
+  # K8s secrets created manually via kubectl before deploying — never stored here.
+  # See docs/deployment.md for kubectl create secret commands.
+  existingRedisSecret: "scrum-poker-redis-secret"
+  existingApiSecret: "scrum-poker-api-secret"
+config:
+  scrumpoker_api:
+    OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
+    ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+    # Overridden by config.yaml template — kept here for documentation
+    HTTP_PORTS: "8080"
+    REDIS_HOST: "redis-service"
+    REDIS_PORT: "6379"
+    OTEL_EXPORTER_OTLP_ENDPOINT: "http://k8s-dashboard-service:18889"
+    OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+    OTEL_SERVICE_NAME: "scrumpoker-api"
+  web:
+    NODE_ENV: "production"
+    PORT: "5000"
+    SCRUMPOKER_API_HTTP: ""
+    services__scrumpoker_api__http__0: ""
+    SCRUMPOKER_API_HTTPS: ""
+    YARP_ENABLE_STATIC_FILES: "true"
+    OTEL_EXPORTER_OTLP_ENDPOINT: "http://k8s-dashboard-service:18889"
+    OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+    OTEL_SERVICE_NAME: "web"
