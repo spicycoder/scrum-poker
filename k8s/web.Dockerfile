@@ -6,8 +6,6 @@ RUN --mount=type=cache,target=/pnpm/store pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm run build
 
-FROM mcr.microsoft.com/dotnet/nightly/yarp:2.3-preview AS runtime
-WORKDIR /app
-COPY --from=build /app/dist /app/wwwroot
-COPY appsettings.json .
-ENTRYPOINT ["dotnet","/app/yarp.dll"]
+FROM nginx:alpine AS runtime
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf

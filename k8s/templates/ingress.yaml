@@ -18,6 +18,13 @@ spec:
   rules:
     - http:
         paths:
+          - path: /api
+            pathType: "Prefix"
+            backend:
+              service:
+                name: "scrumpoker-api-service"
+                port:
+                  number: 8080
           - path: /
             pathType: "Prefix"
             backend:
