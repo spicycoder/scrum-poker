@@ -187,6 +187,14 @@ minikube tunnel   # keep running in a separate terminal
 
 App available at: `http://localhost`
 
+### One-command local deploy
+
+```powershell
+./deploy.ps1 -RedisPassword "devpass"
+```
+
+Builds images, loads into minikube, creates secrets, deploys/upgrades Helm chart. Repeat for code changes — handles full loop.
+
 ### Upgrade after code changes
 
 Rebuild + push images, then:

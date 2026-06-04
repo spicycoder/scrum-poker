@@ -9,4 +9,5 @@ RUN pnpm run build
 FROM mcr.microsoft.com/dotnet/nightly/yarp:2.3-preview AS runtime
 WORKDIR /app
 COPY --from=build /app/dist /app/wwwroot
+COPY appsettings.json .
 ENTRYPOINT ["dotnet","/app/yarp.dll"]
