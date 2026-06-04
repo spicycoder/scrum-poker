@@ -9,7 +9,7 @@ public static class Bootstrap
     {
         var signalR = services.AddSignalR(options =>
         {
-            options.ClientTimeoutInterval = TimeSpan.FromSeconds(5);
+            options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
             options.KeepAliveInterval = TimeSpan.FromSeconds(2);
         });
 
