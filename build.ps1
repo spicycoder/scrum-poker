@@ -1,23 +1,39 @@
+param(
+  [switch]$Images
+)
+
 $ErrorActionPreference = 'Stop'
 
-dotnet clean -c Release ./ScrumPoker.slnx
-dotnet tool restore
-dotnet restore ./ScrumPoker.slnx
-dotnet build --no-restore -c Release ./ScrumPoker.slnx
+if ($Images) {
+  # Build container images — skip tests
+  $containerCmd = if (Get-Command docker -ErrorAction SilentlyContinue) { "docker" } else { "podman" }
 
-if (Test-Path ./.coverage) { Remove-Item ./.coverage -Recurse -Force }
-New-Item -ItemType Directory -Path ./.coverage | Out-Null
+  dotnet publish src/ScrumPoker.API /t:PublishContainer -c Release `
+    -p ContainerRepository=ghcr.io/spicycoder/scrumpoker-api `
+    -p ContainerImageTag=latest `
+    -p ContainerRuntimeIdentifier=linux-x64
 
-# dotnet-coverage wraps the entire test run and attaches the profiler to
-# child processes spawned by Aspire.Hosting.Testing (API, Redis-side .NET, etc.),
-# so integration tests contribute to coverage too.
-dotnet dotnet-coverage collect `
-    --settings ./coverage.runsettings `
-    --output ./.coverage/coverage.cobertura.xml `
-    --output-format cobertura `
-    "dotnet test --no-build -c Release ./ScrumPoker.slnx"
+  & $containerCmd build -f k8s/web.Dockerfile -t ghcr.io/spicycoder/scrumpoker-web:latest web/
 
-dotnet reportgenerator `
-    "-reports:./.coverage/coverage.cobertura.xml" `
-    "-targetdir:./.coverage" `
-    -reporttypes:"Html_Dark;Badges"
+  Write-Host "Images built: ghcr.io/spicycoder/scrumpoker-api:latest, ghcr.io/spicycoder/scrumpoker-web:latest" -ForegroundColor Green
+} else {
+  # .NET build + test + coverage
+  dotnet clean -c Release ./ScrumPoker.slnx
+  dotnet tool restore
+  dotnet restore ./ScrumPoker.slnx
+  dotnet build --no-restore -c Release ./ScrumPoker.slnx
+
+  if (Test-Path ./.coverage) { Remove-Item ./.coverage -Recurse -Force }
+  New-Item -ItemType Directory -Path ./.coverage | Out-Null
+
+  dotnet dotnet-coverage collect `
+      --settings ./coverage.runsettings `
+      --output ./.coverage/coverage.cobertura.xml `
+      --output-format cobertura `
+      "dotnet test --no-build -c Release ./ScrumPoker.slnx"
+
+  dotnet reportgenerator `
+      "-reports:./.coverage/coverage.cobertura.xml" `
+      "-targetdir:./.coverage" `
+      -reporttypes:"Html_Dark;Badges"
+}

@@ -32,14 +32,14 @@ spec:
             httpGet:
               path: /alive
               port: {{ .Values.parameters.scrumpoker_api.port_http | int }}
-            initialDelaySeconds: 5
+            initialDelaySeconds: 15
             periodSeconds: 10
             failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /health
               port: {{ .Values.parameters.scrumpoker_api.port_http | int }}
-            initialDelaySeconds: 5
+            initialDelaySeconds: 15
             periodSeconds: 10
             failureThreshold: 3
   selector:

@@ -1,14 +1,11 @@
 param(
   [Parameter(Mandatory)]
   [string]$RedisPassword,
-  [switch]$Build
+  [switch]$Pull  # pull from ghcr instead of using local images
 )
 
 $ErrorActionPreference = "Stop"
 $PSNativeCommandErrorActionPreference = $true
-
-$containerCmd = if (Get-Command docker -ErrorAction SilentlyContinue) { "docker" } else { "podman" }
-Write-Host "Using $containerCmd for container builds" -ForegroundColor DarkGray
 
 $ns = "scrum-poker"
 $apiImg = "ghcr.io/spicycoder/scrumpoker-api:latest"
@@ -29,7 +26,7 @@ if (-not $ingressPods) {
 # Namespace
 kubectl create namespace $ns --dry-run=client -o yaml | kubectl apply -f -
 
-# Secrets (idempotent — apply, not delete+create)
+# Secrets (idempotent)
 kubectl create secret generic scrum-poker-redis-secret `
   --from-literal=REDIS_PASSWORD="$RedisPassword" `
   --dry-run=client -o yaml -n $ns | kubectl apply -f -
@@ -40,22 +37,13 @@ kubectl create secret generic scrum-poker-api-secret `
   --from-literal=REDIS_URI="redis://:$RedisPassword@redis-service:6379" `
   --dry-run=client -o yaml -n $ns | kubectl apply -f -
 
-# Build or pull images
-if ($Build) {
-  Write-Host "`nBuilding API image..." -ForegroundColor Cyan
-  dotnet publish src/ScrumPoker.API /t:PublishContainer -c Release `
-    -p ContainerImageName=ghcr.io/spicycoder/scrumpoker-api `
-    -p ContainerImageTag=latest `
-    -p ContainerRuntimeIdentifier=linux-x64
-
-  Write-Host "`nBuilding web image..." -ForegroundColor Cyan
-  & $containerCmd build -f k8s/web.Dockerfile -t ghcr.io/spicycoder/scrumpoker-web:latest web/
-
-  Write-Host "`nLoading images into minikube..." -ForegroundColor Cyan
+# Load images into minikube (default: local images)
+if ($Pull) {
+  Write-Host "`nPulling images from ghcr.io..." -ForegroundColor Cyan
+} else {
+  Write-Host "`nLoading local images into minikube..." -ForegroundColor Cyan
   minikube image load $apiImg
   minikube image load $webImg
-} else {
-  Write-Host "`nPulling images from ghcr.io..." -ForegroundColor Cyan
 }
 
 # Deploy
