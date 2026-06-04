@@ -1,6 +1,6 @@
 using ScrumPoker.Domain.Rooms;
 
-namespace ScrumPoker.Application.Abstractions;
+namespace ScrumPoker.Domain.Abstractions;
 
 public interface IRoomRepository
 {

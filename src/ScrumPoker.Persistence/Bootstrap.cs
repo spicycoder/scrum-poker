@@ -1,5 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
-using ScrumPoker.Application.Abstractions;
+using ScrumPoker.Domain.Abstractions;
 
 namespace ScrumPoker.Persistence;
 

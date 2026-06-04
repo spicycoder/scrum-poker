@@ -1,6 +1,6 @@
 # Endpoints
 
-All POST endpoints return status code only — no response body. SignalR pushes full game state after every action.
+All POST endpoints return status code only — no response body. `GET /api/rooms/{id}` returns the full game state. SignalR pushes full game state after every action.
 
 ## Create Room
 
@@ -81,11 +81,12 @@ sequenceDiagram
 ```json
 {
   "gameId": 1234,
-  "players": [
-    { "name": "Alice", "value": "5" },
-    { "name": "Bob", "value": null }
-  ],
-  "revealed": false
+  "players": {
+    "Alice": "5",
+    "Bob": null
+  },
+  "revealed": false,
+  "cardSet": ["0", "0.5", "1", "2", "3", "5", "8", "13", "21", "?"]
 }
 ```
 
@@ -207,7 +208,7 @@ sequenceDiagram
 
 | Status Code | Description |
 |-------------|-------------|
-| 201 | Vote recorded. If all players have voted, `Revealed` is automatically set to `true`. |
+| 201 | Vote recorded |
 | 400 | Validation failed |
 | 404 | Room not found or player not in room |
 
@@ -320,11 +321,16 @@ sequenceDiagram
 
 ### Server → Client Events
 
-| Event | Payload | Triggered by |
-|-------|---------|-------------|
-| RoomCreated | `{ RoomId, PlayerName }` | POST /api/rooms |
-| PlayerJoined | `{ RoomId, PlayerName }` | POST /api/rooms/{id}/join |
-| VoteCast | `{ RoomId, PlayerName, Value }` | POST /api/rooms/{id}/vote |
+All events carry the full game state payload (`{ gameId: int, players: Record<string, string | null>, revealed: boolean, cardSet: string[] }`).
+
+| Event | Triggered by |
+|-------|-------------|
+| RoomCreated | POST /api/rooms |
+| PlayerJoined | POST /api/rooms/{id}/join |
+| PlayerVoted | POST /api/rooms/{id}/vote |
+| VotesRevealed | POST /api/rooms/{id}/reveal |
+| VotesReset | POST /api/rooms/{id}/reset |
+| PlayerLeft | POST /api/rooms/{id}/leave |
 
 ---
 

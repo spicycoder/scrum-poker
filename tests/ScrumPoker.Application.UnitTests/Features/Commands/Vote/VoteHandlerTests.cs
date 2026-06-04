@@ -1,5 +1,5 @@
 using NSubstitute;
-using ScrumPoker.Application.Abstractions;
+using ScrumPoker.Domain.Abstractions;
 using ScrumPoker.Domain.Rooms;
 using ScrumPoker.Domain.Rooms.Events;
 using Wolverine;

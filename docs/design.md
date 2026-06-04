@@ -7,20 +7,12 @@
 flowchart TD
     Client
 
-    Client -->|HTTPS| LB[Load Balancer]
+    Client -->|HTTPS| API["API (single instance)"]
 
-    LB --> API1 & API2 & APIN
-
-    subgraph Instances["Backend Instances"]
-        API1["Instance 1"]
-        API2["Instance 2"]
-        APIN["Instance N"]
-    end
-
-    Instances <-->|read / write| Redis[(Redis)]
-    Instances <-->|backplane| Redis
-    Redis -->|fan-out| Instances
-    Instances -->|SignalR push| Client
+    API <-->|read / write| Redis[(Redis)]
+    API <-->|backplane| Redis
+    Redis -->|fan-out| API
+    API -->|SignalR push| Client
 ```
 
 ## Low Level Design
@@ -30,8 +22,7 @@ flowchart TD
 flowchart TD
     Client
 
-    Client -->|HTTP request| API
-    API -->|status code only| Client
+    Client -->|HTTPS + GET body| API
 
     API -->|Wolverine dispatch| Application
 

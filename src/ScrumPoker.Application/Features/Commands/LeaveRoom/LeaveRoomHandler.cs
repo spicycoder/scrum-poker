@@ -1,4 +1,4 @@
-using ScrumPoker.Application.Abstractions;
+using ScrumPoker.Domain.Abstractions;
 using Wolverine;
 
 namespace ScrumPoker.Application.Features.Commands.LeaveRoom;

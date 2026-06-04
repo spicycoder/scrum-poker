@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
-using ScrumPoker.Application.Abstractions;
+using ScrumPoker.Domain.Abstractions;
 using ScrumPoker.Domain.Rooms;
 using StackExchange.Redis;
 

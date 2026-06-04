@@ -7,7 +7,7 @@ Thanks for your interest in contributing to Scrum Poker!
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
 - [Docker](https://www.docker.com/) or [Podman](https://podman.io/) (for integration tests).
     > If using Podman, enable Docker compatibility.
-- [pnpm](https://pnpm.io/) (frontend, coming soon)
+- [pnpm](https://pnpm.io/) (frontend)
 
 ## Getting Started
 
@@ -17,7 +17,17 @@ cd scrum-poker
 ./build.ps1
 ```
 
-`build.ps1` restores tools, builds, runs all tests, and generates coverage reports to `./.coverage/`.
+`build.ps1` restores tools, builds the .NET backend, runs all tests, and generates coverage reports to `./.coverage/`.
+
+For frontend development:
+
+```bash
+cd web
+pnpm install
+pnpm run dev     # Vite dev server on localhost:5173
+pnpm run build   # typecheck + production build
+pnpm run lint    # ESLint
+```
 
 ### Architecture
 
@@ -43,9 +53,10 @@ cd scrum-poker
 1. Fork the repo
 2. Create a branch from `main`
 3. Make your changes
-4. Ensure `dotnet build` passes
-5. Ensure `dotnet test` passes
-6. Submit a PR
+4. Ensure `pnpm run build` and `pnpm run lint` pass in `web/`
+5. Ensure `dotnet build` passes
+6. Ensure `dotnet test` passes
+7. Submit a PR
 
 ### Commit Messages
 

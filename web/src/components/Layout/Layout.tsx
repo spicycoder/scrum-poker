@@ -1,7 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import DotField from '../DotField/DotField'
 import Navbar from '../Navbar/Navbar'
-import { Toaster } from '../ui/sonner'
 
 export default function Layout() {
   return (
@@ -26,7 +25,6 @@ export default function Layout() {
       <main className="flex flex-col items-center pt-20 px-4">
         <Outlet />
       </main>
-      <Toaster position="top-center" className="z-50" />
     </div>
   )
 }

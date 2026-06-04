@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Net.Http.Json;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
 using ScrumPoker.API.Features.CreateRoom;
 using ScrumPoker.API.Features.JoinRoom;
@@ -36,7 +37,7 @@ public sealed class SignalRTests
         connection.On<GameStateResponse>("PlayerJoined", @event => received.TrySetResult(@event));
 
         await connection.StartAsync(ct);
-        await connection.InvokeAsync("JoinRoom", roomId.ToString(CultureInfo.InvariantCulture), (string?)null, ct);
+        await connection.InvokeAsync("JoinRoom", roomId.ToString(CultureInfo.InvariantCulture), "Alice", ct);
 
         await _fixture.HttpClient.PostAsJsonAsync(
             $"/api/rooms/{roomId}/join",
@@ -61,7 +62,7 @@ public sealed class SignalRTests
         connection.On<GameStateResponse>("PlayerVoted", @event => received.TrySetResult(@event));
 
         await connection.StartAsync(ct);
-        await connection.InvokeAsync("JoinRoom", roomId.ToString(CultureInfo.InvariantCulture), (string?)null, ct);
+        await connection.InvokeAsync("JoinRoom", roomId.ToString(CultureInfo.InvariantCulture), "Alice", ct);
 
         await _fixture.HttpClient.PostAsJsonAsync(
             $"/api/rooms/{roomId}/vote",
@@ -91,7 +92,7 @@ public sealed class SignalRTests
 
         await connection.StartAsync(ct);
         // Subscribe ONLY to room A. Event will fire in room B.
-        await connection.InvokeAsync("JoinRoom", roomAId.ToString(CultureInfo.InvariantCulture), (string?)null, ct);
+        await connection.InvokeAsync("JoinRoom", roomAId.ToString(CultureInfo.InvariantCulture), "Alice", ct);
 
         await _fixture.HttpClient.PostAsJsonAsync(
             $"/api/rooms/{roomBId}/join",
@@ -116,7 +117,7 @@ public sealed class SignalRTests
 
         await connection.StartAsync(ct);
         var roomKey = roomId.ToString(CultureInfo.InvariantCulture);
-        await connection.InvokeAsync("JoinRoom", roomKey, (string?)null, ct);
+        await connection.InvokeAsync("JoinRoom", roomKey, "Alice", ct);
         await connection.InvokeAsync("LeaveRoom", roomKey, ct);
 
         await _fixture.HttpClient.PostAsJsonAsync(
@@ -145,7 +146,7 @@ public sealed class SignalRTests
         connection.On<GameStateResponse>("VotesRevealed", @event => received.TrySetResult(@event));
 
         await connection.StartAsync(ct);
-        await connection.InvokeAsync("JoinRoom", roomId.ToString(CultureInfo.InvariantCulture), (string?)null, ct);
+        await connection.InvokeAsync("JoinRoom", roomId.ToString(CultureInfo.InvariantCulture), "Alice", ct);
 
         await _fixture.HttpClient.PostAsync($"/api/rooms/{roomId}/reveal", null, ct);
 
@@ -173,7 +174,7 @@ public sealed class SignalRTests
         connection.On<GameStateResponse>("VotesReset", @event => received.TrySetResult(@event));
 
         await connection.StartAsync(ct);
-        await connection.InvokeAsync("JoinRoom", roomId.ToString(CultureInfo.InvariantCulture), (string?)null, ct);
+        await connection.InvokeAsync("JoinRoom", roomId.ToString(CultureInfo.InvariantCulture), "Alice", ct);
 
         await _fixture.HttpClient.PostAsync($"/api/rooms/{roomId}/reset", null, ct);
 
@@ -200,7 +201,7 @@ public sealed class SignalRTests
         connection.On<GameStateResponse>("PlayerLeft", @event => received.TrySetResult(@event));
 
         await connection.StartAsync(ct);
-        await connection.InvokeAsync("JoinRoom", roomId.ToString(CultureInfo.InvariantCulture), (string?)null, ct);
+        await connection.InvokeAsync("JoinRoom", roomId.ToString(CultureInfo.InvariantCulture), "Alice", ct);
 
         await _fixture.HttpClient.PostAsJsonAsync($"/api/rooms/{roomId}/leave",
             new LeaveRoomRequest("Bob"), ct);
@@ -244,6 +245,36 @@ public sealed class SignalRTests
         gameState.GameId.ShouldBe(roomId);
         gameState.Players.ShouldContainKey("Alice");
         gameState.Players.ShouldNotContainKey("Bob");
+    }
+
+    [Fact]
+    public async Task JoinRoom_WithInvalidRoom_ThrowsHubException()
+    {
+        var ct = TestContext.Current.CancellationToken;
+
+        await using var connection = BuildHubConnection();
+        await connection.StartAsync(ct);
+
+        var ex = await Should.ThrowAsync<HubException>(async () =>
+            await connection.InvokeAsync("JoinRoom", "99999", "Nobody", ct));
+        ex.Message.ShouldContain("not found");
+    }
+
+    [Fact]
+    public async Task JoinRoom_WithWrongPlayer_ThrowsHubException()
+    {
+        var ct = TestContext.Current.CancellationToken;
+
+        var createResponse = await _fixture.HttpClient.PostAsJsonAsync("/api/rooms",
+            new CreateRoomRequest("Alice", ["0", "1"]), ct);
+        var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
+
+        await using var connection = BuildHubConnection();
+        await connection.StartAsync(ct);
+
+        var ex = await Should.ThrowAsync<HubException>(async () =>
+            await connection.InvokeAsync("JoinRoom", roomId.ToString(CultureInfo.InvariantCulture), "Eve", ct));
+        ex.Message.ShouldContain("not found");
     }
 
     private HubConnection BuildHubConnection()

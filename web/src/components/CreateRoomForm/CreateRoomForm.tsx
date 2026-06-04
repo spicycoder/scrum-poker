@@ -1,43 +1,52 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Hash, Shirt } from 'lucide-react'
 import { Card, CardContent } from '../ui/card'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group'
+import { createRoom } from '../../lib/api'
 
 const STORAGE_KEY_NAME = 'playerName'
 const STORAGE_KEY_SERIES = 'voteSeries'
 
 type VoteSeries = 'fib' | 'tshirt'
 
-const seriesValues: Record<VoteSeries, string[]> = {
+const cardSets: Record<VoteSeries, string[]> = {
   fib: ['0', '0.5', '1', '2', '3', '5', '8', '13', '21', '?'],
   tshirt: ['XS', 'S', 'M', 'L', 'XL', '?'],
 }
 
-const seriesLabels: Record<VoteSeries, string> = {
-  fib: '0, 0.5, 1, 2, 3, 5, 8, 13, 21, ?',
-  tshirt: 'XS, S, M, L, XL, ?',
-}
-
 export default function CreateRoomForm() {
+  const navigate = useNavigate()
   const [name, setName] = useState(() => localStorage.getItem(STORAGE_KEY_NAME) ?? '')
   const [series, setSeries] = useState<VoteSeries>(() => {
     const stored = localStorage.getItem(STORAGE_KEY_SERIES)
     return stored === 'tshirt' ? 'tshirt' : 'fib'
   })
+  const [creating, setCreating] = useState(false)
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY_SERIES, series)
   }, [series])
 
-  function handleCreate() {
+  async function handleCreate() {
     const trimmed = name.trim()
     if (!trimmed) return
+
     localStorage.setItem(STORAGE_KEY_NAME, trimmed)
+    setCreating(true)
+    try {
+      const roomId = await createRoom(trimmed, cardSets[series])
+      navigate(`/${roomId}`)
+    } catch (err) {
+      console.error('Failed to create room:', err)
+    } finally {
+      setCreating(false)
+    }
   }
 
-  const canSubmit = name.trim().length > 0
+  const canSubmit = name.trim().length > 0 && !creating
 
   return (
     <Card>
@@ -68,7 +77,7 @@ export default function CreateRoomForm() {
         </ToggleGroup>
 
         <p className="text-sm text-muted-foreground text-center">
-          {seriesLabels[series]}
+          {cardSets[series].join(', ')}
         </p>
 
         <div className="flex gap-3">
@@ -77,7 +86,7 @@ export default function CreateRoomForm() {
             disabled={!canSubmit}
             onClick={handleCreate}
           >
-            Create
+            {creating ? 'Creating...' : 'Create'}
           </Button>
           <Button
             variant="outline"

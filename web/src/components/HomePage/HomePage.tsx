@@ -4,11 +4,10 @@ import CreateRoomForm from '../CreateRoomForm'
 import JoinRoomForm from '../JoinRoomForm'
 
 interface HomePageProps {
-  defaultTab?: 'create' | 'join'
   roomId?: string
 }
 
-export default function HomePage({ defaultTab = 'create', roomId }: HomePageProps) {
+export default function HomePage({ roomId }: HomePageProps) {
   const navigate = useNavigate()
   const location = useLocation()
 

@@ -26,6 +26,28 @@ jobs:
       - name: Build
         run: dotnet build --no-restore -c Release ./ScrumPoker.slnx
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: web
+
+      - name: Build frontend
+        run: pnpm run build
+        working-directory: web
+
+      - name: Lint frontend
+        run: pnpm run lint
+        working-directory: web
+
       - name: Test with coverage
         run: |
           dotnet dotnet-coverage collect \

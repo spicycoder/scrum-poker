@@ -1,4 +1,4 @@
-using ScrumPoker.Application.Abstractions;
+using ScrumPoker.Domain.Abstractions;
 
 namespace ScrumPoker.Application.Features.Queries.GetGameState;
 
