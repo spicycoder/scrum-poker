@@ -27,4 +27,12 @@ public sealed class LivenessTests
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
+
+    [Fact]
+    public async Task Warmup_Should_Return_200()
+    {
+        var response = await _httpClient.PostAsync("/api/warmup", null, TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
 }

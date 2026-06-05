@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { UserCheck } from 'lucide-react'
+import { toast } from 'sonner'
 import { Card, CardContent } from '../ui/card'
 import { Button } from '../ui/button'
 import { Badge } from '../ui/badge'
@@ -8,6 +9,7 @@ import GooeyNav from '../GooeyNav/GooeyNav'
 import ShinyText from '../ShinyText/ShinyText'
 import { getGameState, castVote, revealVotes, resetVotes, ApiError, type GameStateResponse } from '../../lib/api'
 import { useGameHub } from '../../lib/signalr'
+import { useGameNotifications } from '../../hooks/useGameNotifications'
 
 export default function GameRoom() {
   const { roomId } = useParams<{ roomId: string }>()
@@ -26,6 +28,8 @@ export default function GameRoom() {
     setState,
     () => setActiveIndex(-1),
   )
+
+  useGameNotifications(state, playerName)
 
   useEffect(() => {
     if (!roomId) return
@@ -99,6 +103,7 @@ export default function GameRoom() {
 
   async function handleCopy() {
     await navigator.clipboard.writeText(`${window.location.origin}/join/${roomId}`)
+    toast('Link copied')
   }
 
   if (loading) {

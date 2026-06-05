@@ -1,0 +1,20 @@
+using Microsoft.AspNetCore.Mvc;
+using ScrumPoker.Application.Features.Commands.CreateRoom;
+using ScrumPoker.Application.Features.Queries.GetGameState;
+using ScrumPoker.Domain.Rooms;
+using Wolverine;
+
+namespace ScrumPoker.API.Controllers;
+
+[ApiController]
+[Route("api/warmup")]
+public sealed class WarmupController : ControllerBase
+{
+    [HttpPost]
+    public async Task<IActionResult> Warmup([FromServices] IMessageBus bus)
+    {
+        var room = await bus.InvokeAsync<Room>(new CreateRoomCommand("warmup", ["1", "2"]));
+        _ = await bus.InvokeAsync<GetGameStateResult>(new GetGameStateQuery(room.Id));
+        return Ok();
+    }
+}
