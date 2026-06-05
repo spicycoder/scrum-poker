@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import ShinyText from '../ShinyText/ShinyText'
+import Shuffle from '../Shuffle'
 import ThemeToggle from '../ThemeToggle/ThemeToggle'
 import { Spade } from 'lucide-react'
 
@@ -8,9 +8,20 @@ export default function Navbar() {
     <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-background/80 backdrop-blur-xl border-b border-border/40">
       <Link to="/" className="flex items-center gap-2">
         <Spade className="size-6 text-foreground" />
-        <ShinyText
+        <Shuffle
           text="Scrum Poker"
-          speed={3}
+          shuffleDirection="right"
+          duration={0.35}
+          animationMode="evenodd"
+          shuffleTimes={1}
+          ease="power3.out"
+          stagger={0.03}
+          threshold={0.1}
+          triggerOnce
+          triggerOnHover
+          respectReducedMotion
+          loop={false}
+          loopDelay={0}
           className="text-xl font-bold uppercase"
         />
       </Link>
