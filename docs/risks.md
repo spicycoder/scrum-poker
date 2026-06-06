@@ -204,17 +204,3 @@ Or even simpler for a start: just Uptime Kuma for health alerts + `kubectl logs`
 | 11 | Redis key TTL at scale | Memory pressure at scale | Low |
 | 12 | No production observability | Blind in production | Medium |
 | 13 | No rate limiting | Abuse possible | Low |
-
-| # | Risk | Impact | Priority |
-|---|------|--------|----------|
-| 1 | Room ID collision | Room overwrite (rare) | Low |
-| 2 | No graceful SignalR drain | Brief WS blip on deploy | Low |
-| 3 | Non-durable event bus | Stale clients (refresh fixes) | Low |
-| 4 | Redis SPOF | Complete app outage | **High** |
-| 5 | No web readiness probe | None (nginx starts instantly) | Low |
-| 6 | Web rolling update default | Brief downtime (weekend deploys) | Low |
-| 7 | No TLS on ingress | Local OK, prod needs HTTPS | Low (local) / Medium (prod) |
-| 8 | No resource limits | Fine at expected traffic | Low |
-| 9 | CORS AllowAnyOrigin | Dead code, never fires | None |
-| 10 | Sticky session SameSite | Intermittent WS reconnect issues | Low |
-| 11 | Redis key TTL at scale | Memory pressure at scale | Low |
