@@ -7,7 +7,7 @@ metadata:
     app: scrum-poker
     component: scrumpoker-api
 spec:
-  replicas: 1
+  replicas: 3
   strategy:
     type: RollingUpdate
     rollingUpdate:

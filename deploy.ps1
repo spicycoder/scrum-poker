@@ -50,8 +50,9 @@ Write-Host "Installing/upgrading Redis with Sentinel via Helm..." -ForegroundCol
 helm repo add bitnami https://charts.bitnami.com/bitnami 2>$null
 helm upgrade --install redis bitnami/redis --version $redisChartVersion `
   --namespace $ns `
-  --set architecture=sentinel `
+  --set architecture=replication `
   --set replica.replicaCount=3 `
+  --set sentinel.enabled=true `
   --set auth.password="$RedisPassword" `
   --set auth.sentinelPassword="$RedisPassword" `
   --wait --timeout 5m
@@ -63,7 +64,7 @@ if ($LASTEXITCODE -ne 0) {
 # ---- 6. Secrets ----
 Write-Host "Creating secrets..." -ForegroundColor Cyan
 kubectl create secret generic scrum-poker-api-secret `
-  --from-literal=ConnectionStrings__redis="redis-redis:26379,serviceName=mymaster,password=$RedisPassword,sentinelPassword=$RedisPassword" `
+  --from-literal=ConnectionStrings__redis="redis:26379,serviceName=mymaster,password=$RedisPassword" `
   --dry-run=client -o yaml -n $ns | kubectl apply -f -
 
 # ---- 7. Deploy app manifests ----
