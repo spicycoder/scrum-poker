@@ -7,6 +7,7 @@ PowerShell commands to deploy to local minikube. No Helm — raw `kubectl apply`
 ## Prerequisites
 
 - minikube, kubectl
+- **helm** (v3.8+) 
 - podman
 - .NET 10 SDK
 
@@ -34,10 +35,11 @@ This does all of the following automatically:
 2. Builds web image (podman multi-stage)
 3. Loads both into minikube
 4. Creates namespace `scrum-poker`
-5. Creates Redis + API secrets (password: `devpass`)
-6. Applies all YAML manifests (Redis, API, Web, Ingress)
-7. Waits for all pods to be ready
-8. Restarts deployments to pick up fresh images
+5. Installs Redis with Sentinel via Helm (3 replicas, auto-failover)
+6. Creates API secrets
+7. Applies app manifests (API, Web, Ingress)
+8. Waits for all pods to be ready
+9. Restarts deployments to pick up fresh images
 
 Use any password you like. Just keep it consistent.
 
@@ -55,7 +57,17 @@ This stays running. Then open `http://localhost` in your browser.
 
 ## Redeploy (code changes)
 
-When you change code, rebuild images and restart pods:
+When you change code, rebuild images and restart app pods. Redis is managed by Helm and doesn't need to be redeployed.
+
+Run the full cycle:
+
+```powershell
+.\deploy.ps1 -RedisPassword "devpass"
+```
+
+This skips Redis if already installed (Helm `upgrade --install` is idempotent).
+
+Or just the app part manually:
 
 ```powershell
 dotnet publish src/ScrumPoker.API -t:PublishContainer -c Release -p ContainerRepository=ghcr.io/spicycoder/scrumpoker-api -p ContainerImageTag=latest -p ContainerRuntimeIdentifier=linux-x64
@@ -66,8 +78,6 @@ minikube image load ghcr.io/spicycoder/scrumpoker-api:latest ghcr.io/spicycoder/
 
 kubectl rollout restart deployment -n scrum-poker
 ```
-
-Or run `.\deploy.ps1 -RedisPassword "devpass"` again (does full cycle).
 
 ---
 

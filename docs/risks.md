@@ -40,15 +40,15 @@ Risks identified during scale audit and initial deployment. Each risk includes s
 
 ---
 
-## 4. Redis Single Point of Failure
+## 4. Redis Single Point of Failure — **Resolved**
 
-**Files:** `k8s/redis/statefulset.yaml`
+**Files:** `deploy.ps1`, `k8s/redis/` (removed)
 
 **Problem:** Single Redis pod. If it crashes, all rooms, game state, and SignalR backplane are lost. Entire app goes down.
 
-**Verdict:** To be addressed — Redis cluster next. The current setup works for single-node testing but cannot survive a Redis pod failure.
+**Fix:** Replaced single Redis StatefulSet with Bitnami Redis chart in Sentinel mode — 3 replicas + 3 sentinels with auto-failover. The K8s service always points to the current master. StackExchange.Redis uses Sentinel-aware connection string (`serviceName=mymaster`) to handle failover transparently.
 
-**Priority:** **High.** Next focus.
+**Priority:** **Resolved.**
 
 ---
 
@@ -170,7 +170,7 @@ Or even simpler for a start: just Uptime Kuma for health alerts + `kubectl logs`
 
 | # | Risk | Impact | Priority |
 |---|------|--------|----------|
-| 4 | Redis SPOF | Complete app outage | **High** |
+| 4 | Redis SPOF | Complete app outage — **Resolved via Sentinel** | **Resolved** |
 | 7 | No TLS on ingress | Local OK, prod needs HTTPS | Low / Medium (prod) |
 | 8 | No resource limits | Fine at expected traffic | Low |
 | 10 | No production observability | Blind in production | Medium |

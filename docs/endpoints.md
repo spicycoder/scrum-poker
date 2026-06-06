@@ -2,6 +2,47 @@
 
 All POST endpoints return status code only — no response body. `GET /api/rooms/{id}` returns the full game state. SignalR pushes full game state after every action.
 
+---
+
+## Endpoints Overview
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/rooms` | POST | Create a room |
+| `/api/rooms/{id}` | GET | Get game state |
+| `/api/rooms/{id}/join` | POST | Join a room |
+| `/api/rooms/{id}/vote` | POST | Cast a vote |
+| `/api/rooms/{id}/reveal` | POST | Reveal votes |
+| `/api/rooms/{id}/reset` | POST | Reset votes |
+| `/api/rooms/{id}/leave` | POST | Leave a room |
+| `/api/hub` | WebSocket (SignalR) | Real-time events |
+| `/health` | GET | Readiness probe |
+| `/alive` | GET | Liveness probe |
+| `/api/warmup` | GET | Startup probe |
+
+---
+
+## Interactive Testing
+
+When running locally (dev mode), the API exposes **Swagger UI** at:
+
+> **[/swagger](http://localhost:8080/swagger)**
+
+Use it to explore endpoints and send test requests with auto-generated payloads.
+
+---
+
+## Validation Rules
+
+| Field | Endpoints | Type | Rules |
+|-------|-----------|------|-------|
+| `id` (path) | All room endpoints | int | must be > 0 |
+| `PlayerName` | Create, Join, Vote, Leave | string | required, max 50 chars |
+| `Value` | Vote | string | required, must be one of the room's card set values |
+| `CardSet` | Create | string[] | required, non-empty list of card values (e.g. `["0", "1", "2", "3", "5", "8", "13", "21", "?"]`) |
+
+---
+
 ## Create Room
 
 `POST /api/rooms`
@@ -29,11 +70,12 @@ sequenceDiagram
     end
 ```
 
-### PlayerName (body)
+### CreateRoomRequest (body)
 
 | Field | Type | Required | Rules |
 |-------|------|----------|-------|
 | PlayerName | string | yes | max 50 chars |
+| CardSet | string[] | yes | non-empty list of card values, e.g. `["0", "0.5", "1", "2", "3", "5", "8", "13", "21", "?"]` |
 
 | Status Code | Description |
 |-------------|-------------|
@@ -308,6 +350,63 @@ sequenceDiagram
 
 ---
 
+## Leave Room
+
+`POST /api/rooms/{id}/leave`
+
+Removes a player from the room.
+
+### Sequence
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant All as All Clients
+    participant API as API
+    participant R as Redis
+
+    C->>API: POST /api/rooms/{id}/leave
+    alt Invalid id
+        API-->>C: 400 Bad Request
+    else Room not found
+        API->>R: Get room
+        R-->>API: null
+        API-->>C: 404 Not Found
+    else Player not in room
+        API->>R: Get room
+        R-->>API: room
+        API-->>C: 404 Not Found
+    else OK
+        API->>R: Get room
+        R-->>API: room
+        API->>R: Save updated room
+        R-->>API: OK
+        API-->>C: 204 No Content
+        Note over API,C: SignalR (async, server push)
+        API-)All: PlayerLeft event
+    end
+```
+
+### id (path)
+
+| Field | Type | Required | Rules |
+|-------|------|----------|-------|
+| id | int | yes | must be > 0 |
+
+### PlayerName (body)
+
+| Field | Type | Required | Rules |
+|-------|------|----------|-------|
+| PlayerName | string | yes | max 50 chars |
+
+| Status Code | Description |
+|-------------|-------------|
+| 204 | Player removed |
+| 400 | Invalid id |
+| 404 | Room not found or player not in room |
+
+---
+
 ## SignalR Hub
 
 `/api/hub`
@@ -340,3 +439,4 @@ All events carry the full game state payload (`{ gameId: int, players: Record<st
 |-------|---------|
 | GET /health | Ready probe (all checks must pass) |
 | GET /alive | Liveness probe (tagged "live" only) |
+| GET /api/warmup | Startup probe (creates + reads room to warm JIT and Redis) |
