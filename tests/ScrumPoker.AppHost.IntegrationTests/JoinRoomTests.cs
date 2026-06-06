@@ -71,8 +71,8 @@ public sealed class JoinRoomTests
     }
 }
 
-[Collection(DistributedApplicationCollection.Name)]
 public sealed class JoinRoomExpiryTests(ShortTtlDistributedApplicationFixture fixture)
+    : IClassFixture<ShortTtlDistributedApplicationFixture>
 {
     // TTL = 4s. Join at t≈2s resets it to 4s (expires at t≈6s).
     // At t≈5s the room would have been gone without the reset — proves timer was restarted.
