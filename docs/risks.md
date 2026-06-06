@@ -102,38 +102,7 @@ Risks identified during scale audit and initial deployment. Each risk includes s
 
 ---
 
-## 9. CORS AllowAnyOrigin
-
-**File:** `src/ScrumPoker.API/Program.cs`
-
-**Problem:** CORS allows any origin. Unnecessary — SPA and API are always same-origin (Vite proxy in dev, ingress in production). The CORS middleware never actually fires for same-origin requests.
-
-**Verdict:** Dead code, not a real risk. Can be removed or kept. If removed, use `if (env.IsDevelopment())` for any dev-only CORS config.
-
-**Priority:** None (doesn't affect anything).
-
----
-
-## 10. Sticky Session Cookie SameSite
-
-**File:** `k8s/ingress.yaml`
-
-**Problem:** Ingress sets `.ScrumPoker.Affinity` cookie for sticky sessions but doesn't set `SameSite` attribute.
-
-**Why this matters:** When a browser opens a WebSocket to `/api/hub`, it needs to send this cookie so the ingress routes them to the right pod. Modern browsers (Chrome, Safari) default to `SameSite=Lax` for cookies, which may block sending the cookie during WebSocket upgrade. This can cause intermittent SignalR reconnection failures or users jumping between pods.
-
-**Fix:** Add annotation:
-```yaml
-nginx.ingress.kubernetes.io/session-cookie-samesite: "Lax"
-```
-
-**Verdict:** Easy fix but low impact. Users would need to refresh the page to recover. Can address alongside other ingress changes.
-
-**Priority:** Low.
-
----
-
-## 11. Redis Key TTL at Scale
+## 9. Redis Key TTL at Scale
 
 **File:** `src/ScrumPoker.API/appsettings.json` — `Game:ExpirationSeconds: 5400`
 
@@ -145,7 +114,7 @@ nginx.ingress.kubernetes.io/session-cookie-samesite: "Lax"
 
 ---
 
-## 12. No Production Observability
+## 10. No Production Observability
 
 **Files:** `src/ScrumPoker.API/Program.cs`, `src/ScrumPoker.ServiceDefaults/Extensions.cs`
 
@@ -168,7 +137,7 @@ Or even simpler for a start: just Uptime Kuma for health alerts + `kubectl logs`
 
 ---
 
-## 13. No Rate Limiting
+## 11. No Rate Limiting
 
 **Files:** `k8s/ingress.yaml`, `src/ScrumPoker.API/Program.cs`
 
@@ -189,18 +158,29 @@ Or even simpler for a start: just Uptime Kuma for health alerts + `kubectl logs`
 
 ## Summary
 
+### Deployment Edge Cases (only on deploy / scale / pod restart)
+
+| # | Risk | Impact | Priority |
+|---|------|--------|----------|
+| 2 | No graceful SignalR drain | Brief WS blip on deploy | Low |
+| 5 | No web readiness probe | None (nginx starts instantly) | Low |
+| 6 | Web rolling update default | Brief downtime (weekend deploys) | Low |
+
+### Production / Infrastructure (address before VPS deploy)
+
+| # | Risk | Impact | Priority |
+|---|------|--------|----------|
+| 4 | Redis SPOF | Complete app outage | **High** |
+| 7 | No TLS on ingress | Local OK, prod needs HTTPS | Low / Medium (prod) |
+| 8 | No resource limits | Fine at expected traffic | Low |
+| 10 | No production observability | Blind in production | Medium |
+| 11 | No rate limiting | Abuse possible | Low |
+
+### Code / Architecture (exist regardless of deployment)
+
 | # | Risk | Impact | Priority |
 |---|------|--------|----------|
 | 1 | Room ID collision | Room overwrite (rare) | Low |
-| 2 | No graceful SignalR drain | Brief WS blip on deploy | Low |
 | 3 | Non-durable event bus | Stale clients (refresh fixes) | Low |
-| 4 | Redis SPOF | Complete app outage | **High** |
-| 5 | No web readiness probe | None (nginx starts instantly) | Low |
-| 6 | Web rolling update default | Brief downtime (weekend deploys) | Low |
-| 7 | No TLS on ingress | Local OK, prod needs HTTPS | Low (local) / Medium (prod) |
-| 8 | No resource limits | Fine at expected traffic | Low |
-| 9 | CORS AllowAnyOrigin | Dead code, never fires | None |
-| 10 | Sticky session SameSite | Intermittent WS reconnect issues | Low |
-| 11 | Redis key TTL at scale | Memory pressure at scale | Low |
-| 12 | No production observability | Blind in production | Medium |
-| 13 | No rate limiting | Abuse possible | Low |
+| 9 | Redis key TTL at scale | Memory pressure at scale | Low |
+
