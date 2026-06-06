@@ -1,6 +1,6 @@
 # Risks
 
-Risks identified during scale audit and initial deployment. Address once deployment is stable.
+Risks identified during scale audit and initial deployment. Each risk includes severity and decision.
 
 ---
 
@@ -10,20 +10,9 @@ Risks identified during scale audit and initial deployment. Address once deploym
 
 **Problem:** Method generates random 4-digit ID (1000–9999), checks if key exists in Redis, then saves. Two pods can generate same ID simultaneously → second write silently overwrites first.
 
-```
-Pod A: KeyExists(1234) → false → SET 1234 → saved
-Pod B: KeyExists(1234) → false → SET 1234 → overwrites A's room
-```
+**Verdict:** Accept. Very rare edge case (9000 values). Room creation isn't high-frequency.
 
-**Impact:** Room creation collision under concurrent writes. Low probability (9000 values) but non-zero.
-
-**Suggested fixes:**
-- Use Redis `INCR` with a counter key for deterministic sequential IDs
-- Switch to GUID/UUID for room IDs (breaking change to frontend URL format)
-- Use `SETNX` (atomic check-and-set) instead of check-then-set
-- Expand ID space to 6+ digits
-
-**Priority:** Low. Acceptable for now.
+**Priority:** Low.
 
 ---
 
@@ -31,48 +20,23 @@ Pod B: KeyExists(1234) → false → SET 1234 → overwrites A's room
 
 **Files:** `k8s/api/deployment.yaml` (no preStop hook)
 
-**Problem:** K8s sends SIGTERM → pod stops instantly → active WebSocket connections are cut. Clients reconnect to another pod (auto-reconnect logic in `web/src/lib/signalr.ts` handles this), but ~1-2s blip during rollouts.
+**Problem:** K8s sends SIGTERM → pod stops instantly → active WebSocket connections cut. Clients reconnect via auto-reconnect (~1-2s blip).
 
-**Impact:** Brief disruption during rolling updates or pod terminations. No data loss — clients reconnect via `onreconnected` handler which re-joins the SignalR group.
+**Verdict:** Accept. Only affects active games during deployments. Deployments happen on weekends when nobody plays. Client reconnection worked in testing.
 
-**Suggested fixes:**
-- Add `preStop` lifecycle hook to API deployment:
-  ```yaml
-  lifecycle:
-    preStop:
-      exec:
-        command: ["sleep", "5"]
-  ```
-  This gives in-flight WebSocket messages time to complete before SIGTERM.
-
-**Priority:** Medium. Affects UX during deployments.
+**Priority:** Low.
 
 ---
 
 ## 3. Wolverine In-Memory Bus (Non-Durable Events)
 
-**File:** `src/ScrumPoker.Application/Features/Commands/*/` — all handlers follow same pattern:
+**File:** `src/ScrumPoker.Application/Features/Commands/*/`
 
-```csharp
-await repository.SaveAsync(room, ct);   // Save to Redis
-await bus.PublishAsync(@event);          // Fire SignalR notification
-```
+**Problem:** No transactional outbox. If Redis save succeeds but SignalR publish fails, clients go stale. If Redis save fails but event publishes (unlikely), phantom event.
 
-**Problem:** No transactional outbox. If step 1 succeeds but step 2 fails:
-- Room saved in Redis → data persists
-- SignalR event never fires → connected clients don't update
-- User sees stale state until page refresh
+**Verdict:** Intentional. Using Redis as Wolverine transport is not worth the complexity for this context. Stale clients can refresh. No data corruption.
 
-If step 1 fails but step 2 fires (unlikely with in-memory bus, but theoretically possible with certain failure modes): phantom event.
-
-**Impact:** Stale clients under transient Redis or network failures. No data corruption — state is always consistent in Redis.
-
-**Suggested fixes:**
-- Add Wolverine transactional outbox with Redis backing
-- Accept and let clients refresh on missed updates (current behavior)
-- Retry event publish on failure
-
-**Priority:** Low for a real-time game. Acceptable trade-off.
+**Priority:** Low.
 
 ---
 
@@ -80,169 +44,146 @@ If step 1 fails but step 2 fires (unlikely with in-memory bus, but theoretically
 
 **Files:** `k8s/redis/statefulset.yaml`
 
-**Problem:**
-- Single replica Redis StatefulSet (`replicas: 1`)
-- No RDB or AOF persistence configured in `redis-server` args
-- PVC is mounted but no explicit save policy
-- No Redis Sentinel or Cluster for high availability
+**Problem:** Single Redis pod. If it crashes, all rooms, game state, and SignalR backplane are lost. Entire app goes down.
 
-**Failure scenarios:**
-- Redis pod restarts → empty state (unless Redis saves to disk via its default config)
-- Redis pod fails → all game rooms lost
-- Redis is slow → all API pods fail readiness probes → complete outage
+**Verdict:** To be addressed — Redis cluster next. The current setup works for single-node testing but cannot survive a Redis pod failure.
 
-**Current mitigation:** PVC provides disk persistence. Redis 8.6 defaults to RDB saves which should persist to the mounted volume. Not explicitly verified.
-
-**Suggested fixes:**
-- Add explicit `redis-server --save 60 1000 --appendonly yes` for RDB + AOF
-- Document Redis recovery procedure
-- For production: use managed Redis or add Redis Sentinel
-
-**Priority:** High. Must address before any real use. Single Redis = single point of failure for entire app — rooms, game state, and SignalR backplane all depend on it.
+**Priority:** **High.** Next focus.
 
 ---
 
-## 5. Podman Image Prefix Quirk (Resolved)
-
-**Files:** `k8s/api/deployment.yaml`, `k8s/web/deployment.yaml`, `deploy.ps1`
-
-**Problem:** podman automatically prefixes locally-built images with `localhost/` when no registry is specified. Caused image name mismatch with deployment YAMLs.
-
-**Resolution:** Switched image names to `ghcr.io/spicycoder/scrumpoker-api:latest` format. podman only adds `localhost/` prefix when no registry hostname is in the image name — `ghcr.io/` prevents it. Now works with both podman and Docker.
-
-**Priority:** Resolved.
-
----
-
-## 6. Web Deployment: No Readiness Probe
+## 5. Web Deployment: No Readiness Probe
 
 **File:** `k8s/web/deployment.yaml`
 
-**Problem:** Web deployment has a TCP liveness probe but no readiness probe. If nginx is slow to start, K8s has no signal that the pod isn't ready for traffic.
+**Problem:** Web deployment has a TCP liveness probe but no readiness probe. If nginx is slow to start, traffic could briefly hit a pod that isn't ready.
 
-**Impact:** Brief window where traffic could reach a pod that isn't serving. Unlikely with nginx (starts in <1s).
-
-**Suggested fix:** Add TCP readiness probe matching the liveness probe:
-```yaml
-readinessProbe:
-  tcpSocket:
-    port: 5000
-  initialDelaySeconds: 5
-  periodSeconds: 10
-  failureThreshold: 3
-```
+**Verdict:** Accept. nginx starts in <1s. Negligible impact.
 
 **Priority:** Low.
 
 ---
 
-## 7. Rolling Update Strategy Not on Web
+## 6. Rolling Update Strategy Not on Web
 
 **File:** `k8s/web/deployment.yaml`
 
-**Problem:** Web deployment has no explicit `strategy` block. Default K8s rolling update uses `maxUnavailable: 25%`, which with 1 replica means 0 pods available briefly during updates.
+**Problem:** Default rolling update (`maxUnavailable: 25%`) with 1 replica means 0 pods available briefly during web updates. Short downtime window.
 
-**Impact:** Brief downtime window on web deployments.
+**Verdict:** Accept. Deployments happen on weekends when nobody plays. No impact on active users.
 
-**Note:** API deployment already has `maxSurge: 1, maxUnavailable: 0` strategy applied.
+**Note:** API deployment already has `maxSurge: 1, maxUnavailable: 0` applied.
 
-**Suggested fix:** Add same strategy to web deployment.
-
-**Priority:** Low for single-replica web. Matters at scale.
+**Priority:** Low.
 
 ---
 
-## 8. No TLS on Ingress
+## 7. No TLS on Ingress
 
 **File:** `k8s/ingress.yaml`
 
-**Problem:** Ingress serves HTTP on port 80 only. No HTTPS, no TLS termination. Traffic between browser and cluster is unencrypted.
+**Problem:** Ingress serves HTTP on port 80 only. No HTTPS. Traffic unencrypted.
 
-**Impact:** All traffic in plaintext. Fine for local minikube testing. Production requires TLS cert (e.g., Let's Encrypt via cert-manager).
+**Verdict:** Not needed for local minikube. Production concern — address when deploying to Oracle VPS (use Let's Encrypt via cert-manager).
 
-**Suggested fixes:**
-- Add TLS block in ingress with cluster issuer for Let's Encrypt
-- For local: `minikube addons enable ingress` already provides an option for TLS
-
-**Priority:** Low (local) / Critical (production)
+**Priority:** Low (local) / Medium (production).
 
 ---
 
-## 9. No Resource Limits on Pods
+## 8. No Resource Limits on Pods
 
-**Files:** All deployment/statefulset YAMLs
+**File:** All deployment/statefulset YAMLs
 
-**Problem:** No container has CPU/memory `requests` or `limits`. Pod can consume all node resources, starving other pods (including K8s system components).
+**Problem:** No CPU/memory requests or limits. Pod can consume all node resources.
 
-**Impact:** Unpredictable performance under load. K8s scheduler has no resource data for placement decisions.
+**Verdict:** Accept. Expected traffic is low (dozens of teams, each <12 players). Oracle VPS has 24GB RAM / 200GB storage — plenty of headroom. If usage grows, add sensible limits.
 
-**Suggested fixes:**
-- Add sensible requests/limits:
-  ```yaml
-  resources:
-    requests:
-      cpu: "100m"
-      memory: "128Mi"
-    limits:
-      cpu: "500m"
-      memory: "256Mi"
-  ```
-- Adjust based on actual usage metrics
-
-**Priority:** Medium. Won't cause failures at low traffic.
+**Priority:** Low.
 
 ---
 
-## 10. CORS AllowAnyOrigin
+## 9. CORS AllowAnyOrigin
 
-**File:** `src/ScrumPoker.API/Program.cs` — `.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()`
+**File:** `src/ScrumPoker.API/Program.cs`
 
-**Problem:** CORS policy allows any origin. Works because SPA talks to same origin via ingress. But unusual pattern — typically the API would restrict to the SPA's origin.
+**Problem:** CORS allows any origin. Unnecessary — SPA and API are always same-origin (Vite proxy in dev, ingress in production). The CORS middleware never actually fires for same-origin requests.
 
-**Impact:** Any website can make API calls from a browser. No credential/CSRF protection.
+**Verdict:** Dead code, not a real risk. Can be removed or kept. If removed, use `if (env.IsDevelopment())` for any dev-only CORS config.
 
-**Suggested fix:** Restrict to the SPA origin:
-```csharp
-.WithOrigins("http://localhost")
-.AllowAnyHeader()
-.AllowAnyMethod();
-```
-
-**Priority:** Low for local. Medium for production.
+**Priority:** None (doesn't affect anything).
 
 ---
 
-## 11. Sticky Session Cookie SameSite
+## 10. Sticky Session Cookie SameSite
 
 **File:** `k8s/ingress.yaml`
 
-**Problem:** Ingress sets `.ScrumPoker.Affinity` cookie for sticky sessions but does not set `SameSite` attribute. Modern browsers (Chrome, Safari) default cross-site cookies to `Lax` or `Strict`, which can interfere with the SignalR WebSocket upgrade handshake.
+**Problem:** Ingress sets `.ScrumPoker.Affinity` cookie for sticky sessions but doesn't set `SameSite` attribute.
 
-**Impact:** Intermittent WebSocket connection failures depending on browser and how the user navigates to the app.
+**Why this matters:** When a browser opens a WebSocket to `/api/hub`, it needs to send this cookie so the ingress routes them to the right pod. Modern browsers (Chrome, Safari) default to `SameSite=Lax` for cookies, which may block sending the cookie during WebSocket upgrade. This can cause intermittent SignalR reconnection failures or users jumping between pods.
 
-**Suggested fix:** Add annotation:
+**Fix:** Add annotation:
 ```yaml
 nginx.ingress.kubernetes.io/session-cookie-samesite: "Lax"
 ```
 
-**Priority:** Medium. Will hit users randomly based on browser defaults.
+**Verdict:** Easy fix but low impact. Users would need to refresh the page to recover. Can address alongside other ingress changes.
+
+**Priority:** Low.
 
 ---
 
-## 12. Redis Key TTL at Scale
+## 11. Redis Key TTL at Scale
 
 **File:** `src/ScrumPoker.API/appsettings.json` — `Game:ExpirationSeconds: 5400`
 
-**Problem:** Rooms expire after 1.5 hours. Redis uses passive expiry (checked on access) + active expiry (sampled periodically). Under high room creation rates, stale keys can accumulate between active expiry sweeps.
+**Problem:** Rooms expire after 1.5 hours. Under high creation rates, stale keys accumulate in Redis memory between expiry sweeps.
 
-**Impact:** Redis memory pressure if rooms are created rapidly without being accessed. Won't cause correctness issues — expired keys are skipped on access.
+**Verdict:** Not significant at expected traffic levels. Redis on an Oracle VPS can handle far more keys than this app will ever create.
 
-**Suggested fixes:**
-- Monitor Redis memory usage (`kubectl exec` into Redis and run `INFO memory`)
-- Lower TTL if appropriate
-- Acceptable behavior for local testing
+**Priority:** Low.
 
-**Priority:** Low. Only matters at very high room creation rates.
+---
+
+## 12. No Production Observability
+
+**Files:** `src/ScrumPoker.API/Program.cs`, `src/ScrumPoker.ServiceDefaults/Extensions.cs`
+
+**Problem:** Application has OpenTelemetry wired (via Aspire) but no production-grade observability stack. Currently:
+- OTLP exporter configured but no receiver (Aspire dashboard only works locally)
+- No log aggregation (Loki, Elastic, etc.)
+- No metrics dashboards (Prometheus + Grafana)
+- No alerting (who gets paged when Redis dies?)
+
+**Suggested stack (keep it simple):**
+- **Uptime Kuma** — synthetic monitoring, pings the app every minute, alerts via email/Telegram/Discord if down
+- **Loki + Promtail** — lightweight log aggregation from K8s pods
+- **Grafana** — dashboard for logs + basic metrics
+
+Or even simpler for a start: just Uptime Kuma for health alerts + `kubectl logs` for ad-hoc debugging.
+
+**Verdict:** To be addressed. Can start minimal and grow.
+
+**Priority:** Medium.
+
+---
+
+## 13. No Rate Limiting
+
+**Files:** `k8s/ingress.yaml`, `src/ScrumPoker.API/Program.cs`
+
+**Problem:** No rate limiting at any layer. A malicious user could spam the API with requests (create rooms, vote rapidly, etc.) and degrade the experience for others.
+
+**Options (from edge to app):**
+1. **Cloudflare** — reverse proxy with built-in DDoS protection + rate limiting rules. Simplest if DNS goes through Cloudflare
+2. **nginx ingress annotations** — `nginx.ingress.kubernetes.io/limit-rps: "10"` — rate limit per IP at the ingress level
+3. **API middleware** — library like `AspNetCoreRateLimit` for app-level rate limiting (more flexible, per-endpoint rules)
+
+**Suggested approach:** Start with nginx ingress rate limiting (zero code change, one annotation). Realistic human limit: ~100 req/min per IP. A whole game session (create, join, vote × few rounds) is ~20 requests.
+
+**Verdict:** Not urgent at expected traffic levels, but easy to add basic protection.
+
+**Priority:** Low (add before going public).
 
 ---
 
@@ -250,15 +191,30 @@ nginx.ingress.kubernetes.io/session-cookie-samesite: "Lax"
 
 | # | Risk | Impact | Priority |
 |---|------|--------|----------|
-| 1 | Room ID collision | Data loss (room overwrite) | Low |
-| 2 | No graceful SignalR drain | UX blip during rollouts | Medium |
-| 3 | Non-durable event bus | Stale clients | Low |
-| 4 | Redis SPOF | Complete data loss. Rooms, game state, SignalR backplane all die | **High** |
-| 5 | Podman image prefix | Build tooling coupling | Low |
-| 6 | No web readiness probe | Brief traffic routing issue | Low |
-| 7 | Web rolling update default | Brief deploy downtime | Low |
-| 8 | No TLS on ingress | Traffic unencrypted | Low (local) / Critical (prod) |
-| 9 | No resource limits | Unpredictable performance | Medium |
-| 10 | CORS AllowAnyOrigin | No origin restriction | Low |
-| 11 | Sticky session cookie SameSite | Intermittent WS failures | Medium |
-| 12 | Redis key TTL at scale | Memory pressure | Low |
+| 1 | Room ID collision | Room overwrite (rare) | Low |
+| 2 | No graceful SignalR drain | Brief WS blip on deploy | Low |
+| 3 | Non-durable event bus | Stale clients (refresh fixes) | Low |
+| 4 | Redis SPOF | Complete app outage | **High** |
+| 5 | No web readiness probe | None (nginx starts instantly) | Low |
+| 6 | Web rolling update default | Brief downtime (weekend deploys) | Low |
+| 7 | No TLS on ingress | Local OK, prod needs HTTPS | Low (local) / Medium (prod) |
+| 8 | No resource limits | Fine at expected traffic | Low |
+| 9 | CORS AllowAnyOrigin | Dead code, never fires | None |
+| 10 | Sticky session SameSite | Intermittent WS reconnect issues | Low |
+| 11 | Redis key TTL at scale | Memory pressure at scale | Low |
+| 12 | No production observability | Blind in production | Medium |
+| 13 | No rate limiting | Abuse possible | Low |
+
+| # | Risk | Impact | Priority |
+|---|------|--------|----------|
+| 1 | Room ID collision | Room overwrite (rare) | Low |
+| 2 | No graceful SignalR drain | Brief WS blip on deploy | Low |
+| 3 | Non-durable event bus | Stale clients (refresh fixes) | Low |
+| 4 | Redis SPOF | Complete app outage | **High** |
+| 5 | No web readiness probe | None (nginx starts instantly) | Low |
+| 6 | Web rolling update default | Brief downtime (weekend deploys) | Low |
+| 7 | No TLS on ingress | Local OK, prod needs HTTPS | Low (local) / Medium (prod) |
+| 8 | No resource limits | Fine at expected traffic | Low |
+| 9 | CORS AllowAnyOrigin | Dead code, never fires | None |
+| 10 | Sticky session SameSite | Intermittent WS reconnect issues | Low |
+| 11 | Redis key TTL at scale | Memory pressure at scale | Low |
