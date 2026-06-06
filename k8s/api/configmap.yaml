@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scrumpoker-api-config
+  namespace: scrum-poker
+  labels:
+    app: scrum-poker
+    component: scrumpoker-api
+data:
+  ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+  HTTP_PORTS: "8080"
+  OTEL_SERVICE_NAME: "scrumpoker-api"

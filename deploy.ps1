@@ -1,65 +1,65 @@
 param(
   [Parameter(Mandatory)]
-  [string]$RedisPassword,
-  [switch]$Pull  # pull from ghcr instead of using local images
+  [string]$RedisPassword
 )
 
 $ErrorActionPreference = "Stop"
-$PSNativeCommandErrorActionPreference = $true
 
 $ns = "scrum-poker"
 $apiImg = "ghcr.io/spicycoder/scrumpoker-api:latest"
 $webImg = "ghcr.io/spicycoder/scrumpoker-web:latest"
 
-# Preflight checks
-$minikubeStatus = & minikube status 2>$null
+# ---- Preflight ----
+$minikubeOk = & minikube status 2>$null
 if ($LASTEXITCODE -ne 0) {
   Write-Error "Minikube not running. Run: minikube start && minikube addons enable ingress"
   exit 1
 }
 
-$ingressPods = & kubectl get pods -n ingress-nginx --no-headers 2>$null
-if (-not $ingressPods) {
-  Write-Warning "Ingress controller not found. Run: minikube addons enable ingress"
-}
+# ---- 1. Build images ----
+Write-Host "`nBuilding API image..." -ForegroundColor Cyan
+dotnet publish src/ScrumPoker.API -t:PublishContainer -c Release `
+  -p ContainerRepository=ghcr.io/spicycoder/scrumpoker-api `
+  -p ContainerImageTag=latest `
+  -p ContainerRuntimeIdentifier=linux-x64
 
-# Namespace
+Write-Host "Building web image..." -ForegroundColor Cyan
+podman build -f k8s/web.Dockerfile -t $webImg web/
+
+# ---- 2. Load into minikube ----
+Write-Host "Loading images into minikube..." -ForegroundColor Cyan
+minikube image load $apiImg $webImg
+
+# ---- 3. Namespace ----
 kubectl create namespace $ns --dry-run=client -o yaml | kubectl apply -f -
 
-# Secrets (idempotent)
+# ---- 4. Secrets ----
+Write-Host "Creating secrets..." -ForegroundColor Cyan
 kubectl create secret generic scrum-poker-redis-secret `
   --from-literal=REDIS_PASSWORD="$RedisPassword" `
   --dry-run=client -o yaml -n $ns | kubectl apply -f -
 
 kubectl create secret generic scrum-poker-api-secret `
   --from-literal=ConnectionStrings__redis="redis-service:6379,password=$RedisPassword" `
-  --from-literal=REDIS_PASSWORD="$RedisPassword" `
-  --from-literal=REDIS_URI="redis://:$RedisPassword@redis-service:6379" `
   --dry-run=client -o yaml -n $ns | kubectl apply -f -
 
-# Load images into minikube (default: local images)
-if ($Pull) {
-  Write-Host "`nPulling images from ghcr.io..." -ForegroundColor Cyan
-} else {
-  Write-Host "`nLoading local images into minikube..." -ForegroundColor Cyan
-  minikube image load $apiImg
-  minikube image load $webImg
-}
+# ---- 5. Deploy manifests ----
+Write-Host "Deploying manifests..." -ForegroundColor Cyan
+kubectl apply -f k8s/redis/
+kubectl apply -f k8s/api/
+kubectl apply -f k8s/web/
+kubectl apply -f k8s/ingress.yaml
 
-# Deploy
-Write-Host "`nDeploying Helm chart..." -ForegroundColor Cyan
-helm upgrade --install scrum-poker ./k8s --namespace $ns -f k8s/values.yaml
+# ---- 6. Wait for pods ----
+Write-Host "Waiting for pods..." -ForegroundColor Cyan
+kubectl wait --for=condition=ready pod -l component=redis -n $ns --timeout=60s
+kubectl wait --for=condition=ready pod -l component=scrumpoker-api -n $ns --timeout=120s
+kubectl wait --for=condition=ready pod -l component=web -n $ns --timeout=60s
 
-# Wait for each component
-Write-Host "`nWaiting for Redis..." -ForegroundColor Cyan
-kubectl wait --for=condition=ready pod -l app.kubernetes.io/component=redis -n $ns --timeout=60s
-
-Write-Host "Waiting for API..." -ForegroundColor Cyan
-kubectl wait --for=condition=ready pod -l app.kubernetes.io/component=scrumpoker-api -n $ns --timeout=120s
-
-Write-Host "Waiting for web..." -ForegroundColor Cyan
-kubectl wait --for=condition=ready pod -l app.kubernetes.io/component=web -n $ns --timeout=60s
+# ---- 7. Restart pods to pick up fresh images ----
+kubectl rollout restart deployment -n $ns
 
 kubectl get pods -n $ns
 
-Write-Host "`nDone! Run 'minikube tunnel' in a separate terminal, then open http://localhost" -ForegroundColor Green
+Write-Host "`nDone!" -ForegroundColor Green
+Write-Host "Run 'minikube tunnel' in a separate terminal, then open http://localhost" -ForegroundColor Yellow

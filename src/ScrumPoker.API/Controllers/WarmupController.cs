@@ -10,7 +10,7 @@ namespace ScrumPoker.API.Controllers;
 [Route("api/warmup")]
 public sealed class WarmupController : ControllerBase
 {
-    [HttpPost]
+    [HttpGet]
     public async Task<IActionResult> Warmup([FromServices] IMessageBus bus)
     {
         var room = await bus.InvokeAsync<Room>(new CreateRoomCommand("warmup", ["1", "2"]));
