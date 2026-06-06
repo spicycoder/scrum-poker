@@ -8,7 +8,7 @@ $ErrorActionPreference = "Stop"
 $ns = "scrum-poker"
 $apiImg = "ghcr.io/spicycoder/scrumpoker-api:latest"
 $webImg = "ghcr.io/spicycoder/scrumpoker-web:latest"
-$redisChartVersion = "21.0.1"
+$redisChartVersion = "27.0.4"
 
 # ---- Preflight ----
 $minikubeOk = & minikube status 2>$null
@@ -55,6 +55,10 @@ helm upgrade --install redis bitnami/redis --version $redisChartVersion `
   --set auth.password="$RedisPassword" `
   --set auth.sentinelPassword="$RedisPassword" `
   --wait --timeout 5m
+if ($LASTEXITCODE -ne 0) {
+  Write-Error "Helm install failed. Try running 'helm repo update' first."
+  exit 1
+}
 
 # ---- 6. Secrets ----
 Write-Host "Creating secrets..." -ForegroundColor Cyan
