@@ -4,7 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.4.2" />
-    <PackageVersion Include="Aspire.Hosting.Redis" Version="13.4.2" />
+    <PackageVersion Include="Aspire.Hosting.Redis" Version="13.4.3" />
     <PackageVersion Include="Aspire.StackExchange.Redis" Version="13.4.2" />
     <PackageVersion Include="AspNetCore.SwaggerUI.Themes" Version="3.0.2" />
     <PackageVersion Include="FluentValidation.AspNetCore" Version="11.3.1" />
