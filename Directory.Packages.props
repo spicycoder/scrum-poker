@@ -20,7 +20,7 @@
     <PackageVersion Include="Scalar.AspNetCore" Version="2.14.14" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="10.2.1" />
     <PackageVersion Include="Swashbuckle.AspNetCore.ReDoc" Version="10.2.1" />
-    <PackageVersion Include="WolverineFx" Version="6.5.0" />
+    <PackageVersion Include="WolverineFx" Version="6.5.1" />
     <PackageVersion Include="WolverineFx.RuntimeCompilation" Version="6.5.0" />
   </ItemGroup>
   <ItemGroup>
