@@ -102,7 +102,19 @@ export default function GameRoom() {
   }
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(`${window.location.origin}/join/${roomId}`)
+    const text = `${window.location.origin}/join/${roomId}`
+    try {
+      await navigator.clipboard.writeText(text)
+    } catch {
+      const el = document.createElement('textarea')
+      el.value = text
+      el.style.position = 'fixed'
+      el.style.opacity = '0'
+      document.body.appendChild(el)
+      el.select()
+      document.execCommand('copy')
+      document.body.removeChild(el)
+    }
     toast('Link copied')
   }
 

@@ -1,0 +1,49 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: scrumpoker-redis
+    restart: unless-stopped
+    expose:
+      - 6379
+
+  api:
+    image: ghcr.io/spicycoder/scrumpoker-api:${API_IMAGE_TAG:-latest}
+    container_name: scrumpoker-api
+    restart: unless-stopped
+    ports:
+      - "${API_PORT:-1802}:8080"
+    environment:
+      ConnectionStrings__redis: ${REDIS_CONNECTION:-redis:6379}
+      ASPNETCORE_ENVIRONMENT: Development
+      HTTP_PORTS: "8080"
+      Game__ExpirationSeconds: ${GAME_EXPIRATION:-5400}
+    depends_on:
+      - redis
+
+  web:
+    image: ghcr.io/spicycoder/scrumpoker-web:${WEB_IMAGE_TAG:-latest}
+    container_name: scrumpoker-web
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-1801}:5000"
+
+  proxy:
+    image: caddy:2-alpine
+    container_name: scrumpoker-proxy
+    restart: unless-stopped
+    ports:
+      - "${PORT:-1800}:80"
+    depends_on:
+      - api
+      - web
+    command:
+      - /bin/sh
+      - -c
+      - |
+        cat > /etc/caddy/Caddyfile << 'EOF'
+        :80 {
+          reverse_proxy /api/* api:8080
+          reverse_proxy web:5000
+        }
+        EOF
+        exec caddy run --config /etc/caddy/Caddyfile
