@@ -22,7 +22,7 @@ flowchart TD
 flowchart TD
     Client
 
-    Client -->|HTTPS + GET body| API
+    Client -->|HTTPS| API
 
     API -->|Wolverine dispatch| Application
 

@@ -18,7 +18,7 @@ All POST endpoints return status code only — no response body. `GET /api/rooms
 | `/api/hub` | WebSocket (SignalR) | Real-time events |
 | `/health` | GET | Readiness probe |
 | `/alive` | GET | Liveness probe |
-| `/api/warmup` | GET | Startup probe |
+| `/api/warmup` | GET, HEAD | Keep-alive (prevents Render sleep) |
 
 ---
 
@@ -38,7 +38,7 @@ Use it to explore endpoints and send test requests with auto-generated payloads.
 |-------|-----------|------|-------|
 | `id` (path) | All room endpoints | int | must be > 0 |
 | `PlayerName` | Create, Join, Vote, Leave | string | required, max 50 chars |
-| `Value` | Vote | string | required, must be one of the room's card set values |
+| `Value` | Vote | string | required, not empty. Frontend restricts to card set; API does not enforce |
 | `CardSet` | Create | string[] | required, non-empty list of card values (e.g. `["0", "1", "2", "3", "5", "8", "13", "21", "?"]`) |
 
 ---
@@ -246,7 +246,7 @@ sequenceDiagram
 | Field | Type | Required | Rules |
 |-------|------|----------|-------|
 | PlayerName | string | yes | max 50 chars |
-| Value | string | yes | must be one of: `0, 0.5, 1, 2, 3, 5, 8, 13, 21, ?` |
+| Value | string | yes | not empty. Frontend restricts to room's card set; API does not enforce |
 
 | Status Code | Description |
 |-------------|-------------|
@@ -439,4 +439,4 @@ All events carry the full game state payload (`{ gameId: int, players: Record<st
 |-------|---------|
 | GET /health | Ready probe (all checks must pass) |
 | GET /alive | Liveness probe (tagged "live" only) |
-| GET /api/warmup | Startup probe (creates + reads room to warm JIT and Redis) |
+| GET, HEAD /api/warmup | Keep-alive (creates + reads room to warm JIT and Redis, prevents Render free-tier sleep) |
