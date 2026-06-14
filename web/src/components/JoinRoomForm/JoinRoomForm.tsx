@@ -59,7 +59,8 @@ export default function JoinRoomForm({ roomId }: JoinRoomFormProps) {
   const nameError =
     !validating && name && roomState && name in roomState.players
 
-  async function handleJoin() {
+  async function handleJoin(e?: React.FormEvent) {
+    e?.preventDefault()
     const trimmed = name.trim()
     if (!trimmed || otp.length !== 4) return
 
@@ -86,7 +87,7 @@ export default function JoinRoomForm({ roomId }: JoinRoomFormProps) {
     ? null
     : joinError
   const displayCardSet =
-    !validating && !joinError && !nameError && roomState
+    !validating && !joinError && roomState
       ? roomState.cardSet
       : null
   const canSubmit =
@@ -97,16 +98,16 @@ export default function JoinRoomForm({ roomId }: JoinRoomFormProps) {
     !nameError &&
     roomState !== null
 
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === 'Escape') {
+      handleClear()
+    }
+  }
+
   return (
     <Card>
-      <CardContent className="flex flex-col gap-5 p-6">
-        <Input
-          placeholder="Your name"
-          maxLength={20}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-
+      <CardContent className="flex flex-col gap-5 p-6" onKeyDown={handleKeyDown}>
+        <form onSubmit={handleJoin} className="contents">
         <div className="flex justify-center">
           <InputOTP
             maxLength={4}
@@ -134,27 +135,35 @@ export default function JoinRoomForm({ roomId }: JoinRoomFormProps) {
           </p>
         )}
 
-        {nameError && (
-          <p className="text-sm text-destructive text-center">
-            Name already taken
-          </p>
-        )}
-
         {displayCardSet && (
           <p className="text-sm text-muted-foreground text-center">
             {displayCardSet.join(', ')}
           </p>
         )}
 
+        <Input
+          placeholder="Your name"
+          maxLength={20}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+
+        {nameError && (
+          <p className="text-sm text-destructive text-center">
+            Name already taken
+          </p>
+        )}
+
         <div className="flex gap-3">
           <Button
+            type="submit"
             className="flex-1"
             disabled={!canSubmit}
-            onClick={handleJoin}
           >
             Join
           </Button>
           <Button
+            type="button"
             variant="outline"
             className="flex-1"
             onClick={handleClear}
@@ -163,6 +172,7 @@ export default function JoinRoomForm({ roomId }: JoinRoomFormProps) {
             Clear
           </Button>
         </div>
+        </form>
       </CardContent>
     </Card>
   )

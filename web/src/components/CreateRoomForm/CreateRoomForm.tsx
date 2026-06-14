@@ -30,7 +30,8 @@ export default function CreateRoomForm() {
     localStorage.setItem(STORAGE_KEY_SERIES, series)
   }, [series])
 
-  async function handleCreate() {
+  async function handleCreate(e?: React.FormEvent) {
+    e?.preventDefault()
     const trimmed = name.trim()
     if (!trimmed) return
 
@@ -46,18 +47,18 @@ export default function CreateRoomForm() {
     }
   }
 
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === 'Escape') {
+      setName('')
+    }
+  }
+
   const canSubmit = name.trim().length > 0 && !creating
 
   return (
     <Card>
-      <CardContent className="flex flex-col gap-5 p-6">
-        <Input
-          placeholder="Your name"
-          maxLength={20}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-
+      <CardContent className="flex flex-col gap-5 p-6" onKeyDown={handleKeyDown}>
+        <form onSubmit={handleCreate} className="contents">
         <ToggleGroup
           type="single"
           value={series}
@@ -80,6 +81,13 @@ export default function CreateRoomForm() {
           {cardSets[series].join(', ')}
         </p>
 
+        <Input
+          placeholder="Your name"
+          maxLength={20}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+
         <div className="flex gap-3">
           <Button
             className="flex-1"
@@ -89,6 +97,7 @@ export default function CreateRoomForm() {
             {creating ? 'Creating...' : 'Create'}
           </Button>
           <Button
+            type="button"
             variant="outline"
             className="flex-1"
             onClick={() => setName('')}
@@ -97,6 +106,7 @@ export default function CreateRoomForm() {
             Clear
           </Button>
         </div>
+        </form>
       </CardContent>
     </Card>
   )
