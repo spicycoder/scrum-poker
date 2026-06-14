@@ -37,6 +37,7 @@
     "@storybook/addon-a11y": "10.4.4",
     "@storybook/addon-docs": "10.4.4",
     "@storybook/addon-themes": "^10.4.4",
+    "@storybook/react": "10.4.4",
     "@storybook/react-vite": "^10.4.4",
     "@types/babel__core": "^7.20.5",
     "@types/node": "^24.12.4",
