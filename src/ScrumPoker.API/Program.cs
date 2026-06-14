@@ -27,7 +27,8 @@ if (allowedOrigins is { Length: > 0 })
             policy.WithOrigins(allowedOrigins)
                   .AllowAnyHeader()
                   .AllowAnyMethod()
-                  .AllowCredentials();
+                  .AllowCredentials()
+                  .WithExposedHeaders("Location");
         });
     });
 }
