@@ -1,21 +1,11 @@
-import { useEffect, useState } from 'react'
 import { Toaster } from 'sonner'
 import { Outlet } from 'react-router-dom'
+import { useTheme } from '../../contexts/ThemeContext'
 import DotField from '../DotField/DotField'
 import Navbar from '../Navbar/Navbar'
 
 export default function Layout() {
-  const [theme, setTheme] = useState<'light' | 'dark'>(
-    () => document.documentElement.classList.contains('dark') ? 'dark' : 'light',
-  )
-
-  useEffect(() => {
-    const observer = new MutationObserver(() =>
-      setTheme(document.documentElement.classList.contains('dark') ? 'dark' : 'light'),
-    )
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
-    return () => observer.disconnect()
-  }, [])
+  const { resolvedTheme } = useTheme()
 
   return (
     <div className="relative min-h-screen">
@@ -39,7 +29,7 @@ export default function Layout() {
       <main className="flex flex-col items-center pt-20 px-4">
         <Outlet />
       </main>
-      <Toaster position="top-center" theme={theme} />
+      <Toaster position="top-center" theme={resolvedTheme} />
     </div>
   )
 }
