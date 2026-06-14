@@ -25,7 +25,7 @@ if ($Images) {
 
   # Frontend build
   Push-Location web
-  pnpm install --frozen-lockfile
+  pnpm install
   pnpm run build
   Pop-Location
 

@@ -40,7 +40,7 @@ jobs:
           version: latest
 
       - name: Install frontend dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
         working-directory: web
 
       - name: Build frontend
