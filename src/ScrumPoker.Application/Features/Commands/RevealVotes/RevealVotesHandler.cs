@@ -14,7 +14,7 @@ public sealed class RevealVotesHandler(IRoomRepository repository, IMessageBus b
         }
 
         var (updated, @event) = room.Reveal();
-        await repository.SaveAsync(updated, ct);
+        await repository.SaveAsync(updated, null, ct);
         await bus.PublishAsync(@event);
         return new RevealVotesResult.Success(updated);
     }

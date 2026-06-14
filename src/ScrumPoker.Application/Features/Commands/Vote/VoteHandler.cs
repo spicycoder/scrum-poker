@@ -17,7 +17,7 @@ public sealed class VoteHandler(IRoomRepository repository, IMessageBus bus)
         try
         {
             var (updated, @event) = room.Vote(command.PlayerName, command.Value);
-            var saved = await repository.SaveAsync(updated, ct);
+            var saved = await repository.SaveAsync(updated, null, ct);
             await bus.PublishAsync(@event);
             return new VoteResult.Success(saved);
         }

@@ -22,7 +22,7 @@ public sealed class CreateRoomHandlerTests
     {
         var command = new CreateRoomCommand("Alice", ["0", "1"]);
         var savedRoom = new Room { Id = 1, Players = [new Player("Alice", null)] };
-        _repository.SaveAsync(Arg.Any<Room>(), Arg.Any<CancellationToken>()).Returns(savedRoom);
+        _repository.SaveAsync(Arg.Any<Room>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>()).Returns(savedRoom);
 
         var result = await _sut.Handle(command, CancellationToken.None);
 
@@ -33,6 +33,7 @@ public sealed class CreateRoomHandlerTests
 
         await _repository.Received(1).SaveAsync(
             Arg.Is<Room>(r => r.Players.Count == 1 && r.Players[0].Name == "Alice"),
+            Arg.Any<TimeSpan?>(),
             Arg.Any<CancellationToken>());
     }
 
@@ -41,7 +42,7 @@ public sealed class CreateRoomHandlerTests
     {
         var command = new CreateRoomCommand("Alice", ["0", "1"]);
         var savedRoom = new Room { Id = 42, Players = [new Player("Alice", null)] };
-        _repository.SaveAsync(Arg.Any<Room>(), Arg.Any<CancellationToken>()).Returns(savedRoom);
+        _repository.SaveAsync(Arg.Any<Room>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>()).Returns(savedRoom);
 
         await _sut.Handle(command, CancellationToken.None);
 

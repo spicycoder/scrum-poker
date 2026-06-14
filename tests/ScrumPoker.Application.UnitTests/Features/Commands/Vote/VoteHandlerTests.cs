@@ -54,7 +54,7 @@ public sealed class VoteHandlerTests
         };
         var command = new VoteCommand(1, "Alice", "5");
         _repository.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(room);
-        _repository.SaveAsync(Arg.Any<Room>(), Arg.Any<CancellationToken>())
+        _repository.SaveAsync(Arg.Any<Room>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
             .Returns(ci => ci.ArgAt<Room>(0));
 
         var result = await _sut.Handle(command, CancellationToken.None);
@@ -66,6 +66,7 @@ public sealed class VoteHandlerTests
 
         await _repository.Received(1).SaveAsync(
             Arg.Is<Room>(r => r.Players[0].Value == "5"),
+            Arg.Any<TimeSpan?>(),
             Arg.Any<CancellationToken>());
     }
 
@@ -81,13 +82,13 @@ public sealed class VoteHandlerTests
         var cts = new CancellationTokenSource();
         var ct = cts.Token;
         _repository.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(room);
-        _repository.SaveAsync(Arg.Any<Room>(), Arg.Any<CancellationToken>())
+        _repository.SaveAsync(Arg.Any<Room>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
             .Returns(ci => ci.ArgAt<Room>(0));
 
         await _sut.Handle(command, ct);
 
         await _repository.Received(1).GetByIdAsync(1, ct);
-        await _repository.Received(1).SaveAsync(Arg.Any<Room>(), ct);
+        await _repository.Received(1).SaveAsync(Arg.Any<Room>(), Arg.Any<TimeSpan?>(), ct);
     }
 
     [Fact]
@@ -100,7 +101,7 @@ public sealed class VoteHandlerTests
         };
         var command = new VoteCommand(1, "Bob", "8");
         _repository.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(room);
-        _repository.SaveAsync(Arg.Any<Room>(), Arg.Any<CancellationToken>())
+        _repository.SaveAsync(Arg.Any<Room>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
             .Returns(ci => ci.ArgAt<Room>(0));
 
         var result = await _sut.Handle(command, CancellationToken.None);
@@ -117,7 +118,7 @@ public sealed class VoteHandlerTests
         var room = new Room { Id = 1, Players = [new Player("Alice", null)] };
         var command = new VoteCommand(1, "Alice", "8");
         _repository.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(room);
-        _repository.SaveAsync(Arg.Any<Room>(), Arg.Any<CancellationToken>())
+        _repository.SaveAsync(Arg.Any<Room>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
             .Returns(ci => ci.ArgAt<Room>(0));
 
         await _sut.Handle(command, CancellationToken.None);

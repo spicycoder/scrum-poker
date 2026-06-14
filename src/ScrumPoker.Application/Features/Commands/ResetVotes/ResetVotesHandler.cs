@@ -14,7 +14,7 @@ public sealed class ResetVotesHandler(IRoomRepository repository, IMessageBus bu
         }
 
         var (updated, @event) = room.ResetVotes();
-        await repository.SaveAsync(updated, ct);
+        await repository.SaveAsync(updated, null, ct);
         await bus.PublishAsync(@event);
         return new ResetVotesResult.Success(updated);
     }

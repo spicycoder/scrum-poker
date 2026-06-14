@@ -9,7 +9,7 @@ public sealed class CreateRoomHandler(IRoomRepository repository, IMessageBus bu
     public async Task<Room> Handle(CreateRoomCommand command, CancellationToken ct)
     {
         var (room, @event) = Room.Create(command.PlayerName, command.CardSet);
-        var saved = await repository.SaveAsync(room, ct);
+        var saved = await repository.SaveAsync(room, command.Expiry, ct);
         await bus.PublishAsync(@event with { RoomId = saved.Id });
         return saved;
     }

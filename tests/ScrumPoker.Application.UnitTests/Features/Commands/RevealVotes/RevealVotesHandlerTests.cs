@@ -48,6 +48,7 @@ public sealed class RevealVotesHandlerTests
 
         await _repository.Received(1).SaveAsync(
             Arg.Is<Room>(r => r.Revealed),
+            Arg.Any<TimeSpan?>(),
             Arg.Any<CancellationToken>());
     }
 

@@ -56,7 +56,7 @@ public sealed class JoinRoomHandlerTests
         _repository.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(room);
 
         var updatedRoom = room with { Players = [.. room.Players, new Player("Bob", null)] };
-        _repository.SaveAsync(Arg.Any<Room>(), Arg.Any<CancellationToken>()).Returns(updatedRoom);
+        _repository.SaveAsync(Arg.Any<Room>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>()).Returns(updatedRoom);
 
         var result = await _sut.Handle(command, CancellationToken.None);
 
@@ -67,6 +67,7 @@ public sealed class JoinRoomHandlerTests
 
         await _repository.Received(1).SaveAsync(
             Arg.Is<Room>(r => r.Players.Count == 2),
+            Arg.Any<TimeSpan?>(),
             Arg.Any<CancellationToken>());
     }
 
@@ -76,7 +77,7 @@ public sealed class JoinRoomHandlerTests
         var room = new Room { Id = 1, Players = [new Player("Alice", null)] };
         var command = new JoinRoomCommand(1, "Bob");
         _repository.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(room);
-        _repository.SaveAsync(Arg.Any<Room>(), Arg.Any<CancellationToken>())
+        _repository.SaveAsync(Arg.Any<Room>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
             .Returns(ci => ci.ArgAt<Room>(0));
 
         await _sut.Handle(command, CancellationToken.None);

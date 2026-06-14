@@ -54,7 +54,7 @@ public sealed class LeaveRoomHandlerTests
         };
         var command = new LeaveRoomCommand(1, "Bob");
         _repository.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(room);
-        _repository.SaveAsync(Arg.Any<Room>(), Arg.Any<CancellationToken>())
+        _repository.SaveAsync(Arg.Any<Room>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
             .Returns(ci => ci.ArgAt<Room>(0));
 
         var result = await _sut.Handle(command, CancellationToken.None);
@@ -65,6 +65,7 @@ public sealed class LeaveRoomHandlerTests
 
         await _repository.Received(1).SaveAsync(
             Arg.Is<Room>(r => r.Players.Count == 1 && r.Players[0].Name == "Alice"),
+            Arg.Any<TimeSpan?>(),
             Arg.Any<CancellationToken>());
     }
 
@@ -78,7 +79,7 @@ public sealed class LeaveRoomHandlerTests
         };
         var command = new LeaveRoomCommand(1, "Bob");
         _repository.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(room);
-        _repository.SaveAsync(Arg.Any<Room>(), Arg.Any<CancellationToken>())
+        _repository.SaveAsync(Arg.Any<Room>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
             .Returns(ci => ci.ArgAt<Room>(0));
 
         await _sut.Handle(command, CancellationToken.None);

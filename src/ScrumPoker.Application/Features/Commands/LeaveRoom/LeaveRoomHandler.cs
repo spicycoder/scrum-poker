@@ -16,7 +16,7 @@ public sealed class LeaveRoomHandler(IRoomRepository repository, IMessageBus bus
         try
         {
             var (updated, @event) = room.Leave(command.PlayerName);
-            await repository.SaveAsync(updated, ct);
+            await repository.SaveAsync(updated, null, ct);
             await bus.PublishAsync(@event);
             return new LeaveRoomResult.Success(updated);
         }

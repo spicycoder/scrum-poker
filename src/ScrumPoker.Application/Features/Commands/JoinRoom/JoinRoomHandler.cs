@@ -17,7 +17,7 @@ public sealed class JoinRoomHandler(IRoomRepository repository, IMessageBus bus)
         try
         {
             var (updated, @event) = room.Join(command.PlayerName);
-            var saved = await repository.SaveAsync(updated, ct);
+            var saved = await repository.SaveAsync(updated, null, ct);
             await bus.PublishAsync(@event);
             return new JoinRoomResult.Success(saved);
         }

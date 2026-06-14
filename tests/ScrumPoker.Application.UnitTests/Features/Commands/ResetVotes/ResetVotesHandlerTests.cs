@@ -48,6 +48,7 @@ public sealed class ResetVotesHandlerTests
 
         await _repository.Received(1).SaveAsync(
             Arg.Is<Room>(r => !r.Revealed && r.Players.All(p => p.Value == null)),
+            Arg.Any<TimeSpan?>(),
             Arg.Any<CancellationToken>());
     }
 

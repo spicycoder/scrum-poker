@@ -4,6 +4,7 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 
 using ScrumPoker.API.Middleware;
+using ScrumPoker.API.Settings;
 using ScrumPoker.Application;
 using ScrumPoker.Application.Features.Commands.LeaveRoom;
 using ScrumPoker.Infrastructure;
@@ -29,6 +30,9 @@ builder.Services.AddProblemDetails();
 builder.Services.AddControllers();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
+builder.Services.AddOptions<WarmupSettings>()
+    .BindConfiguration("Warmup");
 
 var app = builder.Build();
 
