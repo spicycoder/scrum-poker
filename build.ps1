@@ -13,7 +13,7 @@ if ($Images) {
     -p ContainerImageTag=latest `
     -p ContainerRuntimeIdentifier=linux-x64
 
-  & $containerCmd build -f k8s/web.Dockerfile -t ghcr.io/spicycoder/scrumpoker-web:latest web/
+  & $containerCmd build -f web/Dockerfile -t ghcr.io/spicycoder/scrumpoker-web:latest web/
 
   Write-Host "Images built: ghcr.io/spicycoder/scrumpoker-api:latest, ghcr.io/spicycoder/scrumpoker-web:latest" -ForegroundColor Green
 } else {
