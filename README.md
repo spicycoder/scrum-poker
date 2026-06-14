@@ -34,3 +34,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 Thanks to [Render](https://render.com) and [UptimeRobot](https://uptimerobot.com)
 for providing free tiers that make side projects like this possible.
+
+## Supplementary Sites
+
+- [Storybook](https://scrumpoker-sb.onrender.com)
+- [Coverage](https://scrumpoker-coverage.onrender.com)

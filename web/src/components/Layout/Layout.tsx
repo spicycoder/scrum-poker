@@ -11,11 +11,11 @@ export default function Layout() {
     <div className="relative min-h-screen">
       <div className="fixed inset-0 -z-10">
         <DotField
-          dotRadius={1.5}
-          dotSpacing={14}
+          dotRadius={3}
+          dotSpacing={28}
           bulgeStrength={67}
           glowRadius={160}
-          sparkle={false}
+          sparkle
           waveAmplitude={0}
           cursorRadius={500}
           cursorForce={0.1}

@@ -1,0 +1,103 @@
+<style>
+  /* Hide built-in Storybook help pages from sidebar */
+  a[href*="/settings/about"],
+  a[href*="/settings/shortcuts"],
+  a[href*="/settings/whats-new"] {
+    display: none !important;
+  }
+
+  @keyframes shuffle-char-in {
+    0% {
+      opacity: 0;
+      transform: translateY(-24px) rotateX(90deg) scale(0.5);
+      filter: blur(4px);
+    }
+    60% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) rotateX(0deg) scale(1);
+      filter: blur(0);
+    }
+  }
+  .sb-shuffled-char {
+    display: inline-block;
+    white-space: pre;
+    animation: shuffle-char-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+</style>
+
+<script>
+  (function () {
+    var BRAND_TEXT = '\u2660 Scrum Poker';
+
+    function isShuffled(el) {
+      return el.getAttribute('data-shuffled') === 'true';
+    }
+
+    function shuffleBrand(el) {
+      if (isShuffled(el)) return;
+      var text = el.textContent;
+      if (text.indexOf('Scrum') === -1) return;
+      el.setAttribute('data-shuffled', 'true');
+
+      el.textContent = '';
+      el.style.display = 'inline-flex';
+      el.style.flexWrap = 'wrap';
+
+      var chars = [];
+      for (var i = 0; i < text.length; i++) {
+        (function (idx) {
+          var ch = text.charAt(idx);
+          var span = document.createElement('span');
+          span.className = 'sb-shuffled-char';
+          span.textContent = ch === ' ' ? '\u00A0' : ch;
+          span.style.animationDelay = idx * 30 + 'ms';
+          el.appendChild(span);
+          chars.push(span);
+        })(i);
+      }
+    }
+
+    function findAndShuffle() {
+      var walker = document.createTreeWalker(
+        document.body,
+        NodeFilter.SHOW_TEXT,
+        {
+          acceptNode: function (node) {
+            return node.textContent.indexOf('Scrum') !== -1
+              ? NodeFilter.FILTER_ACCEPT
+              : NodeFilter.FILTER_SKIP;
+          },
+        }
+      );
+      while (walker.nextNode()) {
+        var parent = walker.currentNode.parentElement;
+        if (parent && !isShuffled(parent)) {
+          shuffleBrand(parent);
+        }
+      }
+    }
+
+    var pollTimer = setInterval(function () {
+      findAndShuffle();
+      if (document.querySelector('[data-shuffled="true"]')) {
+        clearInterval(pollTimer);
+      }
+    }, 200);
+
+    var observer = new MutationObserver(function () {
+      if (!document.querySelector('[data-shuffled="true"]')) {
+        findAndShuffle();
+      }
+    });
+    if (document.body) {
+      observer.observe(document.body, { childList: true, subtree: true });
+    } else {
+      document.addEventListener('DOMContentLoaded', function () {
+        observer.observe(document.body, { childList: true, subtree: true });
+      });
+    }
+  })();
+</script>
