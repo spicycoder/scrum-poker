@@ -8,8 +8,7 @@ COPY src/ScrumPoker.Domain/ScrumPoker.Domain.csproj src/ScrumPoker.Domain/
 COPY src/ScrumPoker.Infrastructure/ScrumPoker.Infrastructure.csproj src/ScrumPoker.Infrastructure/
 COPY src/ScrumPoker.Persistence/ScrumPoker.Persistence.csproj src/ScrumPoker.Persistence/
 COPY src/ScrumPoker.ServiceDefaults/ScrumPoker.ServiceDefaults.csproj src/ScrumPoker.ServiceDefaults/
-RUN --mount=type=cache,target=/root/.nuget/packages \
-    dotnet restore src/ScrumPoker.API/ScrumPoker.API.csproj
+RUN dotnet restore src/ScrumPoker.API/ScrumPoker.API.csproj
 
 COPY . .
 RUN dotnet publish src/ScrumPoker.API/ScrumPoker.API.csproj -c Release -o /app/publish
