@@ -1,8 +1,10 @@
 # ♠️ Scrum Poker
 
-[![CI](https://github.com/spicycoder/scrum-poker/actions/workflows/ci.yml/badge.svg)](https://github.com/spicycoder/scrum-poker/actions/workflows/ci.yml)
-
 ♠️ Online ♦️ Real-time ♣️ Multi-player ♥️ Game
+
+| Build | Alive |
+| --- | --- |
+| [![CI](https://github.com/spicycoder/scrum-poker/actions/workflows/ci.yml/badge.svg)](https://github.com/spicycoder/scrum-poker/actions/workflows/ci.yml) | [![API Status](https://img.shields.io/uptimerobot/status/m803295015-15a0d5a0f5529c5bea50970e)](https://uptimerobot.com) |
 
 ---
 
@@ -26,3 +28,8 @@ cd scrum-poker
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+
+## Acknowledgements
+
+Thanks to [Render](https://render.com) and [UptimeRobot](https://uptimerobot.com)
+for providing free tiers that make side projects like this possible.
