@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.StackExchange.Redis" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
   </ItemGroup>
 
 </Project>
