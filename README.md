@@ -38,4 +38,3 @@ for providing free tiers that make side projects like this possible.
 ## Supplementary Sites
 
 - [Storybook](https://scrumpoker-sb.onrender.com)
-- [Coverage](https://scrumpoker-coverage.onrender.com)
