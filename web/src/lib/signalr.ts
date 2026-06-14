@@ -26,8 +26,12 @@ export function useGameHub(
 
     let active = true
 
+    const hubUrl = import.meta.env.VITE_API_URL
+      ? `${import.meta.env.VITE_API_URL.replace(/\/+$/, '')}/api/hub`
+      : '/api/hub'
+
     const connection = new HubConnectionBuilder()
-      .withUrl('/api/hub')
+      .withUrl(hubUrl)
       .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
       .configureLogging(LogLevel.Information)
       .build()

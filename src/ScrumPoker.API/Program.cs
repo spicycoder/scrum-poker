@@ -17,6 +17,21 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 builder.AddRedisClient("redis");
 
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+if (allowedOrigins is { Length: > 0 })
+{
+    builder.Services.AddCors(options =>
+    {
+        options.AddDefaultPolicy(policy =>
+        {
+            policy.WithOrigins(allowedOrigins)
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials();
+        });
+    });
+}
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -48,6 +63,11 @@ tracker.PlayerRemoved = (roomId, playerName) =>
 app.MapDefaultEndpoints();
 
 app.UseExceptionHandler();
+
+if (allowedOrigins is { Length: > 0 })
+{
+    app.UseCors();
+}
 
 if (app.Environment.IsDevelopment())
 {
