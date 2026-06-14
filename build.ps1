@@ -23,6 +23,12 @@ if ($Images) {
   dotnet restore ./ScrumPoker.slnx
   dotnet build --no-restore -c Release ./ScrumPoker.slnx
 
+  # Frontend build
+  Push-Location web
+  pnpm install --frozen-lockfile
+  pnpm run build
+  Pop-Location
+
   if (Test-Path ./.coverage) { Remove-Item ./.coverage -Recurse -Force }
   New-Item -ItemType Directory -Path ./.coverage | Out-Null
 

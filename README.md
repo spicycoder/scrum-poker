@@ -17,6 +17,7 @@
 ## Prerequisites
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
+- [Node.js](https://nodejs.org/) (22.x) + [pnpm](https://pnpm.io/installation)
 - [Docker](https://www.docker.com/) or [Podman](https://podman.io/) (for integration tests). If using Podman, enable Docker compatibility.
 
 ## Getting Started
