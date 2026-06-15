@@ -12,7 +12,7 @@ namespace ScrumPoker.API.Controllers;
 [Route("api/warmup")]
 public sealed class WarmupController : ControllerBase
 {
-    [HttpGet]
+    [AcceptVerbs("GET", "HEAD")]
     public async Task<IActionResult> Warmup(
         [FromServices] IMessageBus bus,
         [FromServices] IOptions<WarmupSettings> settings)
