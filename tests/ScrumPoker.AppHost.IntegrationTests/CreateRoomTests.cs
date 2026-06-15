@@ -65,7 +65,7 @@ public sealed class CreateRoomExpiryTests(ShortTtlDistributedApplicationFixture 
             new CreateRoomRequest("Alice", ["0", "1"]), TestContext.Current.CancellationToken);
         var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
 
-        await Task.Delay(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        await Task.Delay(TimeSpan.FromSeconds(7), TestContext.Current.CancellationToken);
 
         var joinResponse = await fixture.HttpClient.PostAsJsonAsync(
             $"/api/rooms/{roomId}/join",

@@ -22,7 +22,7 @@ public sealed class ShortTtlDistributedApplicationFixture : IAsyncLifetime
             .CreateAsync<Projects.ScrumPoker_AppHost>(ct);
 
         var api = appHost.CreateResourceBuilder<ProjectResource>("scrumpoker-api");
-        api.WithEnvironment("Game__ExpirationSeconds", "4");
+        api.WithEnvironment("Game__ExpirationSeconds", "6");
 
         _app = await appHost.BuildAsync(ct).WaitAsync(ct);
         await _app.StartAsync(ct).WaitAsync(ct);

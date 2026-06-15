@@ -74,8 +74,8 @@ public sealed class JoinRoomTests
 public sealed class JoinRoomExpiryTests(ShortTtlDistributedApplicationFixture fixture)
     : IClassFixture<ShortTtlDistributedApplicationFixture>
 {
-    // TTL = 4s. Join at t≈2s resets it to 4s (expires at t≈6s).
-    // At t≈5s the room would have been gone without the reset — proves timer was restarted.
+    // TTL = 6s. Join at t≈2s resets TTL (expires at t≈8s).
+    // At t≈6s the room would have been gone without the reset — proves timer was restarted.
     [Fact]
     public async Task Join_Should_Reset_Expiry_Timer()
     {
@@ -85,13 +85,13 @@ public sealed class JoinRoomExpiryTests(ShortTtlDistributedApplicationFixture fi
 
         await Task.Delay(TimeSpan.FromSeconds(2), TestContext.Current.CancellationToken);
 
-        // Join resets the TTL back to 4s.
+        // Join resets TTL back to 6s.
         await fixture.HttpClient.PostAsJsonAsync(
             $"/api/rooms/{roomId}/join",
             new JoinRoomRequest("Bob"), TestContext.Current.CancellationToken);
 
-        // t≈5s: past the original expiry (t=4s), but within the reset window (t=6s).
-        await Task.Delay(TimeSpan.FromSeconds(3), TestContext.Current.CancellationToken);
+        // t≈6s: past original expiry (t=6s), but within reset window (t=8s).
+        await Task.Delay(TimeSpan.FromSeconds(4), TestContext.Current.CancellationToken);
 
         var joinResponse = await fixture.HttpClient.PostAsJsonAsync(
             $"/api/rooms/{roomId}/join",
@@ -108,7 +108,7 @@ public sealed class JoinRoomExpiryTests(ShortTtlDistributedApplicationFixture fi
             new CreateRoomRequest("Alice", ["0", "1"]), TestContext.Current.CancellationToken);
         var roomId = IntegrationTestHelpers.GetRoomIdFromLocation(createResponse);
 
-        await Task.Delay(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        await Task.Delay(TimeSpan.FromSeconds(7), TestContext.Current.CancellationToken);
 
         var joinResponse = await fixture.HttpClient.PostAsJsonAsync(
             $"/api/rooms/{roomId}/join",
