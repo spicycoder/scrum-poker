@@ -12,7 +12,6 @@ public static class Bootstrap
         services.AddScoped<IRoomRepository, RoomRepository>();
         services.AddScoped<IStatsRepository, StatsRepository>();
         services.AddHostedService<DatabaseInitializer>();
-        services.AddHostedService<DataCleanupService>();
         services.AddOptions<GameSettings>()
             .BindConfiguration("Game");
 
