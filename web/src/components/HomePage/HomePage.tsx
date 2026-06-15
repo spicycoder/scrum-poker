@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
 import CreateRoomForm from '../CreateRoomForm'
 import JoinRoomForm from '../JoinRoomForm'
+import StatsCard from '../StatsCard'
 
 interface HomePageProps {
   roomId?: string
@@ -18,7 +19,7 @@ export default function HomePage({ roomId }: HomePageProps) {
   }
 
   return (
-    <div className="flex justify-center px-6 pt-8">
+    <div className="flex flex-col items-center px-6 pt-8">
       <Tabs value={tab} onValueChange={onTabChange} className="w-full max-w-md">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="create">Create Room</TabsTrigger>
@@ -31,6 +32,7 @@ export default function HomePage({ roomId }: HomePageProps) {
           <JoinRoomForm roomId={roomId} />
         </TabsContent>
       </Tabs>
+      <StatsCard />
     </div>
   )
 }

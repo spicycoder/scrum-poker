@@ -42,6 +42,8 @@
 }
 
 :root {
+  --stat-games: oklch(0.35 0 0);
+  --stat-players: oklch(0.55 0 0);
   --background: oklch(0.98 0.003 285.86);
   --foreground: oklch(0.1411 0.0053 285.86);
   --card: oklch(0.98 0.003 285.86);
@@ -77,6 +79,8 @@
 }
 
 .dark {
+  --stat-games: oklch(0.5 0 0);
+  --stat-players: oklch(0.75 0 0);
   --background: oklch(0.1411 0.0053 285.86);
   --foreground: oklch(0.9133 0.0053 285.86);
   --card: oklch(0.1411 0.0053 285.86);

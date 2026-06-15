@@ -83,3 +83,18 @@ export async function resetVotes(roomId: number): Promise<void> {
     method: 'POST',
   })
 }
+
+export interface MonthlyStatRow {
+  monthKey: string
+  gameCount: number
+  playerCount: number
+}
+
+export interface StatsResponse {
+  monthlyStats: MonthlyStatRow[]
+  currentMonth: MonthlyStatRow
+}
+
+export async function getStats(): Promise<StatsResponse> {
+  return request('/api/stats')
+}

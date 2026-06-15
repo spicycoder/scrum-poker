@@ -1,4 +1,5 @@
 using NSubstitute;
+using ScrumPoker.Application.Abstractions;
 using ScrumPoker.Domain.Abstractions;
 using ScrumPoker.Domain.Rooms;
 using ScrumPoker.Domain.Rooms.Events;
@@ -10,11 +11,12 @@ public sealed class JoinRoomHandlerTests
 {
     private readonly IRoomRepository _repository = Substitute.For<IRoomRepository>();
     private readonly IMessageBus _bus = Substitute.For<IMessageBus>();
+    private readonly IStatsRepository _stats = Substitute.For<IStatsRepository>();
     private readonly JoinRoomHandler _sut;
 
     public JoinRoomHandlerTests()
     {
-        _sut = new JoinRoomHandler(_repository, _bus);
+        _sut = new JoinRoomHandler(_repository, _bus, _stats);
     }
 
     [Fact]

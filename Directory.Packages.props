@@ -22,6 +22,10 @@
     <PackageVersion Include="Swashbuckle.AspNetCore.ReDoc" Version="10.2.1" />
     <PackageVersion Include="WolverineFx" Version="6.8.0" />
     <PackageVersion Include="WolverineFx.RuntimeCompilation" Version="6.8.0" />
+    <PackageVersion Include="Aspire.Npgsql" Version="13.4.3" />
+    <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="13.4.3" />
+    <PackageVersion Include="Npgsql" Version="9.0.3" />
+    <PackageVersion Include="Dapper" Version="2.1.35" />
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="Aspire.Hosting.Testing" Version="13.4.3" />

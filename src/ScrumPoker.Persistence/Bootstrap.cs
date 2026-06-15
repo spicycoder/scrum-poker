@@ -1,5 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
+using ScrumPoker.Application.Abstractions;
 using ScrumPoker.Domain.Abstractions;
+using ScrumPoker.Persistence.Stats;
 
 namespace ScrumPoker.Persistence;
 
@@ -8,6 +10,9 @@ public static class Bootstrap
     public static IServiceCollection AddPersistence(this IServiceCollection services)
     {
         services.AddScoped<IRoomRepository, RoomRepository>();
+        services.AddScoped<IStatsRepository, StatsRepository>();
+        services.AddHostedService<DatabaseInitializer>();
+        services.AddHostedService<DataCleanupService>();
         services.AddOptions<GameSettings>()
             .BindConfiguration("Game");
 

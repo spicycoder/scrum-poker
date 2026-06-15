@@ -8,6 +8,7 @@ public sealed record Room
     public List<Player> Players { get; init; } = [];
     public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
     public bool Revealed { get; init; }
+    public bool IsWarmup { get; init; }
     public List<string> CardSet { get; init; } = [];
 
     public static (Room Room, RoomCreated Event) Create(string playerName, List<string>? cardSet = null)
