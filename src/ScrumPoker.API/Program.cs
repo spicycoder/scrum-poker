@@ -1,3 +1,4 @@
+using Npgsql;
 using AspNetCore.Swagger.Themes;
 
 using FluentValidation;
@@ -18,6 +19,24 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 builder.AddRedisClient("redis");
+var statsConnStr = builder.Configuration.GetConnectionString("statsdb");
+if (statsConnStr is not null &&
+    (statsConnStr.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase) ||
+     statsConnStr.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase)))
+{
+    var uri = new Uri(statsConnStr);
+    var userInfo = uri.UserInfo?.Split(':', 2);
+    statsConnStr = new NpgsqlConnectionStringBuilder
+    {
+        Host = uri.Host,
+        Port = uri.Port > 0 ? uri.Port : 5432,
+        Database = uri.AbsolutePath.TrimStart('/'),
+        Username = userInfo?[0],
+        Password = userInfo?.Length > 1 ? userInfo[1] : null,
+        SslMode = SslMode.Require,
+    }.ConnectionString;
+    builder.Configuration["ConnectionStrings:statsdb"] = statsConnStr;
+}
 builder.AddNpgsqlDataSource("statsdb");
 
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
