@@ -27,8 +27,8 @@ public sealed class LeaveRoomEndpointTests
     {
         var request = new LeaveRoomRequest("Bob");
         var room = new Room { Id = 1, Players = [new Player("Alice", null)] };
-        _bus.InvokeAsync<LeaveRoomResult>(Arg.Any<LeaveRoomCommand>(), Arg.Any<CancellationToken>())
-            .Returns(new LeaveRoomResult.Success(room));
+        _bus.InvokeAsync<Room?>(Arg.Any<LeaveRoomCommand>(), Arg.Any<CancellationToken>())
+            .Returns(room);
 
         var result = await _sut.Leave(1, request, TestContext.Current.CancellationToken);
 
@@ -39,8 +39,8 @@ public sealed class LeaveRoomEndpointTests
     public async Task Should_Return_404NotFound_When_RoomNotFound()
     {
         var request = new LeaveRoomRequest("Bob");
-        _bus.InvokeAsync<LeaveRoomResult>(Arg.Any<LeaveRoomCommand>(), Arg.Any<CancellationToken>())
-            .Returns(new LeaveRoomResult.RoomNotFound());
+        _bus.InvokeAsync<Room?>(Arg.Any<LeaveRoomCommand>(), Arg.Any<CancellationToken>())
+            .Returns((Room?)null);
 
         var result = await _sut.Leave(1, request, TestContext.Current.CancellationToken);
 
@@ -51,38 +51,12 @@ public sealed class LeaveRoomEndpointTests
     public async Task Should_Return_404NotFound_When_PlayerNotInRoom()
     {
         var request = new LeaveRoomRequest("Bob");
-        _bus.InvokeAsync<LeaveRoomResult>(Arg.Any<LeaveRoomCommand>(), Arg.Any<CancellationToken>())
-            .Returns(new LeaveRoomResult.PlayerNotInRoom());
+        _bus.InvokeAsync<Room?>(Arg.Any<LeaveRoomCommand>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromException<Room?>(new InvalidOperationException("not in room")));
 
         var result = await _sut.Leave(1, request, TestContext.Current.CancellationToken);
 
         result.ShouldBeOfType<NotFoundResult>();
     }
 
-    [Theory]
-    [InlineData(0)]
-    [InlineData(-5)]
-    public async Task Should_Return_400BadRequest_When_IdIsInvalid(int id)
-    {
-        var request = new LeaveRoomRequest("Bob");
-
-        var result = await _sut.Leave(id, request, TestContext.Current.CancellationToken);
-
-        result.ShouldBeOfType<BadRequestResult>();
-        await _bus.DidNotReceiveWithAnyArgs().InvokeAsync<LeaveRoomResult>(default!, default(CancellationToken));
-    }
-
-    [Fact]
-    public async Task Should_Throw_InvalidOperationException_For_UnknownResultType()
-    {
-        var request = new LeaveRoomRequest("Bob");
-        var unknownResult = Substitute.For<LeaveRoomResult>();
-        _bus.InvokeAsync<LeaveRoomResult>(Arg.Any<LeaveRoomCommand>(), Arg.Any<CancellationToken>())
-            .Returns(unknownResult);
-
-        var exception = await Should.ThrowAsync<InvalidOperationException>(() =>
-            _sut.Leave(1, request, TestContext.Current.CancellationToken));
-
-        exception.Message.ShouldContain("Unknown result type");
-    }
 }

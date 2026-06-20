@@ -20,18 +20,18 @@ public sealed class JoinRoomHandlerTests
     }
 
     [Fact]
-    public async Task Handle_Should_Return_RoomNotFound_When_Room_DoesNotExist()
+    public async Task Handle_Should_Return_Null_When_Room_DoesNotExist()
     {
         var command = new JoinRoomCommand(42, "Bob");
         _repository.GetByIdAsync(42, Arg.Any<CancellationToken>()).Returns((Room?)null);
 
         var result = await _sut.Handle(command, CancellationToken.None);
 
-        result.ShouldBeOfType<JoinRoomResult.RoomNotFound>();
+        result.ShouldBeNull();
     }
 
     [Fact]
-    public async Task Handle_Should_Return_PlayerAlreadyInRoom_When_Player_Exists()
+    public async Task Handle_Should_Throw_When_Player_AlreadyInRoom()
     {
         var room = new Room
         {
@@ -41,13 +41,12 @@ public sealed class JoinRoomHandlerTests
         var command = new JoinRoomCommand(1, "Bob");
         _repository.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(room);
 
-        var result = await _sut.Handle(command, CancellationToken.None);
-
-        result.ShouldBeOfType<JoinRoomResult.PlayerAlreadyInRoom>();
+        await Should.ThrowAsync<InvalidOperationException>(() =>
+            _sut.Handle(command, CancellationToken.None));
     }
 
     [Fact]
-    public async Task Handle_Should_Return_Success_With_UpdatedRoom()
+    public async Task Handle_Should_Return_Room_With_UpdatedPlayers()
     {
         var room = new Room
         {
@@ -56,16 +55,17 @@ public sealed class JoinRoomHandlerTests
         };
         var command = new JoinRoomCommand(1, "Bob");
         _repository.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(room);
-
-        var updatedRoom = room with { Players = [.. room.Players, new Player("Bob", null)] };
-        _repository.SaveAsync(Arg.Any<Room>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>()).Returns(updatedRoom);
+        _repository.SaveAsync(Arg.Any<Room>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
+            .Returns(ci => ci.ArgAt<Room>(0));
+        _stats.RecordPlayerJoinedAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
 
         var result = await _sut.Handle(command, CancellationToken.None);
 
-        var success = result.ShouldBeOfType<JoinRoomResult.Success>();
-        success.Room.Players.Count.ShouldBe(2);
-        success.Room.Players.ShouldContain(p => p.Name == "Alice");
-        success.Room.Players.ShouldContain(p => p.Name == "Bob");
+        result.ShouldNotBeNull();
+        result.Players.Count.ShouldBe(2);
+        result.Players.ShouldContain(p => p.Name == "Alice");
+        result.Players.ShouldContain(p => p.Name == "Bob");
 
         await _repository.Received(1).SaveAsync(
             Arg.Is<Room>(r => r.Players.Count == 2),
@@ -81,6 +81,8 @@ public sealed class JoinRoomHandlerTests
         _repository.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(room);
         _repository.SaveAsync(Arg.Any<Room>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
             .Returns(ci => ci.ArgAt<Room>(0));
+        _stats.RecordPlayerJoinedAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
 
         await _sut.Handle(command, CancellationToken.None);
 
@@ -106,7 +108,8 @@ public sealed class JoinRoomHandlerTests
         var command = new JoinRoomCommand(1, "Bob");
         _repository.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(room);
 
-        await _sut.Handle(command, CancellationToken.None);
+        await Should.ThrowAsync<InvalidOperationException>(() =>
+            _sut.Handle(command, CancellationToken.None));
 
         await _bus.DidNotReceiveWithAnyArgs().PublishAsync(Arg.Any<PlayerJoined>());
     }
