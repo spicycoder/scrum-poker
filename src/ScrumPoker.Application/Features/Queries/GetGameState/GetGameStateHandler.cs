@@ -1,14 +1,12 @@
 using ScrumPoker.Domain.Abstractions;
+using ScrumPoker.Domain.Rooms;
 
 namespace ScrumPoker.Application.Features.Queries.GetGameState;
 
 public sealed class GetGameStateHandler(IRoomRepository repository)
 {
-    public async Task<GetGameStateResult> Handle(GetGameStateQuery query, CancellationToken ct)
+    public async Task<Room?> Handle(GetGameStateQuery query, CancellationToken ct)
     {
-        var room = await repository.GetByIdAsync(query.RoomId, ct);
-        return room is null
-            ? new GetGameStateResult.RoomNotFound()
-            : new GetGameStateResult.Success(room);
+        return await repository.GetByIdAsync(query.RoomId, ct);
     }
 }

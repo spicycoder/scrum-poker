@@ -18,18 +18,18 @@ public sealed class VoteHandlerTests
     }
 
     [Fact]
-    public async Task Handle_Should_Return_RoomNotFound_When_Room_DoesNotExist()
+    public async Task Handle_Should_Return_Null_When_Room_DoesNotExist()
     {
         var command = new VoteCommand(42, "Bob", "5");
         _repository.GetByIdAsync(42, Arg.Any<CancellationToken>()).Returns((Room?)null);
 
         var result = await _sut.Handle(command, CancellationToken.None);
 
-        result.ShouldBeOfType<VoteResult.RoomNotFound>();
+        result.ShouldBeNull();
     }
 
     [Fact]
-    public async Task Handle_Should_Return_PlayerNotInRoom_When_Player_NotFound()
+    public async Task Handle_Should_Throw_When_Player_NotInRoom()
     {
         var room = new Room
         {
@@ -39,13 +39,12 @@ public sealed class VoteHandlerTests
         var command = new VoteCommand(1, "Bob", "5");
         _repository.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(room);
 
-        var result = await _sut.Handle(command, CancellationToken.None);
-
-        result.ShouldBeOfType<VoteResult.PlayerNotInRoom>();
+        await Should.ThrowAsync<InvalidOperationException>(() =>
+            _sut.Handle(command, CancellationToken.None));
     }
 
     [Fact]
-    public async Task Handle_Should_Return_Success_With_UpdatedVote_When_Valid()
+    public async Task Handle_Should_Return_Room_With_UpdatedVote()
     {
         var room = new Room
         {
@@ -59,10 +58,10 @@ public sealed class VoteHandlerTests
 
         var result = await _sut.Handle(command, CancellationToken.None);
 
-        var success = result.ShouldBeOfType<VoteResult.Success>();
-        success.Room.Players.ShouldHaveSingleItem();
-        success.Room.Players[0].Name.ShouldBe("Alice");
-        success.Room.Players[0].Value.ShouldBe("5");
+        result.ShouldNotBeNull();
+        result.Players.ShouldHaveSingleItem();
+        result.Players[0].Name.ShouldBe("Alice");
+        result.Players[0].Value.ShouldBe("5");
 
         await _repository.Received(1).SaveAsync(
             Arg.Is<Room>(r => r.Players[0].Value == "5"),
@@ -106,10 +105,10 @@ public sealed class VoteHandlerTests
 
         var result = await _sut.Handle(command, CancellationToken.None);
 
-        var success = result.ShouldBeOfType<VoteResult.Success>();
-        success.Room.Players.Count.ShouldBe(2);
-        success.Room.Players.ShouldContain(p => p.Name == "Alice" && p.Value == "3");
-        success.Room.Players.ShouldContain(p => p.Name == "Bob" && p.Value == "8");
+        result.ShouldNotBeNull();
+        result.Players.Count.ShouldBe(2);
+        result.Players.ShouldContain(p => p.Name == "Alice" && p.Value == "3");
+        result.Players.ShouldContain(p => p.Name == "Bob" && p.Value == "8");
     }
 
     [Fact]
@@ -145,7 +144,8 @@ public sealed class VoteHandlerTests
         var command = new VoteCommand(1, "Bob", "5");
         _repository.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(room);
 
-        await _sut.Handle(command, CancellationToken.None);
+        await Should.ThrowAsync<InvalidOperationException>(() =>
+            _sut.Handle(command, CancellationToken.None));
 
         await _bus.DidNotReceiveWithAnyArgs().PublishAsync(Arg.Any<VoteCast>());
     }
