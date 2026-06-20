@@ -60,7 +60,7 @@ jobs:
             "dotnet test --no-build -c Release ./ScrumPoker.slnx"
 
       - name: Update test badges
-        if: always()
+        if: always() && github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ secrets.GIST_TOKEN }}
         run: |
