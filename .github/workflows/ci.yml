@@ -60,7 +60,7 @@ jobs:
             "dotnet test --no-build -c Release ./ScrumPoker.slnx"
 
       - name: Update test badges
-        if: always()
+        if: always() && github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ secrets.GIST_TOKEN }}
         run: |
@@ -89,7 +89,7 @@ jobs:
     name: Publish containers
     runs-on: ubuntu-latest
     needs: build
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: read
       packages: write
