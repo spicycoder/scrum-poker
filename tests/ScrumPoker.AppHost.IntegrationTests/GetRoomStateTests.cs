@@ -44,11 +44,11 @@ public sealed class GetRoomStateTests
     }
 
     [Fact]
-    public async Task With_InvalidId_Should_Return_400()
+    public async Task With_InvalidId_Should_Return_404()
     {
         var response = await _httpClient.GetAsync("/api/rooms/0",
             TestContext.Current.CancellationToken);
 
-        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
 }

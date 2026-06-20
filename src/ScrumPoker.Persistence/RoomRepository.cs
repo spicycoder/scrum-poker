@@ -14,14 +14,12 @@ public sealed class RoomRepository(IConnectionMultiplexer redis, IOptions<GameSe
 
     public async Task<Room?> GetByIdAsync(int id, CancellationToken ct = default)
     {
-        _ = ct;
         var value = await _db.StringGetAsync(id.ToString());
         return value.IsNullOrEmpty ? null : JsonSerializer.Deserialize<Room>(value.ToString());
     }
 
     public async Task<Room> SaveAsync(Room room, TimeSpan? expiry = null, CancellationToken ct = default)
     {
-        _ = ct;
         var id = room.Id == 0 ? await GenerateIdAsync() : room.Id;
         var saved = room with { Id = id };
 

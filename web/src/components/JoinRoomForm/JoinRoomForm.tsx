@@ -70,8 +70,8 @@ export default function JoinRoomForm({ roomId }: JoinRoomFormProps) {
       await joinRoom(roomIdNum, trimmed)
       localStorage.setItem(STORAGE_KEY_NAME, trimmed)
       navigate(`/${roomIdNum}`)
-    } catch {
-      setJoinError('Failed to join room')
+    } catch (err) {
+      setJoinError(err instanceof ApiError && err.status === 409 ? 'Name already taken' : 'Failed to join room')
     }
   }
 

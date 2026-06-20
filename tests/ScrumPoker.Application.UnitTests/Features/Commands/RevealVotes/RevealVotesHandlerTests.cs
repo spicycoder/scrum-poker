@@ -18,14 +18,14 @@ public sealed class RevealVotesHandlerTests
     }
 
     [Fact]
-    public async Task Handle_Should_ReturnRoomNotFound_When_RoomDoesNotExist()
+    public async Task Handle_Should_Return_Null_When_Room_DoesNotExist()
     {
         var command = new RevealVotesCommand(42);
         _repository.GetByIdAsync(42, Arg.Any<CancellationToken>()).Returns((Room?)null);
 
         var result = await _sut.Handle(command, CancellationToken.None);
 
-        result.ShouldBeOfType<RevealVotesResult.RoomNotFound>();
+        result.ShouldBeNull();
     }
 
     [Fact]
@@ -39,12 +39,14 @@ public sealed class RevealVotesHandlerTests
         };
         var command = new RevealVotesCommand(1);
         _repository.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(room);
+        _repository.SaveAsync(Arg.Any<Room>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
+            .Returns(ci => ci.ArgAt<Room>(0));
 
         var result = await _sut.Handle(command, CancellationToken.None);
 
-        var success = result.ShouldBeOfType<RevealVotesResult.Success>();
-        success.Room.Revealed.ShouldBeTrue();
-        success.Room.Players.Count.ShouldBe(2);
+        result.ShouldNotBeNull();
+        result.Revealed.ShouldBeTrue();
+        result.Players.Count.ShouldBe(2);
 
         await _repository.Received(1).SaveAsync(
             Arg.Is<Room>(r => r.Revealed),
@@ -63,6 +65,8 @@ public sealed class RevealVotesHandlerTests
         };
         var command = new RevealVotesCommand(1);
         _repository.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(room);
+        _repository.SaveAsync(Arg.Any<Room>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
+            .Returns(ci => ci.ArgAt<Room>(0));
 
         await _sut.Handle(command, CancellationToken.None);
 

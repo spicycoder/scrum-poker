@@ -13,6 +13,8 @@ using ScrumPoker.Infrastructure.Realtime;
 using ScrumPoker.Persistence;
 using Wolverine;
 
+using Microsoft.Extensions.Logging;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
@@ -74,11 +76,19 @@ var app = builder.Build();
 
 var tracker = app.Services.GetRequiredService<PlayerConnectionTracker>();
 var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
-tracker.PlayerRemoved = (roomId, playerName) =>
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+tracker.PlayerRemoved = async (roomId, playerName) =>
 {
-    using var scope = scopeFactory.CreateScope();
-    var bus = scope.ServiceProvider.GetRequiredService<IMessageBus>();
-    return bus.InvokeAsync(new LeaveRoomCommand(roomId, playerName));
+    try
+    {
+        using var scope = scopeFactory.CreateScope();
+        var bus = scope.ServiceProvider.GetRequiredService<IMessageBus>();
+        await bus.InvokeAsync(new LeaveRoomCommand(roomId, playerName));
+    }
+    catch (Exception ex)
+    {
+        logger.LogWarning(ex, "PlayerRemoved cleanup failed for {PlayerName} in room {RoomId}", playerName, roomId);
+    }
 };
 
 app.MapDefaultEndpoints();

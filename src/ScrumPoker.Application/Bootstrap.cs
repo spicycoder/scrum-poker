@@ -7,14 +7,14 @@ namespace ScrumPoker.Application;
 
 public static class Bootstrap
 {
-    public static IServiceCollection AddApplication(this IServiceCollection services, params Assembly[] extraHandlerAssemblies)
+    public static IServiceCollection AddApplication(this IServiceCollection services, Assembly? extraHandlerAssembly = null)
     {
         services.AddWolverine(opts =>
         {
             opts.Discovery.IncludeAssembly(typeof(Bootstrap).Assembly);
-            foreach (var assembly in extraHandlerAssemblies)
+            if (extraHandlerAssembly is not null)
             {
-                opts.Discovery.IncludeAssembly(assembly);
+                opts.Discovery.IncludeAssembly(extraHandlerAssembly);
             }
         });
 
