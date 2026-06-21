@@ -20,7 +20,7 @@ public sealed class WarmupController : ControllerBase
         var ttl = TimeSpan.FromSeconds(settings.Value.ExpirationSeconds);
         var room = await bus.InvokeAsync<Room>(
             new CreateRoomCommand("warmup", ["1", "2"], ttl, IsWarmup: true));
-        _ = await bus.InvokeAsync<GetGameStateResult>(new GetGameStateQuery(room.Id));
+        _ = await bus.InvokeAsync<Room?>(new GetGameStateQuery(room.Id));
         return Ok(room.Id);
     }
 }

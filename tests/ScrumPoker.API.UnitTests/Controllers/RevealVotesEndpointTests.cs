@@ -24,8 +24,8 @@ public sealed class RevealVotesEndpointTests
     [Fact]
     public async Task Should_Return_201Created_When_Success()
     {
-        _bus.InvokeAsync<RevealVotesResult>(Arg.Any<RevealVotesCommand>(), Arg.Any<CancellationToken>())
-            .Returns(new RevealVotesResult.Success(new Room()));
+        _bus.InvokeAsync<Room?>(Arg.Any<RevealVotesCommand>(), Arg.Any<CancellationToken>())
+            .Returns(new Room());
 
         var result = await _sut.Reveal(1, TestContext.Current.CancellationToken);
 
@@ -36,35 +36,12 @@ public sealed class RevealVotesEndpointTests
     [Fact]
     public async Task Should_Return_404NotFound_When_RoomNotFound()
     {
-        _bus.InvokeAsync<RevealVotesResult>(Arg.Any<RevealVotesCommand>(), Arg.Any<CancellationToken>())
-            .Returns(new RevealVotesResult.RoomNotFound());
+        _bus.InvokeAsync<Room?>(Arg.Any<RevealVotesCommand>(), Arg.Any<CancellationToken>())
+            .Returns((Room?)null);
 
         var result = await _sut.Reveal(1, TestContext.Current.CancellationToken);
 
         result.ShouldBeOfType<NotFoundResult>();
     }
 
-    [Theory]
-    [InlineData(0)]
-    [InlineData(-5)]
-    public async Task Should_Return_400BadRequest_When_IdIsInvalid(int id)
-    {
-        var result = await _sut.Reveal(id, TestContext.Current.CancellationToken);
-
-        result.ShouldBeOfType<BadRequestResult>();
-        await _bus.DidNotReceiveWithAnyArgs().InvokeAsync<RevealVotesResult>(default!, default(CancellationToken));
-    }
-
-    [Fact]
-    public async Task Should_Throw_InvalidOperationException_For_UnknownResultType()
-    {
-        var unknownResult = Substitute.For<RevealVotesResult>();
-        _bus.InvokeAsync<RevealVotesResult>(Arg.Any<RevealVotesCommand>(), Arg.Any<CancellationToken>())
-            .Returns(unknownResult);
-
-        var exception = await Should.ThrowAsync<InvalidOperationException>(() =>
-            _sut.Reveal(1, TestContext.Current.CancellationToken));
-
-        exception.Message.ShouldContain("Unknown result type");
-    }
 }

@@ -15,26 +15,26 @@ public sealed class GetGameStateHandlerTests
     }
 
     [Fact]
-    public async Task Handle_Should_ReturnSuccess_When_RoomExists()
+    public async Task Handle_Should_Return_Room_When_RoomExists()
     {
         var room = new Room { Id = 42, Players = [new Player("Alice", null)] };
         _repository.GetByIdAsync(42, Arg.Any<CancellationToken>()).Returns(room);
 
         var result = await _sut.Handle(new GetGameStateQuery(42), CancellationToken.None);
 
-        var success = result.ShouldBeOfType<GetGameStateResult.Success>();
-        success.Room.Id.ShouldBe(42);
-        success.Room.Players.ShouldHaveSingleItem();
-        success.Room.Players[0].Name.ShouldBe("Alice");
+        result.ShouldNotBeNull();
+        result.Id.ShouldBe(42);
+        result.Players.ShouldHaveSingleItem();
+        result.Players[0].Name.ShouldBe("Alice");
     }
 
     [Fact]
-    public async Task Handle_Should_ReturnRoomNotFound_When_RoomDoesNotExist()
+    public async Task Handle_Should_Return_Null_When_Room_DoesNotExist()
     {
         _repository.GetByIdAsync(99, Arg.Any<CancellationToken>()).Returns((Room?)null);
 
         var result = await _sut.Handle(new GetGameStateQuery(99), CancellationToken.None);
 
-        result.ShouldBeOfType<GetGameStateResult.RoomNotFound>();
+        result.ShouldBeNull();
     }
 }
