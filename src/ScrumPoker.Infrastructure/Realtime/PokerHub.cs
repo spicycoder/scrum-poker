@@ -22,8 +22,8 @@ public sealed class PokerHub(PlayerConnectionTracker tracker, IRoomRepository re
             Context.Items[RoomIdKey] = id;
             Context.Items[PlayerNameKey] = playerName;
             await tracker.Join(id, playerName, Context.ConnectionId);
+            await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
         }
-        await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
     }
 
     public Task LeaveRoom(string roomId)

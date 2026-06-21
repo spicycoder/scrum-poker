@@ -18,18 +18,18 @@ public sealed class LeaveRoomHandlerTests
     }
 
     [Fact]
-    public async Task Handle_Should_Return_RoomNotFound_When_Room_DoesNotExist()
+    public async Task Handle_Should_Return_Null_When_Room_DoesNotExist()
     {
         var command = new LeaveRoomCommand(42, "Bob");
         _repository.GetByIdAsync(42, Arg.Any<CancellationToken>()).Returns((Room?)null);
 
         var result = await _sut.Handle(command, CancellationToken.None);
 
-        result.ShouldBeOfType<LeaveRoomResult.RoomNotFound>();
+        result.ShouldBeNull();
     }
 
     [Fact]
-    public async Task Handle_Should_Return_PlayerNotInRoom_When_Player_NotFound()
+    public async Task Handle_Should_Throw_When_Player_NotInRoom()
     {
         var room = new Room
         {
@@ -39,13 +39,12 @@ public sealed class LeaveRoomHandlerTests
         var command = new LeaveRoomCommand(1, "Bob");
         _repository.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(room);
 
-        var result = await _sut.Handle(command, CancellationToken.None);
-
-        result.ShouldBeOfType<LeaveRoomResult.PlayerNotInRoom>();
+        await Should.ThrowAsync<InvalidOperationException>(() =>
+            _sut.Handle(command, CancellationToken.None));
     }
 
     [Fact]
-    public async Task Handle_Should_Return_Success_With_UpdatedRoom_When_Valid()
+    public async Task Handle_Should_Return_Room_When_Valid()
     {
         var room = new Room
         {
@@ -59,9 +58,9 @@ public sealed class LeaveRoomHandlerTests
 
         var result = await _sut.Handle(command, CancellationToken.None);
 
-        var success = result.ShouldBeOfType<LeaveRoomResult.Success>();
-        success.Room.Players.ShouldHaveSingleItem();
-        success.Room.Players[0].Name.ShouldBe("Alice");
+        result.ShouldNotBeNull();
+        result.Players.ShouldHaveSingleItem();
+        result.Players[0].Name.ShouldBe("Alice");
 
         await _repository.Received(1).SaveAsync(
             Arg.Is<Room>(r => r.Players.Count == 1 && r.Players[0].Name == "Alice"),
@@ -110,7 +109,8 @@ public sealed class LeaveRoomHandlerTests
         var command = new LeaveRoomCommand(1, "Bob");
         _repository.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(room);
 
-        await _sut.Handle(command, CancellationToken.None);
+        await Should.ThrowAsync<InvalidOperationException>(() =>
+            _sut.Handle(command, CancellationToken.None));
 
         await _bus.DidNotReceiveWithAnyArgs().PublishAsync(Arg.Any<PlayerLeft>());
     }
