@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using ScrumPoker.Application.Abstractions;
+using ScrumPoker.Domain.Abstractions;
 
 namespace ScrumPoker.API.Controllers;
 

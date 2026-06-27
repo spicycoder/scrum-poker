@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using ScrumPoker.API.Features.CreateRoom;
 using ScrumPoker.API.Features.JoinRoom;
-using ScrumPoker.Application.Abstractions;
+using ScrumPoker.Domain.Abstractions;
 
 namespace ScrumPoker.AppHost.IntegrationTests;
 

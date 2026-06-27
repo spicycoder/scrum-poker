@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="NSubstitute" />
-    <ProjectReference Include="..\..\src\ScrumPoker.API\ScrumPoker.API.csproj" />
+    <ProjectReference Include="..\..\..\src\ScrumPoker.Application\ScrumPoker.Application.csproj" />
   </ItemGroup>
 
 </Project>

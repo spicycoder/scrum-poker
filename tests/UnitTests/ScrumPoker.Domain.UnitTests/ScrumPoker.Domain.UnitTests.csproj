@@ -5,8 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NSubstitute" />
-    <ProjectReference Include="..\..\src\ScrumPoker.Application\ScrumPoker.Application.csproj" />
+    <ProjectReference Include="..\..\..\src\ScrumPoker.Domain\ScrumPoker.Domain.csproj" />
   </ItemGroup>
 
 </Project>

@@ -2,6 +2,10 @@
 
 ♠️ Online ♦️ Real-time ♣️ Multi-player ♥️ Game
 
+Agile estimation cards — real-time voting, no login required.
+
+> The public instance is for demo purposes only. Self-host for production use.
+
 | Build | Alive |
 | --- | --- |
 | [![CI](https://github.com/spicycoder/scrum-poker/actions/workflows/ci.yml/badge.svg)](https://github.com/spicycoder/scrum-poker/actions/workflows/ci.yml) | [![API Status](https://img.shields.io/uptimerobot/status/m803295015-15a0d5a0f5529c5bea50970e)](https://uptimerobot.com) |

@@ -10,8 +10,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\ScrumPoker.AppHost\ScrumPoker.AppHost.csproj" />
-    <ProjectReference Include="..\..\src\ScrumPoker.API\ScrumPoker.API.csproj" />
+    <ProjectReference Include="..\..\..\src\ScrumPoker.AppHost\ScrumPoker.AppHost.csproj" />
+    <ProjectReference Include="..\..\..\src\ScrumPoker.API\ScrumPoker.API.csproj" />
   </ItemGroup>
 
 </Project>
