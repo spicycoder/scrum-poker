@@ -1,5 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using ScrumPoker.Application.Abstractions;
 using ScrumPoker.Domain.Abstractions;
 using ScrumPoker.Persistence.Stats;
 

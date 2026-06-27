@@ -1,4 +1,3 @@
-using ScrumPoker.Application.Abstractions;
 using ScrumPoker.Domain.Abstractions;
 using ScrumPoker.Domain.Rooms;
 using Wolverine;

@@ -1,4 +1,4 @@
-namespace ScrumPoker.Application.Abstractions;
+namespace ScrumPoker.Domain.Abstractions;
 
 public interface IStatsRepository
 {

@@ -1,6 +1,6 @@
 using Dapper;
 using Npgsql;
-using ScrumPoker.Application.Abstractions;
+using ScrumPoker.Domain.Abstractions;
 
 namespace ScrumPoker.Persistence.Stats;
 
