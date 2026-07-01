@@ -73,7 +73,7 @@ jobs:
         with:
           name: Coverage report
           path: ./.coverage/coverage.cobertura.xml
-          reporter: dotnet-coverage
+          reporter: cobertura
           fail-on-error: false
 
       - name: Update test badges
