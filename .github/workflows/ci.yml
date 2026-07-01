@@ -67,15 +67,6 @@ jobs:
             --output-format cobertura \
             "dotnet test --no-build -c Release ./ScrumPoker.slnx"
 
-      - name: Coverage annotations
-        uses: dorny/test-reporter@v2
-        if: success() || failure()
-        with:
-          name: Coverage report
-          path: ./.coverage/coverage.cobertura.xml
-          reporter: cobertura
-          fail-on-error: false
-
       - name: Update test badges
         if: always() && github.ref == 'refs/heads/main'
         env:
