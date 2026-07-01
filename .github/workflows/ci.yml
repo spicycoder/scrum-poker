@@ -65,7 +65,16 @@ jobs:
             --settings ./coverage.runsettings \
             --output ./.coverage/coverage.cobertura.xml \
             --output-format cobertura \
-            "dotnet test --no-build -c Release ./ScrumPoker.slnx"
+            "dotnet test --no-build -c Release ./ScrumPoker.slnx --logger trx --results-directory ./.coverage/trx"
+
+      - name: Test report
+        uses: dorny/test-reporter@v2
+        if: success() || failure()
+        with:
+          name: Test results
+          path: ./.coverage/trx/*.trx
+          reporter: dotnet-trx
+          fail-on-error: false
 
       - name: Update test badges
         if: always() && github.ref == 'refs/heads/main'
