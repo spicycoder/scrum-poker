@@ -18,7 +18,7 @@ All POST endpoints return status code only — no response body. `GET /api/rooms
 | `/api/hub` | WebSocket (SignalR) | Real-time events |
 | `/health` | GET | Readiness probe |
 | `/alive` | GET | Liveness probe |
-| `/api/warmup` | GET, HEAD | Keep-alive (prevents Render sleep) |
+| `/api/warmup` | GET | Keep-alive (prevents Render sleep) |
 
 ---
 
@@ -439,4 +439,4 @@ All events carry the full game state payload (`{ gameId: int, players: Record<st
 |-------|---------|
 | GET /health | Ready probe (all checks must pass) |
 | GET /alive | Liveness probe (tagged "live" only) |
-| GET, HEAD /api/warmup | Keep-alive (creates + reads room to warm JIT and Redis, prevents Render free-tier sleep) |
+| GET /api/warmup | Keep-alive (creates + reads room to warm JIT and Redis, prevents Render free-tier sleep) |
