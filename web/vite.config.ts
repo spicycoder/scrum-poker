@@ -11,6 +11,7 @@ const apiTarget = apiHttps || apiHttp || 'https://localhost:7234'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/scrum-poker/',
   plugins: [
     react(),
     babel({ presets: [reactCompilerPreset()] }),
