@@ -1,0 +1,10 @@
+name: Keepalive
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - run: curl -fsS 'https://scrumpoker-api-mt5n.onrender.com/api/warmup' -o /dev/null
