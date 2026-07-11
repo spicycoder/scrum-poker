@@ -168,21 +168,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            frontend:
+              - 'web/**'
+
       - name: Setup Node.js
+        if: steps.filter.outputs.frontend == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 22.x
 
       - name: Install pnpm
+        if: steps.filter.outputs.frontend == 'true'
         uses: pnpm/action-setup@v4
         with:
           version: latest
 
       - name: Install dependencies
+        if: steps.filter.outputs.frontend == 'true'
         run: pnpm install
         working-directory: web
 
       - name: Build frontend
+        if: steps.filter.outputs.frontend == 'true'
         run: pnpm run build
         working-directory: web
         env:
@@ -190,6 +201,7 @@ jobs:
           VITE_CLARITY_ID: ${{ vars.VITE_CLARITY_ID }}
 
       - name: Deploy to gh-pages
+        if: steps.filter.outputs.frontend == 'true'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
