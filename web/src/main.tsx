@@ -16,6 +16,6 @@ createRoot(document.getElementById('root')!).render(
           <App />
         </ThemeProvider>
       </TooltipProvider>
-    </BrowserRouter>
+    </HashRouter>
   </StrictMode>,
 )
