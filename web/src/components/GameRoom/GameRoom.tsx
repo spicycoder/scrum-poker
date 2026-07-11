@@ -102,7 +102,9 @@ export default function GameRoom() {
   }
 
   async function handleCopy() {
-    const text = `${window.location.origin}${import.meta.env.BASE_URL}join/${roomId}`
+    const url = new URL(window.location.href)
+    url.hash = `/join/${roomId}`
+    const text = url.href
     try {
       await navigator.clipboard.writeText(text)
     } catch {
