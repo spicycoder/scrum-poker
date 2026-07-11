@@ -144,7 +144,7 @@ export default function GameRoom() {
         onClick={handleCopy}
         className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
       >
-        🔗 {window.location.origin}/join/{roomId}
+        🔗 {window.location.origin}{import.meta.env.BASE_URL}#/join/{roomId}
       </button>
 
       <Card className="w-full max-w-md">
