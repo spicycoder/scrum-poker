@@ -10,12 +10,11 @@ public sealed class CreateRoomHandlerTests
 {
     private readonly IRoomRepository _repository = Substitute.For<IRoomRepository>();
     private readonly IMessageBus _bus = Substitute.For<IMessageBus>();
-    private readonly IStatsRepository _stats = Substitute.For<IStatsRepository>();
     private readonly CreateRoomHandler _sut;
 
     public CreateRoomHandlerTests()
     {
-        _sut = new CreateRoomHandler(_repository, _bus, _stats);
+        _sut = new CreateRoomHandler(_repository, _bus);
     }
 
     [Fact]

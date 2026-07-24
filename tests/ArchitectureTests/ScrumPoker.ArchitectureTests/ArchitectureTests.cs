@@ -10,7 +10,7 @@ public sealed class LayerArchitectureTests
 {
     private static readonly Architecture Architecture = new ArchLoader()
         .LoadAssemblies(
-            typeof(ScrumPoker.Domain.Abstractions.IStatsRepository).Assembly,
+            typeof(ScrumPoker.Domain.Rooms.Room).Assembly,
             typeof(ScrumPoker.Application.Bootstrap).Assembly,
             typeof(ScrumPoker.Infrastructure.Bootstrap).Assembly,
             typeof(ScrumPoker.Persistence.Bootstrap).Assembly,

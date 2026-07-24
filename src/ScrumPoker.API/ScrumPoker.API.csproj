@@ -2,7 +2,6 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.StackExchange.Redis" />
-    <PackageReference Include="Aspire.Npgsql" />
     <PackageReference Include="AspNetCore.SwaggerUI.Themes" />
     <PackageReference Include="Scalar.AspNetCore" />
     <PackageReference Include="Swashbuckle.AspNetCore" />

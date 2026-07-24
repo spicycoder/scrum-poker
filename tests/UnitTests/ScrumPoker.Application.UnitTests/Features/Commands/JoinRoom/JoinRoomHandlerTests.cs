@@ -10,12 +10,11 @@ public sealed class JoinRoomHandlerTests
 {
     private readonly IRoomRepository _repository = Substitute.For<IRoomRepository>();
     private readonly IMessageBus _bus = Substitute.For<IMessageBus>();
-    private readonly IStatsRepository _stats = Substitute.For<IStatsRepository>();
     private readonly JoinRoomHandler _sut;
 
     public JoinRoomHandlerTests()
     {
-        _sut = new JoinRoomHandler(_repository, _bus, _stats);
+        _sut = new JoinRoomHandler(_repository, _bus);
     }
 
     [Fact]
@@ -56,8 +55,6 @@ public sealed class JoinRoomHandlerTests
         _repository.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(room);
         _repository.SaveAsync(Arg.Any<Room>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
             .Returns(ci => ci.ArgAt<Room>(0));
-        _stats.RecordPlayerJoinedAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(Task.CompletedTask);
 
         var result = await _sut.Handle(command, CancellationToken.None);
 
@@ -80,8 +77,6 @@ public sealed class JoinRoomHandlerTests
         _repository.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(room);
         _repository.SaveAsync(Arg.Any<Room>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
             .Returns(ci => ci.ArgAt<Room>(0));
-        _stats.RecordPlayerJoinedAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(Task.CompletedTask);
 
         await _sut.Handle(command, CancellationToken.None);
 

@@ -4,7 +4,7 @@ using Wolverine;
 
 namespace ScrumPoker.Application.Features.Commands.CreateRoom;
 
-public sealed class CreateRoomHandler(IRoomRepository repository, IMessageBus bus, IStatsRepository stats)
+public sealed class CreateRoomHandler(IRoomRepository repository, IMessageBus bus)
 {
     public async Task<Room> Handle(CreateRoomCommand command, CancellationToken ct)
     {
@@ -12,12 +12,6 @@ public sealed class CreateRoomHandler(IRoomRepository repository, IMessageBus bu
         var warmupRoom = room with { IsWarmup = command.IsWarmup };
         var saved = await repository.SaveAsync(warmupRoom, command.Expiry, ct);
         await bus.PublishAsync(@event with { RoomId = saved.Id });
-
-        if (!command.IsWarmup)
-        {
-            var monthKey = DateTime.UtcNow.ToString("yyyy-MM");
-            await stats.RecordGameCreatedAsync(monthKey, ct);
-        }
 
         return saved;
     }

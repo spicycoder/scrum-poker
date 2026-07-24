@@ -2,7 +2,6 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
 import CreateRoomForm from '../CreateRoomForm'
 import JoinRoomForm from '../JoinRoomForm'
-import StatsCard from '../StatsCard'
 
 interface HomePageProps {
   roomId?: string
@@ -32,7 +31,6 @@ export default function HomePage({ roomId }: HomePageProps) {
           <JoinRoomForm roomId={roomId} />
         </TabsContent>
       </Tabs>
-      <StatsCard />
     </div>
   )
 }

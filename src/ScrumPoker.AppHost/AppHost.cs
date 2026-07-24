@@ -3,14 +3,9 @@ var builder = DistributedApplication.CreateBuilder(args);
 var redis = builder.AddRedis("redis")
     .WithRedisInsight();
 
-var postgres = builder.AddPostgres("postgres").WithPgAdmin();
-var statsDb = postgres.AddDatabase("statsdb");
-
-var api =builder.AddProject<Projects.ScrumPoker_API>("scrumpoker-api")
+var api = builder.AddProject<Projects.ScrumPoker_API>("scrumpoker-api")
     .WithReference(redis)
-    .WithReference(statsDb)
-    .WaitFor(redis)
-    .WaitFor(postgres);
+    .WaitFor(redis);
 
 var ui = builder
     .AddViteApp("web", "../../web")
