@@ -21,7 +21,7 @@
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="10.2.3" />
     <PackageVersion Include="Swashbuckle.AspNetCore.ReDoc" Version="10.2.3" />
     <PackageVersion Include="WolverineFx" Version="6.22.0" />
-    <PackageVersion Include="WolverineFx.RuntimeCompilation" Version="6.22.0" />
+    <PackageVersion Include="WolverineFx.RuntimeCompilation" Version="6.24.1" />
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="Aspire.Hosting.Testing" Version="13.4.6" />
