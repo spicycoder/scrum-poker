@@ -26,3 +26,7 @@ updates:
         applies-to: version-updates
         patterns:
           - "*"
+        # typescript-eslint rejects TS 7.x; keep TS on individual PRs until
+        # typescript-eslint supports it, then remove this exclusion.
+        exclude-patterns:
+          - "typescript"
